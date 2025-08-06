@@ -3,11 +3,9 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 
 import { TokenService } from '../services/token.service';
-import { AuthService } from '../../features/auth/services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(TokenService);
-  const authService = inject(AuthService);
 
   // URLs que no requieren autenticación
   const excludedUrls = ['/api/v1/auth/sign-in', '/api/v1/auth/forgot-password'];
@@ -27,16 +25,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
     });
 
-    return next(authReq).pipe(
-      catchError((error: HttpErrorResponse) => {
-        // Si el token expiró (401), hacer logout
-        if (error.status === 401) {
-          authService.logout();
-        }
+    // // return next(authReq).pipe(
+    // //   catchError((error: HttpErrorResponse) => {
+    // //     // Si el token expiró (401), hacer logout
+    // //     if (error.status === 401) {
+    // //       authService.logout();
+    // //     }
 
-        return throwError(() => error);
-      })
-    );
+    // //     return throwError(() => error);
+    // //   })
+    // // );
   }
 
   return next(req);

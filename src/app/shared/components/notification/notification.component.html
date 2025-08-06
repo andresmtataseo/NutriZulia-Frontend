@@ -1,0 +1,16 @@
+@if (notification) {
+<div class="notification-container" [class.notification-bottom]="position === 'bottom'">
+  <div class="alert alert-dismissible" [class]="getAlertClass()" bis_skin_checked="1">
+    @if (notification.dismissible !== false) {
+    <button type="button" class="btn-close" (click)="dismiss()" aria-label="Cerrar notificación"></button>
+    }
+
+    <div>
+      @if (notification.title) {
+      <h4 class="alert-heading">{{ notification.title }}</h4>
+      }
+      <p class="mb-0" [innerHTML]="notification.message"></p>
+    </div>
+  </div>
+</div>
+}

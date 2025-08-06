@@ -1,86 +1,44 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-
-import { AuthService } from '../../services/auth.service';
-import { LoginRequest } from '../../../../core/models';
+import { Component, inject } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { NotificationComponent } from '../../../../shared/components/notification/notification.component';
+import { NotificationService } from '../../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [FormsModule, NotificationComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  private readonly fb = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
+  private notificationService = inject(NotificationService);
 
-  loginForm: FormGroup;
-  isSubmitting = signal(false);
-
-  constructor() {
-    this.loginForm = this.fb.group({
-    documentType: ['V', [Validators.required]],
-    documentNumber: ['', [Validators.required, Validators.pattern(/^\d{1,8}$/)]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
-  });
+  get notification() {
+    return this.notificationService.notification;
   }
 
-  get isLoading() {
-    return this.authService.isLoading();
-  }
+  login(form: NgForm) {
+    const tipoCedula = form.value.tipoCedula;
+    const numeroCedula = form.value.numeroCedula;
 
-  get authError() {
-    return this.authService.authError();
-  }
+    const cedula = tipoCedula + '-' + numeroCedula;
+    const password = form.value.clave;
 
-  onSubmit(): void {
-    if (this.loginForm.valid && !this.isSubmitting()) {
-      this.isSubmitting.set(true);
-      this.authService.clearError();
+    // Simulación de login - aquí iría la lógica real de autenticación
+    if (!cedula || !password) {
+      this.notificationService.showError('Por favor, completa todos los campos requeridos.');
+      return;
+    }
 
-      const credentials: LoginRequest = this.loginForm.value;
-
-      this.authService.login(credentials).subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          // Redirigir al dashboard o página principal
-          this.router.navigate(['/dashboard']);
-        },
-        error: () => {
-          this.isSubmitting.set(false);
-        }
-      });
+    if (cedula === 'V-12345678' && password === 'test123') {
+      this.notificationService.showSuccess('¡Inicio de sesión exitoso!', 'Bienvenido');
     } else {
-      this.markFormGroupTouched();
+      this.notificationService.showError('Credenciales incorrectas. Verifica tu cédula y contraseña.');
     }
+
   }
 
-  private markFormGroupTouched(): void {
-    Object.keys(this.loginForm.controls).forEach(key => {
-      const control = this.loginForm.get(key);
-      control?.markAsTouched();
-    });
+  onNotificationDismissed() {
+    this.notificationService.hide();
   }
 
-  getFieldError(fieldName: string): string {
-    const field = this.loginForm.get(fieldName);
-    if (field?.errors && field.touched) {
-      if (field.errors['required']) return 'Este campo es requerido';
-      if (field.errors['pattern']) {
-        if (fieldName === 'documentNumber') return 'La cédula debe contener solo números (máximo 8 dígitos)';
-      }
-      if (field.errors['minlength']) {
-        if (fieldName === 'password') return 'La contraseña debe tener al menos 6 caracteres';
-      }
-    }
-    return '';
-  }
-
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.loginForm.get(fieldName);
-    return !!(field?.invalid && field.touched);
-  }
 }

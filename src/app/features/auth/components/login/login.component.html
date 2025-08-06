@@ -1,86 +1,47 @@
-<div class="container-fluid d-flex justify-content-center align-items-center mt-5">
-  <div class="card shadow-lg" style="max-width: 400px; width: 100%;">
-    <div class="card-body p-4">
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <div class="text-center mb-4">
-          <img class="mb-3" src="favicon.ico" alt="" width="72" height="57">
-          <h1 class="h3 fw-normal">Iniciar sesión</h1>
-        </div>
+<!-- Componente de notificaciones -->
+<app-notification
+  [notification]="notification()"
+  (dismissed)="onNotificationDismissed()">
+</app-notification>
 
-        <!-- Mensaje de error global -->
-        @if (authError) {
-          <div class="alert alert-danger" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            {{ authError }}
-          </div>
-        }
+<div class="container d-flex justify-content-center align-items-center my-5">
+  <div class="card p-4 shadow-sm" style="max-width: 30rem; min-width: 25rem;">
 
-        <!-- Campo de cédula -->
-        <div class="mb-3">
-          <div class="input-group">
-            <select
-              class="form-select"
-              style="max-width: 80px;"
-              formControlName="documentType"
-              [class.is-invalid]="isFieldInvalid('documentType')">
-              <option value="V">V</option>
-              <option value="E">E</option>
-            </select>
-            <div class="form-floating flex-grow-1">
-              <input
-                type="text"
-                class="form-control"
-                id="cedulaInput"
-                placeholder="12345678"
-                formControlName="documentNumber"
-                [class.is-invalid]="isFieldInvalid('documentNumber')">
-              <label for="cedulaInput">Cédula de identidad</label>
-            </div>
-          </div>
-          @if (getFieldError('documentNumber')) {
-            <div class="invalid-feedback d-block">
-              {{ getFieldError('documentNumber') }}
-            </div>
-          }
-        </div>
-
-        <!-- Campo de contraseña -->
-        <div class="form-floating mb-3">
-          <input
-            type="password"
-            class="form-control"
-            id="floatingPassword"
-            placeholder="Password"
-            formControlName="password"
-            [class.is-invalid]="isFieldInvalid('password')">
-          <label for="floatingPassword">Contraseña</label>
-          @if (getFieldError('password')) {
-            <div class="invalid-feedback">
-              {{ getFieldError('password') }}
-            </div>
-          }
-        </div>
-
-        <!-- Enlace ¿Olvidaste tu contraseña? -->
-        <div class="text-end mb-3">
-          <a href="#" class="text-decoration-none text-primary">
-            ¿Olvidaste tu contraseña?
-          </a>
-        </div>
-
-        <!-- Botón de envío -->
-        <button
-          class="btn btn-primary w-100 py-2"
-          type="submit"
-          [disabled]="isLoading || isSubmitting()">
-          @if (isLoading || isSubmitting()) {
-            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            Iniciando sesión...
-          } @else {
-            Iniciar sesión
-          }
-        </button>
-      </form>
+    <div class="text-center mb-4">
+      <img class="mb-3" src="favicon.ico" alt="" width="72" height="57">
+      <h1 class="h3 fw-normal">Iniciar sesión</h1>
     </div>
+
+    <form #f="ngForm" (ngSubmit)="f.form.valid && login(f)">
+      <!-- Campo de cédula -->
+      <div class="input-group mb-3">
+        <!-- Tipo de cedula -->
+        <select class="form-select" style="max-width: 80px;" id="tipoCedula" name="tipoCedula" placeholder="Tipo"
+          ngModel required>
+          <option value="V">V</option>
+          <option value="E">E</option>
+        </select>
+        <!-- Numero de cedula -->
+        <div class="form-floating flex-grow-1">
+          <input type="number" class="form-control" id="numeroCedula" name="numeroCedula" placeholder="Número de cédula"
+            ngModel required />
+          <label for="numeroCedula">Número de cédula</label>
+        </div>
+      </div>
+      <!-- Campo de contraseña -->
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="clave" name="clave" placeholder="Contraseña" ngModel required />
+        <label for="clave">Contraseña</label>
+      </div>
+      <!-- Enlace ¿Olvidaste tu contraseña? -->
+      <div class="text-end mb-3">
+        <a href="#" class="text-decoration-none text-primary">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+      <!-- Botón de envío -->
+      <button class="btn btn-primary w-100" type="submit">Iniciar sesión</button>
+    </form>
+
   </div>
 </div>

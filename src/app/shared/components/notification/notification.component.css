@@ -1,0 +1,28 @@
+/* Contenedor de notificación */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  width: 90%;
+  max-width: 500px;
+}
+
+.notification-container.notification-bottom {
+  top: auto;
+  bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .notification-container {
+    width: 95%;
+    top: 10px;
+  }
+
+  .notification-container.notification-bottom {
+    bottom: 10px;
+  }
+
+}
