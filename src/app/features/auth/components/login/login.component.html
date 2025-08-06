@@ -8,39 +8,105 @@
   <div class="card p-4 shadow-sm" style="max-width: 30rem; min-width: 25rem;">
 
     <div class="text-center mb-4">
-      <img class="mb-3" src="favicon.ico" alt="" width="72" height="57">
+      <img class="mb-3" src="favicon.ico" alt="NutriZulia Logo" width="72" height="57">
       <h1 class="h3 fw-normal">Iniciar sesión</h1>
     </div>
 
-    <form #f="ngForm" (ngSubmit)="f.form.valid && login(f)">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
       <!-- Campo de cédula -->
-      <div class="input-group mb-3">
-        <!-- Tipo de cedula -->
-        <select class="form-select" style="max-width: 80px;" id="tipoCedula" name="tipoCedula" placeholder="Tipo"
-          ngModel required>
-          <option value="V">V</option>
-          <option value="E">E</option>
-        </select>
-        <!-- Numero de cedula -->
-        <div class="form-floating flex-grow-1">
-          <input type="number" class="form-control" id="numeroCedula" name="numeroCedula" placeholder="Número de cédula"
-            ngModel required />
-          <label for="numeroCedula">Número de cédula</label>
+      <div class="mb-3">
+        <label class="form-label">Cédula de identidad</label>
+        <div class="input-group">
+          <!-- Tipo de cedula -->
+          <select 
+            class="form-select" 
+            style="max-width: 80px;" 
+            formControlName="tipoCedula"
+            [class.is-invalid]="hasFieldError('tipoCedula')"
+            aria-label="Tipo de cédula">
+            <option value="V">V</option>
+            <option value="E">E</option>
+          </select>
+          
+          <!-- Numero de cedula -->
+          <div class="form-floating flex-grow-1">
+            <input 
+              type="number" 
+              class="form-control" 
+              id="numeroCedula" 
+              formControlName="numeroCedula"
+              placeholder="Número de cédula"
+              [class.is-invalid]="hasFieldError('numeroCedula')"
+              aria-describedby="numeroCedula-error" />
+            <label for="numeroCedula">Número de cédula</label>
+          </div>
         </div>
+        
+        <!-- Error de cédula -->
+        @if (hasFieldError('numeroCedula')) {
+          <div id="numeroCedula-error" class="invalid-feedback d-block">
+            {{ getFieldError('numeroCedula') }}
+          </div>
+        }
       </div>
+
       <!-- Campo de contraseña -->
-      <div class="form-floating mb-3">
-        <input type="password" class="form-control" id="clave" name="clave" placeholder="Contraseña" ngModel required />
-        <label for="clave">Contraseña</label>
+      <div class="mb-3">
+        <div class="form-floating position-relative">
+          <input 
+            [type]="state().showPassword ? 'text' : 'password'" 
+            class="form-control pe-5" 
+            id="clave" 
+            formControlName="clave"
+            placeholder="Contraseña"
+            [class.is-invalid]="hasFieldError('clave')"
+            aria-describedby="clave-error" />
+          <label for="clave">Contraseña</label>
+          
+          <!-- Botón para mostrar/ocultar contraseña -->
+          <button 
+            type="button"
+            class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-2 p-0"
+            style="z-index: 10; border: none; background: none;"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="state().showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            @if (state().showPassword) {
+              <i class="bi bi-eye-slash text-muted"></i>
+            } @else {
+              <i class="bi bi-eye text-muted"></i>
+            }
+          </button>
+        </div>
+        
+        <!-- Error de contraseña -->
+        @if (hasFieldError('clave')) {
+          <div id="clave-error" class="invalid-feedback d-block">
+            {{ getFieldError('clave') }}
+          </div>
+        }
       </div>
+
       <!-- Enlace ¿Olvidaste tu contraseña? -->
       <div class="text-end mb-3">
         <a href="#" class="text-decoration-none text-primary">
           ¿Olvidaste tu contraseña?
         </a>
       </div>
+
       <!-- Botón de envío -->
-      <button class="btn btn-primary w-100" type="submit">Iniciar sesión</button>
+      <button 
+        class="btn btn-primary w-100 d-flex align-items-center justify-content-center" 
+        type="submit"
+        [disabled]="state().isLoading"
+        [attr.aria-busy]="state().isLoading">
+        
+        @if (state().isLoading) {
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Iniciando sesión...
+        } @else {
+          Iniciar sesión
+        }
+      </button>
     </form>
 
   </div>
