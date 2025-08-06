@@ -1,37 +1,20 @@
-/* Estilos para campos con credenciales inválidas */
-.form-control.is-invalid,
-.form-select.is-invalid {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-}
+/* Mejoras adicionales que Bootstrap no incluye por defecto */
 
-.form-control.is-invalid:focus,
-.form-select.is-invalid:focus {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-}
-
-/* Animación suave para la transición de estados de error */
+/* Transición suave para mejor UX */
 .form-control,
 .form-select {
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-/* Estilo para el mensaje de error */
-.invalid-feedback {
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+/* Ocultar spinners del input type="number" */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-/* Mejora visual para el botón de mostrar/ocultar contraseña */
-.btn-link:focus {
-  box-shadow: none;
-}
-
-/* Estilo para el contenedor de la tarjeta */
-.card {
-  border: 1px solid rgba(0, 0, 0, 0.125);
-  border-radius: 0.5rem;
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 /* Responsive design para pantallas pequeñas */
