@@ -1,0 +1,37 @@
+<div class="container-fluid d-flex justify-content-center align-items-center mt-5">
+  <div class="card shadow-lg" style="max-width: 400px; width: 100%;">
+    <div class="card-body p-4">
+      <form>
+        <div class="text-center mb-4">
+          <img class="mb-3" src="favicon.ico" alt="" width="72" height="57">
+          <h1 class="h3 fw-normal">Iniciar sesión</h1>
+        </div>
+
+        <div class="mb-3">
+          <div class="input-group">
+            <select class="form-select" style="max-width: 80px;" id="tipoDocumento">
+              <option value="V" selected>V</option>
+              <option value="E">E</option>
+            </select>
+            <div class="form-floating flex-grow-1">
+              <input type="text" class="form-control" id="cedulaInput" placeholder="12345678">
+              <label for="cedulaInput">Cédula de identidad</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="password" class="form-control" id="floatingPassword" placeholder="Contraseña">
+          <label for="floatingPassword">Contraseña</label>
+        </div>
+
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" value="remember-me" id="checkDefault">
+          <label class="form-check-label" for="checkDefault">Recuérdame</label>
+        </div>
+
+        <button class="btn btn-primary w-100 py-2" type="submit">Iniciar sesión</button>
+      </form>
+    </div>
+  </div>
+</div>
