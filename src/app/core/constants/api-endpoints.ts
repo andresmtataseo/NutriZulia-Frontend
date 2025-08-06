@@ -1,0 +1,19 @@
+/**
+ * Constantes de endpoints de la API
+ * Centraliza todas las rutas de la API para facilitar el mantenimiento
+ */
+export const API_ENDPOINTS = {
+  // Autenticación
+  AUTH: {
+    LOGIN: '/auth/sign-in',
+    LOGOUT: '/auth/logout',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    CHANGE_PASSWORD: '/auth/change-password',
+    CHECK_AUTH: '/auth/check',
+  },
+} as const;
+
+/**
+ * Tipo para los endpoints de la API
+ */
+export type ApiEndpoint = typeof API_ENDPOINTS;
