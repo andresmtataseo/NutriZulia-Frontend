@@ -11,6 +11,10 @@ export const API_ENDPOINTS = {
     CHANGE_PASSWORD: '/auth/change-password',
     CHECK_AUTH: '/auth/check',
   },
+  USER: {
+    INSTITUTIONS_USER: '/user/institutions-by-user',
+    USERS: 'user/get-all'
+  }
 } as const;
 
 /**
