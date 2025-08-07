@@ -5,7 +5,7 @@
 export const API_ENDPOINTS = {
   // Autenticación
   AUTH: {
-    LOGIN: '/auth/sign-in',
+    LOGIN: '/auth/sign-in-admin',
     LOGOUT: '/auth/logout',
     FORGOT_PASSWORD: '/auth/forgot-password',
     CHANGE_PASSWORD: '/auth/change-password',

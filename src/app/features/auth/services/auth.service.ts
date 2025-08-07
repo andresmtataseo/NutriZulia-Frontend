@@ -6,13 +6,13 @@ import { map, catchError, tap } from 'rxjs/operators';
 
 import { API_ENDPOINTS } from '../../../core/constants';
 import { getApiUrl } from '../../../core/config';
-import { 
-  ApiResponse, 
-  LoginRequest, 
-  LoginResponse, 
-  User, 
+import {
+  ApiResponse,
+  LoginRequest,
+  LoginResponse,
+  User,
   AuthState,
-  ForgotPasswordRequest 
+  ForgotPasswordRequest
 } from '../../../core/models';
 import { AuthStorageService } from './auth-storage.service';
 
@@ -159,7 +159,7 @@ export class AuthService {
       catchError((error: HttpErrorResponse) => {
          // Incluso si falla el logout en el servidor, limpiar estado local
          this.performLocalLogout();
-         
+
          // Retornar éxito ya que el logout local se completó
          return of({
            status: 200,
@@ -220,7 +220,7 @@ export class AuthService {
    */
   checkAuthStatus(): void {
     const isValid = this.isUserAuthenticated();
-    
+
     if (!isValid && this.authState().isAuthenticated) {
       this.logout();
     } else if (isValid && !this.authState().isAuthenticated) {
@@ -261,7 +261,9 @@ export class AuthService {
       errorMessage = error.error.message;
     } else if (error.status === 401) {
       errorMessage = 'Credenciales inválidas';
-    } else if (error.status === 0) {
+    } else if (error.status === 403) {
+      errorMessage = 'No tienes permisos para acceder a este recurso';
+    }else if (error.status === 0) {
       errorMessage = 'Error de conexión con el servidor';
     }
 
