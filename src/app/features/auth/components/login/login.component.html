@@ -95,9 +95,12 @@
 
       <!-- Enlace ¿Olvidaste tu contraseña? -->
       <div class="text-end mb-3">
-        <a href="#" class="text-decoration-none text-primary">
+        <button
+          type="button"
+          class="btn btn-link text-decoration-none text-primary p-0"
+          (click)="openForgotPasswordModal()">
           ¿Olvidaste tu contraseña?
-        </a>
+        </button>
       </div>
 
       <!-- Botón de envío -->
@@ -118,3 +121,109 @@
 
   </div>
 </div>
+
+<!-- Modal de recuperación de contraseña -->
+@if (state().showForgotPasswordModal) {
+  <div class="modal d-block" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="false">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="forgotPasswordModalLabel">
+            <i class="bi bi-key me-2 text-primary"></i>
+            Recuperar contraseña
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            (click)="closeForgotPasswordModal()"
+            [disabled]="state().isForgotPasswordLoading"
+            aria-label="Cerrar">
+          </button>
+        </div>
+
+        <form [formGroup]="forgotPasswordForm" (ngSubmit)="onForgotPasswordSubmit()" novalidate>
+          <div class="modal-body">
+            <div class="text-center mb-4">
+              <i class="bi bi-envelope-paper fa-3x text-primary mb-3"></i>
+              <p class="text-muted">
+                Ingresa tu número de cédula y te enviaremos las instrucciones para recuperar tu contraseña.
+              </p>
+            </div>
+
+            <!-- Campo de cédula -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Cédula</label>
+              <div class="input-group">
+                <!-- Tipo de cedula -->
+                <div class="form-floating" style="max-width: 80px;">
+                  <select
+                    class="form-select"
+                    id="forgotTipoCedula"
+                    formControlName="tipoCedula"
+                    [class.is-invalid]="hasForgotPasswordFieldError('tipoCedula')"
+                    [disabled]="state().isForgotPasswordLoading">
+                    <option value="V">V</option>
+                    <option value="E">E</option>
+                  </select>
+                  <label for="forgotTipoCedula">Tipo</label>
+                </div>
+
+                <!-- Numero de cedula -->
+                <div class="form-floating flex-grow-1">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="forgotNumeroCedula"
+                    formControlName="numeroCedula"
+                    placeholder="Número de cédula"
+                    [class.is-invalid]="hasForgotPasswordFieldError('numeroCedula')"
+                    [disabled]="state().isForgotPasswordLoading" />
+                  <label for="forgotNumeroCedula">Número de cédula</label>
+                </div>
+              </div>
+
+              <!-- Errores de cédula -->
+              @if (hasForgotPasswordFieldError('tipoCedula')) {
+                <div class="invalid-feedback d-block">
+                  {{ getForgotPasswordFieldError('tipoCedula') }}
+                </div>
+              }
+              @if (hasForgotPasswordFieldError('numeroCedula')) {
+                <div class="invalid-feedback d-block">
+                  {{ getForgotPasswordFieldError('numeroCedula') }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="submit"
+              class="btn btn-primary d-flex align-items-center"
+              [disabled]="state().isForgotPasswordLoading">
+              @if (state().isForgotPasswordLoading) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Enviando...
+              } @else {
+                <i class="bi bi-send me-2"></i>
+                Enviar solicitud
+              }
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="closeForgotPasswordModal()"
+              [disabled]="state().isForgotPasswordLoading">
+              <i class="bi bi-x-circle me-2"></i>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdrop del modal -->
+  <div class="modal-backdrop show" (click)="closeForgotPasswordModal()"></div>
+}

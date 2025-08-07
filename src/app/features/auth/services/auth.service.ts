@@ -11,7 +11,8 @@ import {
   LoginRequest, 
   LoginResponse, 
   User, 
-  AuthState 
+  AuthState,
+  ForgotPasswordRequest 
 } from '../../../core/models';
 import { AuthStorageService } from './auth-storage.service';
 
@@ -88,6 +89,19 @@ export class AuthService {
           this.handleLoginSuccess(response.data);
         }
       }),
+      catchError(error => this.handleAuthError(error))
+    );
+  }
+
+  /**
+   * Solicita la recuperación de contraseña
+   * @param request - Datos de la solicitud (cédula)
+   * @returns Observable con la respuesta del servidor
+   */
+  forgotPassword(request: ForgotPasswordRequest): Observable<ApiResponse<any>> {
+    const forgotPasswordUrl = getApiUrl(API_ENDPOINTS.AUTH.FORGOT_PASSWORD);
+
+    return this.http.post<ApiResponse<any>>(forgotPasswordUrl, request).pipe(
       catchError(error => this.handleAuthError(error))
     );
   }

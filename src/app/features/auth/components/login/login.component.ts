@@ -7,12 +7,14 @@ import { NotificationComponent } from '../../../../shared/components/notificatio
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { AuthService } from '../../services';
 import { numeroCedulaValidator, getErrorMessage } from '../../validators';
-import { LoginRequest } from '../../../../core/models';
+import { LoginRequest, ForgotPasswordRequest } from '../../../../core/models';
 
 interface LoginState {
   isLoading: boolean;
   showPassword: boolean;
   hasInvalidCredentials: boolean;
+  showForgotPasswordModal: boolean;
+  isForgotPasswordLoading: boolean;
 }
 
 @Component({
@@ -32,7 +34,9 @@ export class LoginComponent {
   state = signal<LoginState>({
     isLoading: false,
     showPassword: false,
-    hasInvalidCredentials: false
+    hasInvalidCredentials: false,
+    showForgotPasswordModal: false,
+    isForgotPasswordLoading: false
   });
 
   // Formulario reactivo
@@ -40,6 +44,12 @@ export class LoginComponent {
     tipoCedula: ['V', [Validators.required]],
     numeroCedula: ['', [Validators.required, numeroCedulaValidator()]],
     clave: ['', [Validators.required]]
+  });
+
+  // Formulario de recuperación de contraseña
+  forgotPasswordForm: FormGroup = this.fb.group({
+    tipoCedula: ['V', [Validators.required]],
+    numeroCedula: ['', [Validators.required, numeroCedulaValidator()]]
   });
 
   constructor() {
@@ -106,21 +116,11 @@ export class LoginComponent {
       )
       .subscribe({
         next: (response) => {
-          const userName = (response.data?.user?.nombres ?? 'Usuario').split(' ')[0];
-          const lastName = (response.data?.user?.apellidos ?? '').split(' ')[0];
-
-          this.notificationService.showSuccess(
-            '¡Inicio de sesión exitoso!',
-            `Bienvenido ${userName} ${lastName}`
-          );
-
           // Obtener la URL de retorno o usar dashboard por defecto
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-          
-          // Redireccionar después de un breve delay para mostrar la notificación
-          setTimeout(() => {
-            this.router.navigate([returnUrl]);
-          }, 1500);
+
+          // Redireccionar inmediatamente
+          this.router.navigate([returnUrl]);
         },
         error: (error) => {
           console.error('Error en login:', error);
@@ -170,15 +170,15 @@ export class LoginComponent {
    */
   getFieldError(controlName: string): string {
     const control = this.loginForm.get(controlName);
-    
+
     // Si hay credenciales inválidas, mostrar mensaje específico
     const isCredentialField = controlName === 'numeroCedula' || controlName === 'clave';
     if (this.state().hasInvalidCredentials && isCredentialField) {
-      return controlName === 'numeroCedula' 
-        ? 'Verifica tu número de cédula' 
+      return controlName === 'numeroCedula'
+        ? 'Verifica tu número de cédula'
         : 'Verifica tu contraseña';
     }
-    
+
     // Validaciones normales del formulario
     if (!control || !control.touched || !control.errors) {
       return '';
@@ -192,11 +192,11 @@ export class LoginComponent {
   hasFieldError(controlName: string): boolean {
     const control = this.loginForm.get(controlName);
     const hasValidationError = !!(control && control.invalid && control.touched);
-    
+
     // Mostrar error en campos de credenciales cuando hay error 401
     const isCredentialField = controlName === 'numeroCedula' || controlName === 'clave';
     const hasInvalidCredentials = this.state().hasInvalidCredentials && isCredentialField;
-    
+
     return hasValidationError || hasInvalidCredentials;
   }
 
@@ -205,5 +205,116 @@ export class LoginComponent {
    */
   onNotificationDismissed(): void {
     this.notificationService.hide();
+  }
+
+  /**
+   * Abre el modal de recuperación de contraseña
+   */
+  openForgotPasswordModal(): void {
+    this.state.update(state => ({ ...state, showForgotPasswordModal: true }));
+    // Limpiar el formulario
+    this.forgotPasswordForm.reset({ tipoCedula: 'V', numeroCedula: '' });
+  }
+
+  /**
+   * Cierra el modal de recuperación de contraseña
+   */
+  closeForgotPasswordModal(): void {
+    this.state.update(state => ({
+      ...state,
+      showForgotPasswordModal: false,
+      isForgotPasswordLoading: false
+    }));
+  }
+
+  /**
+   * Maneja el envío del formulario de recuperación de contraseña
+   */
+  onForgotPasswordSubmit(): void {
+    if (this.forgotPasswordForm.invalid) {
+      this.markForgotPasswordFormTouched();
+      this.notificationService.showError('Por favor, corrige los errores en el formulario.');
+      return;
+    }
+
+    this.performForgotPassword();
+  }
+
+  /**
+   * Realiza la solicitud de recuperación de contraseña
+   */
+  private performForgotPassword(): void {
+    const formValue = this.forgotPasswordForm.value;
+    const cedula = `${formValue.tipoCedula}-${formValue.numeroCedula}`;
+
+    const request: ForgotPasswordRequest = { cedula };
+
+    // Actualizar estado de loading
+    this.state.update(state => ({ ...state, isForgotPasswordLoading: true }));
+
+    this.authService.forgotPassword(request)
+      .pipe(
+        finalize(() => {
+          this.state.update(state => ({ ...state, isForgotPasswordLoading: false }));
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          // Mostrar mensaje de éxito del servidor
+          const message = response.message || 'Solicitud de recuperación enviada exitosamente.';
+          this.notificationService.showSuccess(message, 'Solicitud enviada');
+
+          // Cerrar modal
+          this.closeForgotPasswordModal();
+        },
+        error: (error) => {
+          console.error('Error en recuperación de contraseña:', error);
+
+          // Mensaje por defecto
+          let defaultMessage = 'Error al procesar la solicitud. Intenta nuevamente.';
+
+          // Mensajes específicos por código de estado
+          if (error.status === 404) {
+            defaultMessage = 'No se encontró un usuario con esa cédula.';
+          } else if (error.status === 0) {
+            defaultMessage = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+          }
+
+          // Usar mensaje del servidor si está disponible
+          const serverMessage = error.error?.message?.trim();
+          const errorMessage = serverMessage || defaultMessage;
+
+          this.notificationService.showError(errorMessage);
+        }
+      });
+  }
+
+  /**
+   * Marca todos los campos del formulario de recuperación como touched
+   */
+  private markForgotPasswordFormTouched(): void {
+    Object.keys(this.forgotPasswordForm.controls).forEach(key => {
+      const control = this.forgotPasswordForm.get(key);
+      control?.markAsTouched();
+    });
+  }
+
+  /**
+   * Obtiene el mensaje de error para un control del formulario de recuperación
+   */
+  getForgotPasswordFieldError(controlName: string): string {
+    const control = this.forgotPasswordForm.get(controlName);
+    if (!control || !control.touched || !control.errors) {
+      return '';
+    }
+    return getErrorMessage(control);
+  }
+
+  /**
+   * Verifica si un campo del formulario de recuperación tiene errores
+   */
+  hasForgotPasswordFieldError(controlName: string): boolean {
+    const control = this.forgotPasswordForm.get(controlName);
+    return !!(control && control.invalid && control.touched);
   }
 }

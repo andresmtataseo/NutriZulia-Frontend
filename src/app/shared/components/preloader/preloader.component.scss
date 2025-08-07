@@ -1,0 +1,276 @@
+// Variables de diseño
+:root {
+  --preloader-primary: #0d6efd; // Color primary de Bootstrap (mismo del navbar)
+  --preloader-secondary: #6c757d;
+  --preloader-background: rgba(255, 255, 255, 0.95);
+  --preloader-backdrop: rgba(0, 0, 0, 0.3);
+  --preloader-text: #333;
+  --preloader-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --preloader-border-radius: 12px;
+  --preloader-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Overlay principal
+.preloader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--preloader-backdrop);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  // Estados de visibilidad
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.05);
+  transition: var(--preloader-transition);
+  
+  &--visible {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+  }
+}
+
+// Contenedor del preloader
+.preloader-container {
+  background: var(--preloader-background);
+  border-radius: var(--preloader-border-radius);
+  box-shadow: var(--preloader-shadow);
+  padding: 2rem;
+  text-align: center;
+  min-width: 200px;
+  max-width: 300px;
+  
+  // Animación de entrada
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Spinner principal
+.spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1.5rem;
+  
+  &__circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    
+    // Círculo exterior
+    border-top-color: var(--preloader-primary);
+    border-right-color: var(--preloader-primary);
+    animation: spinClockwise 1.2s linear infinite;
+    
+    // Círculo interior
+    &--inner {
+      width: 40px;
+      height: 40px;
+      top: 10px;
+      left: 10px;
+      border-top-color: var(--preloader-secondary);
+      border-left-color: var(--preloader-secondary);
+      animation: spinCounterClockwise 1s linear infinite;
+    }
+  }
+  
+  // Variantes por tipo - todas usando tonos del azul primary
+  &--route {
+    .spinner__circle {
+      border-top-color: var(--preloader-primary);
+      border-right-color: var(--preloader-primary);
+      
+      &--inner {
+        border-top-color: #0b5ed7; // Tono más oscuro del primary
+        border-left-color: #0b5ed7;
+      }
+    }
+  }
+  
+  &--http {
+    .spinner__circle {
+      border-top-color: var(--preloader-primary);
+      border-right-color: var(--preloader-primary);
+      
+      &--inner {
+        border-top-color: #3d8bfd; // Tono más claro del primary
+        border-left-color: #3d8bfd;
+      }
+    }
+  }
+  
+  &--custom {
+    .spinner__circle {
+      border-top-color: var(--preloader-primary);
+      border-right-color: var(--preloader-primary);
+      
+      &--inner {
+        border-top-color: #6ea8fe; // Tono intermedio del primary
+        border-left-color: #6ea8fe;
+      }
+    }
+  }
+}
+
+// Mensaje de carga
+.preloader-message {
+  color: var(--preloader-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+  
+  // Animación de texto
+  animation: fadeInText 0.6s ease-out 0.2s both;
+}
+
+// Barra de progreso
+.preloader-progress {
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  
+  &__bar {
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      var(--preloader-primary),
+      #3d8bfd,
+      var(--preloader-primary)
+    );
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: progressSlide 2s ease-in-out infinite;
+  }
+}
+
+// Animaciones
+@keyframes spinClockwise {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinCounterClockwise {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInText {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progressSlide {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .preloader-container {
+    margin: 1rem;
+    padding: 1.5rem;
+    min-width: 180px;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 1rem;
+    
+    &__circle--inner {
+      width: 32px;
+      height: 32px;
+      top: 9px;
+      left: 9px;
+    }
+  }
+  
+  .preloader-message {
+    font-size: 0.85rem;
+  }
+}
+
+// Modo oscuro
+@media (prefers-color-scheme: dark) {
+  :root {
+    --preloader-background: rgba(33, 37, 41, 0.95);
+    --preloader-backdrop: rgba(0, 0, 0, 0.6);
+    --preloader-text: #f8f9fa;
+    --preloader-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Reducir movimiento para usuarios con preferencias de accesibilidad
+@media (prefers-reduced-motion: reduce) {
+  .preloader-overlay,
+  .preloader-container,
+  .preloader-message {
+    animation: none;
+    transition: opacity 0.2s ease;
+  }
+  
+  .spinner__circle {
+    animation: spinClockwise 3s linear infinite;
+    
+    &--inner {
+      animation: spinCounterClockwise 2.5s linear infinite;
+    }
+  }
+  
+  .preloader-progress__bar {
+    animation: progressSlide 4s ease-in-out infinite;
+  }
+}
+
+// Estados de alta contraste
+@media (prefers-contrast: high) {
+  :root {
+    --preloader-primary: #0056b3;
+    --preloader-secondary: #495057;
+    --preloader-background: #ffffff;
+    --preloader-text: #000000;
+    --preloader-backdrop: rgba(0, 0, 0, 0.8);
+  }
+}

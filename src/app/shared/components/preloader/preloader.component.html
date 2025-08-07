@@ -1,0 +1,29 @@
+<!-- Overlay del preloader -->
+<div 
+  class="preloader-overlay"
+  [class.preloader-overlay--visible]="isLoading()"
+  role="status"
+  aria-live="polite"
+  [attr.aria-label]="displayMessage()">
+  
+  <!-- Contenedor del spinner -->
+  <div class="preloader-container">
+    
+    <!-- Spinner principal -->
+    <div [ngClass]="spinnerClasses()">
+      <div class="spinner__circle"></div>
+      <div class="spinner__circle spinner__circle--inner"></div>
+    </div>
+    
+    <!-- Mensaje de carga -->
+    <div class="preloader-message" [attr.aria-label]="displayMessage()">
+      {{ displayMessage() }}
+    </div>
+    
+    <!-- Indicador de progreso adicional -->
+    <div class="preloader-progress">
+      <div class="preloader-progress__bar"></div>
+    </div>
+    
+  </div>
+</div>
