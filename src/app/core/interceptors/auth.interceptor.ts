@@ -14,6 +14,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     API_ENDPOINTS.AUTH.FORGOT_PASSWORD
   ];
 
+  // URLs que requieren autenticación pero no deben redirigir en error 401
+  const logoutUrls = [
+    API_ENDPOINTS.AUTH.LOGOUT
+  ];
+
   if (excludedUrls.some(url => req.url.includes(url))) {
     return next(req);
   }
@@ -31,11 +36,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        // Si el token expiró (401), hacer logout
         if (error.status === 401) {
-          authService.logout();
+          // Solo hacer logout automático si no es una petición de logout
+          const isLogoutRequest = logoutUrls.some(url => req.url.includes(url));
+          if (!isLogoutRequest) {
+            // Token expirado o inválido
+            authService.logout().subscribe();
+          }
         }
-
         return throwError(() => error);
       })
     );

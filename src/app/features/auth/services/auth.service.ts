@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 
 import { API_ENDPOINTS } from '../../../core/constants';
@@ -116,8 +116,52 @@ export class AuthService {
 
   /**
    * Realiza el logout del usuario
+   * Intenta invalidar el token en el servidor, pero siempre limpia el estado local
+   * @returns Observable con la respuesta del logout
    */
-  logout(): void {
+  logout(): Observable<ApiResponse<any>> {
+    this.updateAuthState({ ...this.authState(), isLoading: true });
+
+    const logoutUrl = getApiUrl(API_ENDPOINTS.AUTH.LOGOUT);
+    const token = this.getToken();
+
+    // Si no hay token, hacer logout local directamente
+     if (!token) {
+       this.performLocalLogout();
+       return of({
+         status: 200,
+         message: 'Sesión cerrada exitosamente',
+         data: null,
+         timestamp: new Date().toISOString(),
+         path: '/auth/logout'
+       });
+     }
+
+    // Intentar logout en el servidor
+    return this.http.post<ApiResponse<any>>(logoutUrl, {}).pipe(
+      tap(() => {
+        this.performLocalLogout();
+      }),
+      catchError((error: HttpErrorResponse) => {
+         // Incluso si falla el logout en el servidor, limpiar estado local
+         this.performLocalLogout();
+         
+         // Retornar éxito ya que el logout local se completó
+         return of({
+           status: 200,
+           message: 'Sesión cerrada exitosamente',
+           data: null,
+           timestamp: new Date().toISOString(),
+           path: '/auth/logout'
+         });
+       })
+    );
+  }
+
+  /**
+   * Realiza el logout local (limpia estado y almacenamiento)
+   */
+  private performLocalLogout(): void {
     // Limpiar almacenamiento
     this.authStorage.clearAuthData();
 

@@ -1,11 +1,93 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import { AuthService } from '../../../features/auth/services/auth.service';
+import { User } from '../../../core/models';
+
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit, OnDestroy {
+  // Usar signals para el usuario actual
+  currentUser = computed(() => this.authService.currentUser());
+  isLoggingOut = false;
+  private destroy$ = new Subject<void>();
+  private logoutModal: any;
 
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    // No necesitamos suscribirnos ya que usamos signals
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    // Limpiar modal si existe
+    if (this.logoutModal) {
+      this.logoutModal.dispose();
+    }
+  }
+
+  /**
+   * Muestra el modal de confirmación de logout
+   */
+  showLogoutModal(): void {
+    const modalElement = document.getElementById('logoutModal');
+    if (modalElement) {
+      this.logoutModal = new bootstrap.Modal(modalElement, {
+        backdrop: 'static',
+        keyboard: false
+      });
+      this.logoutModal.show();
+    }
+  }
+
+  /**
+   * Confirma y ejecuta el logout
+   */
+  confirmLogout(): void {
+    this.isLoggingOut = true;
+
+    this.authService.logout()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          // El logout fue exitoso, cerrar modal
+          this.hideLogoutModal();
+          this.isLoggingOut = false;
+          
+          // Mostrar mensaje de éxito si es necesario
+          console.log('Logout exitoso:', response.message);
+        },
+        error: (error) => {
+          // Incluso en caso de error, el logout local se ejecuta
+          this.hideLogoutModal();
+          this.isLoggingOut = false;
+          console.error('Error durante logout:', error);
+        }
+      });
+  }
+
+  /**
+   * Oculta el modal de logout
+   */
+  private hideLogoutModal(): void {
+    if (this.logoutModal) {
+      this.logoutModal.hide();
+    }
+  }
 }

@@ -30,10 +30,51 @@
           <div class="text-sm-center">Andres Moreno</div>
           <small class="ms-2 text-light-emphasis">Administrador</small>
         </div>
-        <button class="btn btn-outline-light" type="button">
+        <button class="btn btn-outline-light" type="button" (click)="showLogoutModal()">
           Cerrar sesión
         </button>
       </div>
     </div>
   </div>
 </nav>
+
+<!-- Modal de confirmación de logout -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logoutModalLabel">
+          <i class="fas fa-sign-out-alt me-2 text-warning"></i>
+          Cerrar sesión
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <div class="mb-3">
+          <i class="fas fa-question-circle fa-3x text-warning mb-3"></i>
+        </div>
+        <p class="mb-0 fs-6">¿Estás seguro de que deseas cerrar tu sesión?</p>
+        <small class="text-muted">Tendrás que iniciar sesión nuevamente para acceder al sistema.</small>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmLogout()"
+          [disabled]="isLoggingOut">
+          <span *ngIf="isLoggingOut" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <i *ngIf="!isLoggingOut" class="fas fa-sign-out-alt me-1"></i>
+          {{ isLoggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary me-2"
+          data-bs-dismiss="modal"
+          [disabled]="isLoggingOut">
+          <i class="fas fa-times me-1"></i>
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
