@@ -13,7 +13,8 @@ export const API_ENDPOINTS = {
   },
   USER: {
     INSTITUTIONS_USER: '/user/institutions-by-user',
-    USERS: 'user/get-all'
+    USERS: '/api/v1/users',
+    USERS_WITH_INSTITUTIONS: '/api/v1/user/con-instituciones'
   }
 } as const;
 

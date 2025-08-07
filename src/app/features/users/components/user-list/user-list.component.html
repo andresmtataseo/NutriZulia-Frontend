@@ -24,34 +24,39 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <div class="input-group">
                 <span class="input-group-text">
                   <i class="bi bi-search"></i>
                 </span>
-                <input type="text" class="form-control" placeholder="Buscar por nombre, cédula o email...">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Buscar por nombre, cédula o email..."
+                  [value]="searchTerm()"
+                  (input)="onSearchChange($event)"
+                  (keyup.enter)="loadUsers()">
               </div>
             </div>
             <div class="col-md-3">
-              <select class="form-select">
-                <option value="">Todos los roles</option>
-                <option value="admin">Administrador</option>
-                <option value="nutritionist">Nutricionista</option>
-                <option value="user">Usuario</option>
+              <select
+                class="form-select"
+                [value]="sortBy()"
+                (change)="onSortByChange($event)">
+                <option value="nombres">Nombre</option>
+                <option value="apellidos">Apellido</option>
+                <option value="cedula">Cédula</option>
+                <option value="correo">Email</option>
               </select>
             </div>
             <div class="col-md-3">
-              <select class="form-select">
-                <option value="">Todos los estados</option>
-                <option value="active">Activo</option>
-                <option value="inactive">Inactivo</option>
+              <select
+                class="form-select"
+                [value]="sortDirection()"
+                (change)="onSortDirectionChange($event)">
+                <option value="asc">Ascendente</option>
+                <option value="desc">Descendente</option>
               </select>
-            </div>
-            <div class="col-md-2">
-              <button type="button" class="btn btn-outline-secondary w-100">
-                <i class="bi bi-funnel me-2"></i>
-                Filtrar
-              </button>
             </div>
           </div>
         </div>
@@ -67,372 +72,229 @@
           <div class="d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Lista de Usuarios</h6>
             <div class="d-flex align-items-center">
-              <span class="text-muted me-3">Mostrando 1-10 de 25 usuarios</span>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-secondary btn-sm">
-                  <i class="bi bi-download"></i>
-                </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm">
-                  <i class="bi bi-printer"></i>
-                </button>
-              </div>
+              <span class="text-muted me-3">
+                @if (usersResponse(); as response) {
+                  Mostrando {{ getStartRecord(response) }}-{{ getEndRecord(response) }} de {{ response.totalElements }} usuarios
+                } @else {
+                  Cargando...
+                }
+              </span>
             </div>
           </div>
         </div>
         <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th scope="col" class="border-0">
-                    <div class="d-flex align-items-center">
-                      Usuario
-                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                    </div>
-                  </th>
-                  <th scope="col" class="border-0">
-                    <div class="d-flex align-items-center">
-                      Cédula
-                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                    </div>
-                  </th>
-                  <th scope="col" class="border-0">
-                    <div class="d-flex align-items-center">
-                      Email
-                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                    </div>
-                  </th>
-                  <th scope="col" class="border-0">
-                    <div class="d-flex align-items-center">
-                      Rol
-                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                    </div>
-                  </th>
-                  <th scope="col" class="border-0">
-                    <div class="d-flex align-items-center">
-                      Institución
-                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                    </div>
-                  </th>
-                  <th scope="col" class="border-0">Estado</th>
-                  <th scope="col" class="border-0 text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- María González - Multiple Institutions -->
-                <tr>
-                  <td rowspan="3" class="align-middle border-end">
-                    <div class="d-flex align-items-center">
-                      <div class="avatar-circle bg-primary text-white me-3">
-                        <i class="bi bi-person-fill"></i>
+          @if (loading()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <p class="text-muted mt-2">Cargando usuarios...</p>
+            </div>
+          } @else if (error()) {
+            <div class="alert alert-danger m-3" role="alert">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              {{ error() }}
+            </div>
+          } @else if (usersResponse()?.content?.length === 0) {
+            <div class="text-center py-5">
+              <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-2">No se encontraron usuarios</p>
+            </div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                      <div class="d-flex align-items-center">
+                        Usuario
+                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
-                      <div>
-                        <div class="fw-semibold">María González</div>
+                    </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                      <div class="d-flex align-items-center">
+                        Cédula
+                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
-                    </div>
-                  </td>
-                  <td rowspan="3" class="align-middle border-end">
-                    <span class="font-monospace">V-12345678</span>
-                  </td>
-                  <td rowspan="3" class="align-middle border-end">
-                    <a href="mailto:maria.gonzalez@nutrizulia.com" class="text-decoration-none">
-                      maria.gonzalez&#64;nutrizulia.com
-                    </a>
-                  </td>
-                  <td>
-                    <span class="badge bg-success-subtle text-success">
-                      <i class="bi bi-shield-check me-1"></i>
-                      Nutricionista
-                    </span>
-                  </td>
-                  <td>
-                    <span class="text-muted">Hospital Central</span>
-                  </td>
-                  <td>
-                    <span class="badge bg-success">
-                      <i class="bi bi-check-circle me-1"></i>
-                      Activo
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-eye me-2"></i>Ver Detalles
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-pencil me-2"></i>Editar
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item text-warning" href="#">
-                            <i class="bi bi-pause-circle me-2"></i>Suspender
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <span class="badge bg-info-subtle text-info">
-                      <i class="bi bi-person-gear me-1"></i>
-                      Coordinadora
-                    </span>
-                  </td>
-                  <td>
-                    <span class="text-muted">Clínica San Rafael</span>
-                  </td>
-                  <td>
-                    <span class="badge bg-success">
-                      <i class="bi bi-check-circle me-1"></i>
-                      Activo
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-eye me-2"></i>Ver Detalles
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-pencil me-2"></i>Editar
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item text-warning" href="#">
-                            <i class="bi bi-pause-circle me-2"></i>Suspender
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <span class="badge bg-secondary-subtle text-secondary">
-                      <i class="bi bi-person me-1"></i>
-                      Consultora
-                    </span>
-                  </td>
-                  <td>
-                    <span class="text-muted">Centro Médico Los Andes</span>
-                  </td>
-                  <td>
-                    <span class="badge bg-warning">
-                      <i class="bi bi-pause-circle me-1"></i>
-                      Suspendido
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-eye me-2"></i>Ver Detalles
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-pencil me-2"></i>Editar
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item text-success" href="#">
-                            <i class="bi bi-play-circle me-2"></i>Activar
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Carlos Rodríguez - Multiple Institutions -->
-                <tr>
-                  <td rowspan="2" class="align-middle border-end">
-                    <div class="d-flex align-items-center">
-                      <div class="avatar-circle bg-info text-white me-3">
-                        <i class="bi bi-person-fill"></i>
+                    </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                      <div class="d-flex align-items-center">
+                        Email
+                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
-                      <div>
-                        <div class="fw-semibold">Carlos Rodríguez</div>
+                    </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                      <div class="d-flex align-items-center">
+                        Rol
+                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
-                    </div>
-                  </td>
-                  <td rowspan="2" class="align-middle border-end">
-                    <span class="font-monospace">V-87654321</span>
-                  </td>
-                  <td rowspan="2" class="align-middle border-end">
-                    <a href="mailto:carlos.rodriguez@nutrizulia.com" class="text-decoration-none">
-                      carlos.rodriguez&#64;nutrizulia.com
-                    </a>
-                  </td>
-                  <td>
-                    <span class="badge bg-danger-subtle text-danger">
-                      <i class="bi bi-shield-fill-exclamation me-1"></i>
-                      Administrador
-                    </span>
-                  </td>
-                  <td>
-                    <span class="text-muted">Oficina Central</span>
-                  </td>
-                  <td>
-                    <span class="badge bg-success">
-                      <i class="bi bi-check-circle me-1"></i>
-                      Activo
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-eye me-2"></i>Ver Detalles
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-pencil me-2"></i>Editar
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item text-warning" href="#">
-                            <i class="bi bi-pause-circle me-2"></i>Suspender
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <span class="badge bg-warning-subtle text-warning">
-                      <i class="bi bi-person-check me-1"></i>
-                      Supervisor
-                    </span>
-                  </td>
-                  <td>
-                    <span class="text-muted">Hospital Central</span>
-                  </td>
-                  <td>
-                    <span class="badge bg-success">
-                      <i class="bi bi-check-circle me-1"></i>
-                      Activo
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-eye me-2"></i>Ver Detalles
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-pencil me-2"></i>Editar
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item text-warning" href="#">
-                            <i class="bi bi-pause-circle me-2"></i>Suspender
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Ana Martínez - Single Institution -->
-                <tr>
-                  <td class="align-middle border-end">
-                    <div class="d-flex align-items-center">
-                      <div class="avatar-circle bg-warning text-white me-3">
-                        <i class="bi bi-person-fill"></i>
+                    </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                      <div class="d-flex align-items-center">
+                        Institución
+                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
-                      <div>
-                        <div class="fw-semibold">Ana Martínez</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="font-monospace">V-11223344</span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <a href="mailto:ana.martinez@mail.com" class="text-decoration-none">
-                      ana.martinez&#64;mail.com
-                    </a>
-                  </td>
-                  <td>
-                    <span class="badge bg-secondary-subtle text-secondary">
-                      <i class="bi bi-person me-1"></i>
-                      Usuario
-                    </span>
-                  </td>
-                  <td>
-                    <span class="text-muted">Clínica San Rafael</span>
-                  </td>
-                  <td>
-                    <span class="badge bg-warning">
-                      <i class="bi bi-pause-circle me-1"></i>
-                      Suspendido
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-eye me-2"></i>Ver Detalles
+                    </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado</th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of usersResponse()?.content; track user.id) {
+                    @if (user.instituciones && user.instituciones.length > 0) {
+                      <!-- Usuario con instituciones asignadas -->
+                      @for (institutionRole of user.instituciones; track $index; let isFirst = $first) {
+                        <tr>
+                          @if (isFirst) {
+                            <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
+                              <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
+                            </td>
+                            <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
+                              <span class="font-monospace">{{ user.cedula }}</span>
+                            </td>
+                            <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
+                              <a [href]="'mailto:' + user.correo" class="text-decoration-none">
+                                {{ user.correo }}
+                              </a>
+                            </td>
+                          }
+                          <td class="align-middle border-end">
+                            <span class="badge"
+                                  [class]="getRoleBadgeClass(institutionRole.rolNombre)">
+                              <i class="bi bi-shield-check me-1"></i>
+                              {{ institutionRole.rolNombre || 'Sin rol' }}
+                            </span>
+                          </td>
+                          <td class="align-middle border-end">
+                            <span class="text-muted">{{ institutionRole.institucionNombre }}</span>
+                          </td>
+                          <td class="align-middle border-end">
+                            <span class="badge"
+                                  [class]="institutionRole.isEnabled ? 'bg-success' : 'bg-warning'">
+                              <i [class]="institutionRole.isEnabled ? 'bi bi-check-circle me-1' : 'bi bi-pause-circle me-1'"></i>
+                              {{ institutionRole.isEnabled ? 'Activo' : 'Suspendido' }}
+                            </span>
+                          </td>
+                          <td class="text-center align-middle">
+                            <div class="dropdown">
+                              <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                      type="button"
+                                      data-bs-toggle="dropdown"
+                                      [attr.aria-expanded]="false">
+                                <i class="bi bi-three-dots"></i>
+                              </button>
+                              <ul class="dropdown-menu">
+                                <li>
+                                  <a class="dropdown-item" href="#"
+                                     (click)="viewUserInstitutionDetails(user, institutionRole)">
+                                    <i class="bi bi-eye me-2"></i>Ver Detalles
+                                  </a>
+                                </li>
+                                <li>
+                                  <a class="dropdown-item" href="#"
+                                     (click)="editUserInstitution(user, institutionRole)">
+                                    <i class="bi bi-pencil me-2"></i>Editar Asignación
+                                  </a>
+                                </li>
+                                <li>
+                                  <a class="dropdown-item" href="#"
+                                     [class]="institutionRole.isEnabled ? 'text-warning' : 'text-success'"
+                                     (click)="toggleUserInstitutionStatus(user, institutionRole)">
+                                    <i [class]="institutionRole.isEnabled ? 'bi bi-pause-circle me-2' : 'bi bi-play-circle me-2'"></i>
+                                    {{ institutionRole.isEnabled ? 'Suspender' : 'Activar' }}
+                                  </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                  <a class="dropdown-item text-danger" href="#"
+                                     (click)="removeUserFromInstitution(user, institutionRole)">
+                                    <i class="bi bi-trash me-2"></i>Remover de Institución
+                                  </a>
+                                </li>
+                              </ul>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    } @else {
+                      <!-- Usuario sin instituciones asignadas -->
+                      <tr>
+                        <td class="align-middle border-end">
+                          <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="font-monospace">{{ user.cedula }}</span>
+                        </td>
+                        <td class="align-middle border-end">
+                          <a [href]="'mailto:' + user.correo" class="text-decoration-none">
+                            {{ user.correo }}
                           </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="#">
-                            <i class="bi bi-pencil me-2"></i>Editar
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item text-success" href="#">
-                            <i class="bi bi-play-circle me-2"></i>Activar
-                          </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                          <a class="dropdown-item text-danger" href="#">
-                            <i class="bi bi-trash me-2"></i>Eliminar
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="badge bg-light text-muted border">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            Sin rol asignado
+                          </span>
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="text-muted fst-italic">
+                            <i class="bi bi-building-slash me-1"></i>
+                            Sin institución asignada
+                          </span>
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="badge"
+                                [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
+                            <i [class]="user.isEnabled ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
+                            {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
+                          </span>
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    [attr.aria-expanded]="false">
+                              <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                              <li>
+                                <a class="dropdown-item" href="#"
+                                   (click)="viewUserDetails(user)">
+                                  <i class="bi bi-eye me-2"></i>Ver Detalles
+                                </a>
+                              </li>
+                              <li>
+                                <a class="dropdown-item" href="#"
+                                   (click)="editUser(user)">
+                                  <i class="bi bi-pencil me-2"></i>Editar Usuario
+                                </a>
+                              </li>
+                              <li>
+                                <a class="dropdown-item text-primary" href="#"
+                                   (click)="assignUserToInstitution(user)">
+                                  <i class="bi bi-building-add me-2"></i>Asignar a Institución
+                                </a>
+                              </li>
+                              <li><hr class="dropdown-divider"></li>
+                              <li>
+                                <a class="dropdown-item" href="#"
+                                   [class]="user.isEnabled ? 'text-warning' : 'text-success'"
+                                   (click)="toggleUserStatus(user)">
+                                  <i [class]="user.isEnabled ? 'bi bi-pause-circle me-2' : 'bi bi-play-circle me-2'"></i>
+                                  {{ user.isEnabled ? 'Desactivar' : 'Activar' }}
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
         </div>
 
         <!-- Pagination Footer -->
@@ -440,7 +302,11 @@
           <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
               <span class="text-muted me-3">Mostrar</span>
-              <select class="form-select form-select-sm" style="width: auto;">
+              <select
+                class="form-select form-select-sm"
+                style="width: auto;"
+                [value]="pageSize()"
+                (change)="onPageSizeChange($event)">
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -449,29 +315,39 @@
               <span class="text-muted ms-3">registros por página</span>
             </div>
 
-            <nav aria-label="Paginación de usuarios">
-              <ul class="pagination pagination-sm mb-0">
-                <li class="page-item disabled">
-                  <a class="page-link" href="#" tabindex="-1">
-                    <i class="bi bi-chevron-left"></i>
-                  </a>
-                </li>
-                <li class="page-item active">
-                  <a class="page-link" href="#">1</a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="#">2</a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="#">3</a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="#">
-                    <i class="bi bi-chevron-right"></i>
-                  </a>
-                </li>
-              </ul>
-            </nav>
+            @if (usersResponse(); as response) {
+              <nav aria-label="Paginación de usuarios">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item" [class.disabled]="response.first">
+                    <button
+                      class="page-link"
+                      [disabled]="response.first"
+                      (click)="onPageChange(response.page - 1)">
+                      <i class="bi bi-chevron-left"></i>
+                    </button>
+                  </li>
+
+                  @for (pageNum of getPageNumbers(response); track pageNum) {
+                    <li class="page-item" [class.active]="pageNum === response.page">
+                      <button
+                        class="page-link"
+                        (click)="onPageChange(pageNum)">
+                        {{ pageNum + 1 }}
+                      </button>
+                    </li>
+                  }
+
+                  <li class="page-item" [class.disabled]="response.last">
+                    <button
+                      class="page-link"
+                      [disabled]="response.last"
+                      (click)="onPageChange(response.page + 1)">
+                      <i class="bi bi-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            }
           </div>
         </div>
       </div>
