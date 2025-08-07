@@ -41,15 +41,19 @@ export class UserListComponent implements OnInit {
       switchMap(searchTerm => {
         this.searchTerm.set(searchTerm);
         this.currentPage.set(0);
-        return this.performSearch();
+        this.loading.set(true);
+        this.error.set(null);
+        return this.performSearchRequest();
       })
-    ).subscribe();
+    ).subscribe(response => {
+      this.loading.set(false);
+      if (response) {
+        this.usersResponse.set(response);
+      }
+    });
   }
 
-  private performSearch() {
-    this.loading.set(true);
-    this.error.set(null);
-
+  private performSearchRequest() {
     const params: UserSearchParams = {
       page: this.currentPage(),
       size: this.pageSize(),
@@ -67,6 +71,12 @@ export class UserListComponent implements OnInit {
     );
   }
 
+  private performSearch() {
+    this.loading.set(true);
+    this.error.set(null);
+    return this.performSearchRequest();
+  }
+
   loadUsers(): void {
     this.performSearch().subscribe(response => {
       this.loading.set(false);
@@ -79,6 +89,14 @@ export class UserListComponent implements OnInit {
   onSearchChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchSubject.next(target.value);
+  }
+
+  onSearchEnter(): void {
+    // Cancelar cualquier búsqueda pendiente del debounce
+    this.searchSubject.next('');
+    // Ejecutar búsqueda inmediata
+    this.currentPage.set(0);
+    this.loadUsers();
   }
 
   onPageChange(page: number): void {
@@ -203,7 +221,7 @@ export class UserListComponent implements OnInit {
     console.log('Cambiar estado del usuario:', user);
     const action = user.isEnabled ? 'desactivar' : 'activar';
     const message = `¿Está seguro que desea ${action} al usuario ${user.nombres} ${user.apellidos}?`;
-    
+
     if (confirm(message)) {
       // TODO: Implementar llamada al servicio para cambiar el estado del usuario
       console.log(`${action} usuario confirmado`);
@@ -234,7 +252,7 @@ export class UserListComponent implements OnInit {
     // TODO: Implementar llamada al servicio para cambiar el estado
     const action = institutionRole.isEnabled ? 'suspender' : 'activar';
     const message = `¿Está seguro que desea ${action} la asignación de ${user.nombres} ${user.apellidos} en ${institutionRole.institucionNombre}?`;
-    
+
     if (confirm(message)) {
       // Aquí iría la llamada al servicio
       console.log(`${action} asignación confirmado`);
@@ -247,7 +265,7 @@ export class UserListComponent implements OnInit {
   removeUserFromInstitution(user: UserWithInstitutions, institutionRole: InstitutionRole): void {
     console.log('Remover de institución:', { user, institutionRole });
     const message = `¿Está seguro que desea remover a ${user.nombres} ${user.apellidos} de ${institutionRole.institucionNombre}?\n\nEsta acción no se puede deshacer.`;
-    
+
     if (confirm(message)) {
       // TODO: Implementar llamada al servicio para remover la asignación
       console.log('Remoción confirmada');

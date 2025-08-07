@@ -25,38 +25,51 @@
         <div class="card-body">
           <div class="row g-3">
             <div class="col-md-6">
-              <div class="input-group">
-                <span class="input-group-text">
-                  <i class="bi bi-search"></i>
-                </span>
+              <div class="form-floating">
                 <input
                   type="text"
                   class="form-control"
-                  placeholder="Buscar por nombre, cédula o email..."
+                  id="searchInput"
+                  placeholder="Buscar usuarios..."
                   [value]="searchTerm()"
                   (input)="onSearchChange($event)"
-                  (keyup.enter)="loadUsers()">
+                  (keyup.enter)="onSearchEnter()">
+                <label for="searchInput">
+                  <i class="bi bi-search me-2"></i>Buscador de usuarios
+                </label>
               </div>
             </div>
             <div class="col-md-3">
-              <select
-                class="form-select"
-                [value]="sortBy()"
-                (change)="onSortByChange($event)">
-                <option value="nombres">Nombre</option>
-                <option value="apellidos">Apellido</option>
-                <option value="cedula">Cédula</option>
-                <option value="correo">Email</option>
-              </select>
+              <div class="form-floating">
+                <select
+                  class="form-select"
+                  id="sortBySelect"
+                  [value]="sortBy()"
+                  (change)="onSortByChange($event)">
+                  <option value="nombres">Nombre</option>
+                  <option value="apellidos">Apellido</option>
+                  <option value="cedula">Cédula</option>
+                  <option value="correo">Email</option>
+                </select>
+                <label for="sortBySelect">
+                  <i class="bi bi-sort-alpha-down me-2"></i>Ordenar por
+                </label>
+              </div>
             </div>
             <div class="col-md-3">
-              <select
-                class="form-select"
-                [value]="sortDirection()"
-                (change)="onSortDirectionChange($event)">
-                <option value="asc">Ascendente</option>
-                <option value="desc">Descendente</option>
-              </select>
+              <div class="form-floating">
+                <select
+                  class="form-select"
+                  id="sortDirectionSelect"
+                  [value]="sortDirection()"
+                  (change)="onSortDirectionChange($event)">
+                  <option value="asc">Ascendente</option>
+                  <option value="desc">Descendente</option>
+                </select>
+                <label for="sortDirectionSelect">
+                  <i class="bi bi-arrow-up-down me-2"></i>Dirección
+                </label>
+              </div>
             </div>
           </div>
         </div>

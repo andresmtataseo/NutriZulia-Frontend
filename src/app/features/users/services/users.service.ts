@@ -4,13 +4,13 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { API_ENDPOINTS } from '../../../core/constants/api-endpoints';
-import { 
-  User, 
-  UserWithInstitutions, 
-  PageResponse, 
+import {
+  User,
+  UserWithInstitutions,
+  PageResponse,
   UserSearchParams,
   CreateUserRequest,
-  UpdateUserRequest 
+  UpdateUserRequest
 } from '../models/user.interface';
 
 @Injectable({
@@ -25,7 +25,7 @@ export class UsersService {
    */
   getUsersWithInstitutions(params: UserSearchParams = {}): Observable<PageResponse<UserWithInstitutions>> {
     let httpParams = new HttpParams();
-    
+
     if (params.page !== undefined) {
       httpParams = httpParams.set('page', params.page.toString());
     }
