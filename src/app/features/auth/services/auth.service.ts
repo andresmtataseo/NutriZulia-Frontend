@@ -128,7 +128,7 @@ export class AuthService {
     this.authStatusSubject.next(false);
 
     // Redirigir al login
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
   }
 
   /**

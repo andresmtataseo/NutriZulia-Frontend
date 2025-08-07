@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { NotificationComponent } from '../../../../shared/components/notification/notification.component';
@@ -24,6 +24,7 @@ interface LoginState {
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
 
@@ -113,9 +114,12 @@ export class LoginComponent {
             `Bienvenido ${userName} ${lastName}`
           );
 
-          // Redireccionar al dashboard después de un breve delay
+          // Obtener la URL de retorno o usar dashboard por defecto
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+          
+          // Redireccionar después de un breve delay para mostrar la notificación
           setTimeout(() => {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate([returnUrl]);
           }, 1500);
         },
         error: (error) => {
