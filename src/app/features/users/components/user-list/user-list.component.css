@@ -1,9 +1,22 @@
-.user-list-container {
-  padding: 20px;
+/* Estilos personalizados específicos para el componente */
+
+/* Avatar Circle - Estilo personalizado no disponible en Bootstrap */
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
-.user-list-container h1 {
-  color: #333;
-  font-size: 2rem;
-  margin-bottom: 20px;
+/* Responsive adjustments para avatares */
+@media (max-width: 768px) {
+  .avatar-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
 }
