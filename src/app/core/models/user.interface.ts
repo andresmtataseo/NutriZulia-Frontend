@@ -8,5 +8,5 @@ export interface User {
   telefono?: string;
   correo: string;
   clave: string;
-  isEnabled: boolean;
+  is_enabled: boolean;
 }

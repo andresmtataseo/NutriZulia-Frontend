@@ -78,7 +78,13 @@
                   inputmode="numeric"
                   (input)="onCedulaInput($event)"
                   [class.is-invalid]="isFieldInvalid('numeroCedula')">
-                <label for="numeroCedula">Número de Cédula</label>
+                <label for="numeroCedula">Número de Cédula <span class="text-danger">*</span></label>
+                <!-- Indicador de verificación de cédula -->
+                <div class="position-absolute top-50 end-0 translate-middle-y me-3" *ngIf="checkingCedula()">
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Verificando...</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('numeroCedula')">
@@ -148,8 +154,8 @@
                 id="genero"
                 formControlName="genero"
                 [class.is-invalid]="isFieldInvalid('genero')">
-                <option value="M">Masculino</option>
-                <option value="F">Femenino</option>
+                <option value="MASCULINO">Masculino</option>
+                <option value="FEMENINO">Femenino</option>
               </select>
               <label for="genero">Género <span class="text-danger">*</span></label>
             </div>
@@ -176,6 +182,7 @@
                   id="prefijoTelefono"
                   formControlName="prefijoTelefono"
                   [class.is-invalid]="isFieldInvalid('prefijoTelefono')">
+                  <option></option>
                   <option value="0424">0424</option>
                   <option value="0414">0414</option>
                   <option value="0412">0412</option>
@@ -183,7 +190,7 @@
                 </select>
                 <label for="prefijoTelefono">Prefijo</label>
               </div>
-              <div class="form-floating flex-fill">
+              <div class="form-floating flex-fill position-relative">
                 <input
                   type="text"
                   class="form-control"
@@ -195,7 +202,13 @@
                   inputmode="numeric"
                   (input)="onNumericInput($event)"
                   [class.is-invalid]="isFieldInvalid('numeroTelefono')">
-                <label for="numeroTelefono">Número de Teléfono <span class="text-danger">*</span></label>
+                <label for="numeroTelefono">Número de Teléfono</label>
+                <!-- Indicador de verificación de teléfono -->
+                <div class="position-absolute top-50 end-0 translate-middle-y me-3" *ngIf="checkingPhone()">
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Verificando...</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('prefijoTelefono')">
@@ -208,7 +221,7 @@
 
           <!-- Correo Electrónico -->
           <div class="col-md-6">
-            <div class="form-floating">
+            <div class="form-floating position-relative">
               <input
                 type="email"
                 class="form-control"
@@ -217,6 +230,12 @@
                 placeholder="usuario@ejemplo.com"
                 [class.is-invalid]="isFieldInvalid('correo')">
               <label for="correo">Correo Electrónico <span class="text-danger">*</span></label>
+              <!-- Indicador de verificación de correo -->
+              <div class="position-absolute top-50 end-0 translate-middle-y me-3" *ngIf="checkingEmail()">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                  <span class="visually-hidden">Verificando...</span>
+                </div>
+              </div>
             </div>
             <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('correo')">
               {{ getFieldError('correo') }}

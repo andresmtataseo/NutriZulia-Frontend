@@ -62,4 +62,28 @@ export class UsersService {
     return this.http.post<User>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CREATE}`, user);
   }
 
+  /**
+   * Verifica si una cédula está disponible
+   */
+  checkCedulaAvailability(cedula: string): Observable<boolean> {
+    const params = new HttpParams().set('cedula', cedula);
+    return this.http.get<boolean>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CHECK_CEDULA}`, { params });
+  }
+
+  /**
+   * Verifica si un correo electrónico está disponible
+   */
+  checkEmailAvailability(email: string): Observable<boolean> {
+    const params = new HttpParams().set('email', email);
+    return this.http.get<boolean>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CHECK_EMAIL}`, { params });
+  }
+
+  /**
+   * Verifica si un número de teléfono está disponible
+   */
+  checkPhoneAvailability(phone: string): Observable<boolean> {
+    const params = new HttpParams().set('phone', phone);
+    return this.http.get<boolean>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CHECK_PHONE}`, { params });
+  }
+
 }

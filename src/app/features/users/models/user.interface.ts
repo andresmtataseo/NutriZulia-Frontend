@@ -49,9 +49,10 @@ export interface CreateUserRequest {
   apellidos: string;
   fechaNacimiento: string;
   genero: string;
-  telefono: string;
+  telefono: string | null;
   correo: string;
   clave: string;
+  is_enabled: boolean;
 }
 
 export interface UpdateUserRequest extends Partial<CreateUserRequest> {
