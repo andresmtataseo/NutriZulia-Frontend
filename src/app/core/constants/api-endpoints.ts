@@ -13,8 +13,12 @@ export const API_ENDPOINTS = {
   },
   USER: {
     INSTITUTIONS_USER: '/user/institutions-by-user',
-    USERS: '/api/v1/users',
-    USERS_WITH_INSTITUTIONS: '/api/v1/user/con-instituciones'
+    USERS_GET_ALL: '/user/get-all',
+    USERS_WITH_INSTITUTIONS: '/user/get-all/institutions',
+    USERS_CREATE: '/user/create',
+    USERS_CHECK_CEDULA: '/user/check-cedula',
+    USERS_CHECK_EMAIL: '/user/check-email',
+    USERS_CHECK_PHONE: '/user/check-phone',
   }
 } as const;
 

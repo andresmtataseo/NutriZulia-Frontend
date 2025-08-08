@@ -9,8 +9,7 @@ import {
   UserWithInstitutions,
   PageResponse,
   UserSearchParams,
-  CreateUserRequest,
-  UpdateUserRequest
+  CreateUserRequest
 } from '../models/user.interface';
 
 @Injectable({
@@ -43,7 +42,7 @@ export class UsersService {
     }
 
     return this.http.get<PageResponse<UserWithInstitutions>>(
-      `${this.baseUrl}${API_ENDPOINTS.USER.USERS_WITH_INSTITUTIONS}`,
+      `${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_WITH_INSTITUTIONS}`,
       { params: httpParams }
     );
   }
@@ -52,34 +51,15 @@ export class UsersService {
    * Obtiene todos los usuarios (método original)
    */
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.baseUrl}${API_ENDPOINTS.USER.USERS}`);
+    return this.http.get<User[]>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_GET_ALL}`);
   }
 
-  /**
-   * Obtiene un usuario por ID
-   */
-  getUserById(id: number): Observable<User> {
-    return this.http.get<User>(`${this.baseUrl}${API_ENDPOINTS.USER.USERS}/${id}`);
-  }
 
   /**
    * Crea un nuevo usuario
    */
   createUser(user: CreateUserRequest): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}${API_ENDPOINTS.USER.USERS}`, user);
+    return this.http.post<User>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CREATE}`, user);
   }
 
-  /**
-   * Actualiza un usuario existente
-   */
-  updateUser(id: number, user: UpdateUserRequest): Observable<User> {
-    return this.http.put<User>(`${this.baseUrl}${API_ENDPOINTS.USER.USERS}/${id}`, user);
-  }
-
-  /**
-   * Elimina un usuario
-   */
-  deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}${API_ENDPOINTS.USER.USERS}/${id}`);
-  }
 }

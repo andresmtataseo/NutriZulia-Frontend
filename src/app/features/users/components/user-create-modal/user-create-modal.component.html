@@ -45,7 +45,7 @@
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()" novalidate>
 
           <!-- Información Personal -->
-          <div class="row mb-4">
+          <div class="row">
             <div class="col-12">
               <h6 class="text-muted mb-3">Información Personal</h6>
             </div>
@@ -73,6 +73,10 @@
                   id="numeroCedula"
                   formControlName="numeroCedula"
                   placeholder="12345678"
+                  maxlength="8"
+                  pattern="[0-9]{1,8}"
+                  inputmode="numeric"
+                  (input)="onCedulaInput($event)"
                   [class.is-invalid]="isFieldInvalid('numeroCedula')">
                 <label for="numeroCedula">Número de Cédula</label>
               </div>
@@ -144,7 +148,6 @@
                 id="genero"
                 formControlName="genero"
                 [class.is-invalid]="isFieldInvalid('genero')">
-                <option value="">Seleccione...</option>
                 <option value="M">Masculino</option>
                 <option value="F">Femenino</option>
               </select>
@@ -157,7 +160,7 @@
         </div>
 
         <!-- Información de Contacto -->
-        <div class="row mb-4">
+        <div class="row">
           <div class="col-12">
             <h6 class="text-muted mb-3">Información de Contacto</h6>
           </div>
@@ -166,18 +169,40 @@
         <!-- Teléfono -->
         <div class="row mb-3">
           <div class="col-md-6">
-            <div class="form-floating">
-              <input
-                type="tel"
-                class="form-control"
-                id="telefono"
-                formControlName="telefono"
-                placeholder="0424-123-4567"
-                [class.is-invalid]="isFieldInvalid('telefono')">
-              <label for="telefono">Teléfono <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <div class="form-floating" style="max-width: 100px;">
+                <select
+                  class="form-select"
+                  id="prefijoTelefono"
+                  formControlName="prefijoTelefono"
+                  [class.is-invalid]="isFieldInvalid('prefijoTelefono')">
+                  <option value="0424">0424</option>
+                  <option value="0414">0414</option>
+                  <option value="0412">0412</option>
+                  <option value="0426">0426</option>
+                </select>
+                <label for="prefijoTelefono">Prefijo</label>
+              </div>
+              <div class="form-floating flex-fill">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="numeroTelefono"
+                  formControlName="numeroTelefono"
+                  placeholder="1234567"
+                  maxlength="7"
+                  pattern="[0-9]{7}"
+                  inputmode="numeric"
+                  (input)="onNumericInput($event)"
+                  [class.is-invalid]="isFieldInvalid('numeroTelefono')">
+                <label for="numeroTelefono">Número de Teléfono <span class="text-danger">*</span></label>
+              </div>
             </div>
-            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('telefono')">
-              {{ getFieldError('telefono') }}
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('prefijoTelefono')">
+              {{ getFieldError('prefijoTelefono') }}
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('numeroTelefono')">
+              {{ getFieldError('numeroTelefono') }}
             </div>
           </div>
 
@@ -200,7 +225,7 @@
         </div>
 
         <!-- Credenciales de Acceso -->
-        <div class="row mb-4">
+        <div class="row">
           <div class="col-12">
             <h6 class="text-muted mb-3">Credenciales de Acceso</h6>
           </div>

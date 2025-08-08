@@ -37,7 +37,8 @@ export class UserCreateModalComponent implements OnInit {
       tipoCedula: ['V', Validators.required],
       numeroCedula: ['', [
         Validators.required,
-        Validators.pattern(/^\d{7,8}$/)
+        Validators.pattern(/^\d{1,8}$/),
+        Validators.maxLength(8)
       ]],
       nombres: ['', [
         Validators.required,
@@ -54,9 +55,12 @@ export class UserCreateModalComponent implements OnInit {
         this.dateValidator
       ]],
       genero: ['', Validators.required],
-      telefono: ['', [
+      prefijoTelefono: ['0424', Validators.required],
+      numeroTelefono: ['', [
         Validators.required,
-        Validators.pattern(/^(\+58|0058|58)?[-\s]?[24]\d{2}[-\s]?\d{3}[-\s]?\d{4}$/)
+        Validators.pattern(/^\d{7}$/),
+        Validators.minLength(7),
+        Validators.maxLength(7)
       ]],
       correo: ['', [
         Validators.required,
@@ -83,7 +87,7 @@ export class UserCreateModalComponent implements OnInit {
     const inputDate = new Date(control.value);
     const today = new Date();
     const minDate = new Date();
-    minDate.setFullYear(today.getFullYear() - 100);
+    minDate.setFullYear(today.getFullYear() - 150);
     const maxDate = new Date();
     maxDate.setFullYear(today.getFullYear() - 18);
 
@@ -135,11 +139,11 @@ export class UserCreateModalComponent implements OnInit {
       const formValue = this.userForm.value;
       const createUserRequest: CreateUserRequest = {
         cedula: `${formValue.tipoCedula}-${formValue.numeroCedula}`,
-        nombres: formValue.nombres.trim(),
-        apellidos: formValue.apellidos.trim(),
-        fechaNacimiento: formValue.fechaNacimiento,
-        genero: formValue.genero,
-        telefono: formValue.telefono,
+        nombres: formValue.nombres.trim().toUpperCase(),
+        apellidos: formValue.apellidos.trim().toUpperCase(),
+        fechaNacimiento: this.formatDateToISO(formValue.fechaNacimiento),
+        genero: this.normalizeGender(formValue.genero),
+        telefono: `${formValue.prefijoTelefono}-${formValue.numeroTelefono}`,
         correo: formValue.correo.toLowerCase().trim(),
         clave: formValue.clave
       };
@@ -212,8 +216,8 @@ export class UserCreateModalComponent implements OnInit {
     if (errors['minlength']) return `Mínimo ${errors['minlength'].requiredLength} caracteres`;
     if (errors['maxlength']) return `Máximo ${errors['maxlength'].requiredLength} caracteres`;
     if (errors['pattern']) {
-      if (fieldName === 'numeroCedula') return 'Solo números, entre 7 y 8 dígitos';
-      if (fieldName === 'telefono') return 'Formato: +58-424-123-4567 o 0424-123-4567';
+      if (fieldName === 'numeroCedula') return 'Solo números, máximo 8 dígitos';
+      if (fieldName === 'numeroTelefono') return 'Solo números, exactamente 7 dígitos';
     }
     if (errors['futureDate']) return 'La fecha no puede ser futura';
     if (errors['tooOld']) return 'Fecha de nacimiento muy antigua';
@@ -232,12 +236,67 @@ export class UserCreateModalComponent implements OnInit {
       'apellidos': 'Apellidos',
       'fechaNacimiento': 'Fecha de nacimiento',
       'genero': 'Género',
-      'telefono': 'Teléfono',
+      'prefijoTelefono': 'Prefijo telefónico',
+      'numeroTelefono': 'Número de teléfono',
       'correo': 'Correo electrónico',
       'clave': 'Contraseña',
       'confirmarClave': 'Confirmación de contraseña'
     };
     return labels[fieldName] || fieldName;
+  }
+
+  // Método para formatear fecha a ISO 8601 (YYYY-MM-DD)
+  private formatDateToISO(dateValue: string): string {
+    if (!dateValue) return '';
+
+    const date = new Date(dateValue);
+    return date.toISOString().split('T')[0];
+  }
+
+  // Método para normalizar género a mayúsculas
+  private normalizeGender(gender: string): string {
+    if (!gender) return '';
+
+    const genderMap: {[key: string]: string} = {
+      'masculino': 'MASCULINO',
+      'femenino': 'FEMENINO',
+      'M': 'MASCULINO',
+      'F': 'FEMENINO'
+    };
+
+    return genderMap[gender.toLowerCase()] || gender.toUpperCase();
+  }
+
+  // Método para manejar input de cédula
+  onCedulaInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+
+    // Remover cualquier carácter que no sea dígito
+    const numericValue = value.replace(/[^0-9]/g, '');
+
+    // Limitar a 8 dígitos máximo
+    const limitedValue = numericValue.slice(0, 8);
+
+    // Actualizar el valor del input y el form control
+    input.value = limitedValue;
+    this.userForm.get('numeroCedula')?.setValue(limitedValue);
+  }
+
+  // Método para manejar input numérico
+  onNumericInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+
+    // Remover cualquier carácter que no sea dígito
+    const numericValue = value.replace(/[^0-9]/g, '');
+
+    // Limitar a 7 dígitos máximo
+    const limitedValue = numericValue.slice(0, 7);
+
+    // Actualizar el valor del input y el form control
+    input.value = limitedValue;
+    this.userForm.get('numeroTelefono')?.setValue(limitedValue);
   }
 
   // Método para manejar el backdrop click
