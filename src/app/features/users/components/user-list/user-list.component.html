@@ -10,7 +10,7 @@
           </h1>
           <p class="text-muted mb-0">Administra los usuarios del sistema NutriZulia</p>
         </div>
-        <button type="button" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
           <i class="bi bi-plus-circle me-2"></i>
           Nuevo Usuario
         </button>
@@ -367,3 +367,10 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de Creación de Usuario -->
+<app-user-create-modal
+  [show]="showCreateModal()"
+  (close)="closeCreateModal()"
+  (userCreated)="onUserCreated($event)">
+</app-user-create-modal>

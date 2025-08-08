@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, catchError, of } from 'rxjs';
 
 import { UsersService } from '../../services/users.service';
-import { UserWithInstitutions, PageResponse, UserSearchParams, InstitutionRole } from '../../models/user.interface';
+import { UserWithInstitutions, PageResponse, UserSearchParams, InstitutionRole, User } from '../../models/user.interface';
+import { UserCreateModalComponent } from '../user-create-modal/user-create-modal.component';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UserCreateModalComponent],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.css']
 })
@@ -28,6 +29,9 @@ export class UserListComponent implements OnInit {
   pageSize = signal<number>(10);
   sortBy = signal<string>('nombres');
   sortDirection = signal<'asc' | 'desc'>('asc');
+
+  // Signal para controlar el modal de creación
+  showCreateModal = signal<boolean>(false);
 
   ngOnInit(): void {
     this.setupSearch();
@@ -270,5 +274,29 @@ export class UserListComponent implements OnInit {
       // TODO: Implementar llamada al servicio para remover la asignación
       console.log('Remoción confirmada');
     }
+  }
+
+  /**
+   * Abrir modal de creación de usuario
+   */
+  openCreateModal(): void {
+    this.showCreateModal.set(true);
+  }
+
+  /**
+   * Cerrar modal de creación de usuario
+   */
+  closeCreateModal(): void {
+    this.showCreateModal.set(false);
+  }
+
+  /**
+   * Manejar la creación exitosa de un usuario
+   */
+  onUserCreated(user: User): void {
+    console.log('Usuario creado exitosamente:', user);
+    this.closeCreateModal();
+    // Recargar la lista de usuarios para mostrar el nuevo usuario
+    this.loadUsers();
   }
 }

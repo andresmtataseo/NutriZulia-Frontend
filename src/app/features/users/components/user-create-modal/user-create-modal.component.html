@@ -1,0 +1,290 @@
+<!-- Modal Backdrop -->
+<div class="modal fade"
+     [class.show]="show"
+     [style.display]="show ? 'block' : 'none'"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="createUserModalLabel"
+     aria-hidden="!show"
+     (click)="onBackdropClick($event)">
+
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="createUserModalLabel">
+          <i class="bi bi-person-plus me-2"></i>
+          Crear Nuevo Usuario
+        </h5>
+        <button type="button"
+                class="btn-close btn-close-white"
+                aria-label="Cerrar"
+                [disabled]="submitting()"
+                (click)="onClose()">
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        <!-- Error Alert -->
+        @if (error()) {
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ error() }}
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Cerrar"
+                    (click)="error.set(null)">
+            </button>
+          </div>
+        }
+
+        <!-- Form -->
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()" novalidate>
+
+          <!-- Información Personal -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <h6 class="text-muted mb-3">Información Personal</h6>
+            </div>
+          </div>
+
+          <!-- Cédula -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="input-group">
+              <div class="form-floating" style="max-width: 80px;">
+                <select
+                  class="form-select"
+                  id="tipoCedula"
+                  formControlName="tipoCedula"
+                  [class.is-invalid]="isFieldInvalid('tipoCedula')">
+                  <option value="V">V</option>
+                  <option value="E">E</option>
+                </select>
+                <label for="tipoCedula">Tipo</label>
+              </div>
+              <div class="form-floating flex-fill">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="numeroCedula"
+                  formControlName="numeroCedula"
+                  placeholder="12345678"
+                  [class.is-invalid]="isFieldInvalid('numeroCedula')">
+                <label for="numeroCedula">Número de Cédula</label>
+              </div>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('numeroCedula')">
+              {{ getFieldError('numeroCedula') }}
+            </div>
+          </div>
+        </div>
+
+          <!-- Nombres -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nombres"
+                  formControlName="nombres"
+                  placeholder="Nombres"
+                  [class.is-invalid]="isFieldInvalid('nombres')">
+                <label for="nombres">Nombres <span class="text-danger">*</span></label>
+              </div>
+              <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('nombres')">
+                {{ getFieldError('nombres') }}
+              </div>
+            </div>
+
+            <!-- Apellidos -->
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="apellidos"
+                  formControlName="apellidos"
+                  placeholder="Apellidos"
+                  [class.is-invalid]="isFieldInvalid('apellidos')">
+                <label for="apellidos">Apellidos <span class="text-danger">*</span></label>
+              </div>
+              <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('apellidos')">
+                {{ getFieldError('apellidos') }}
+              </div>
+            </div>
+          </div>
+
+        <!-- Fecha de Nacimiento y Género -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="form-floating">
+              <input
+                type="date"
+                class="form-control"
+                id="fechaNacimiento"
+                formControlName="fechaNacimiento"
+                [class.is-invalid]="isFieldInvalid('fechaNacimiento')">
+              <label for="fechaNacimiento">Fecha de Nacimiento <span class="text-danger">*</span></label>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('fechaNacimiento')">
+              {{ getFieldError('fechaNacimiento') }}
+            </div>
+          </div>
+
+          <!-- Género -->
+          <div class="col-md-6">
+            <div class="form-floating">
+              <select
+                class="form-select"
+                id="genero"
+                formControlName="genero"
+                [class.is-invalid]="isFieldInvalid('genero')">
+                <option value="">Seleccione...</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+              <label for="genero">Género <span class="text-danger">*</span></label>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('genero')">
+              {{ getFieldError('genero') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Información de Contacto -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-muted mb-3">Información de Contacto</h6>
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="form-floating">
+              <input
+                type="tel"
+                class="form-control"
+                id="telefono"
+                formControlName="telefono"
+                placeholder="0424-123-4567"
+                [class.is-invalid]="isFieldInvalid('telefono')">
+              <label for="telefono">Teléfono <span class="text-danger">*</span></label>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('telefono')">
+              {{ getFieldError('telefono') }}
+            </div>
+          </div>
+
+          <!-- Correo Electrónico -->
+          <div class="col-md-6">
+            <div class="form-floating">
+              <input
+                type="email"
+                class="form-control"
+                id="correo"
+                formControlName="correo"
+                placeholder="usuario@ejemplo.com"
+                [class.is-invalid]="isFieldInvalid('correo')">
+              <label for="correo">Correo Electrónico <span class="text-danger">*</span></label>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('correo')">
+              {{ getFieldError('correo') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Credenciales de Acceso -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-muted mb-3">Credenciales de Acceso</h6>
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="form-floating">
+              <input
+                type="password"
+                class="form-control"
+                id="clave"
+                formControlName="clave"
+                placeholder="Contraseña"
+                [class.is-invalid]="isFieldInvalid('clave')">
+              <label for="clave">Contraseña <span class="text-danger">*</span></label>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('clave')">
+              {{ getFieldError('clave') }}
+            </div>
+          </div>
+
+          <!-- Confirmar Contraseña -->
+          <div class="col-md-6">
+            <div class="form-floating">
+              <input
+                type="password"
+                class="form-control"
+                id="confirmarClave"
+                formControlName="confirmarClave"
+                placeholder="Confirmar Contraseña"
+                [class.is-invalid]="isFieldInvalid('confirmarClave') || userForm.hasError('passwordMismatch')">
+              <label for="confirmarClave">Confirmar Contraseña <span class="text-danger">*</span></label>
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('confirmarClave') || userForm.hasError('passwordMismatch')">
+              {{ getFieldError('confirmarClave') }}
+            </div>
+          </div>
+        </div>
+
+          <!-- Información Adicional -->
+          <div class="row">
+            <div class="col-12">
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Nota:</strong> El usuario será creado con estado activo.
+                Podrá asignar roles e instituciones después de la creación.
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-secondary"
+                [disabled]="submitting()"
+                (click)="onClose()">
+          <i class="bi bi-x-circle me-2"></i>
+          Cancelar
+        </button>
+
+        <button type="submit"
+                class="btn btn-primary"
+                [disabled]="userForm.invalid || submitting()"
+                (click)="onSubmit()">
+          @if (submitting()) {
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Creando...
+          } @else {
+            <i class="bi bi-check-circle me-2"></i>
+            Crear Usuario
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+@if (show) {
+  <div class="modal-backdrop fade show"></div>
+}
