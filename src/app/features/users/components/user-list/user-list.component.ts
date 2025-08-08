@@ -36,8 +36,8 @@ export class UserListComponent implements OnInit {
 
   private setupSearch(): void {
     this.searchSubject.pipe(
-      debounceTime(300),
       distinctUntilChanged(),
+      debounceTime(500), // Aumentado a 500ms para dar más tiempo al usuario
       switchMap(searchTerm => {
         this.searchTerm.set(searchTerm);
         this.currentPage.set(0);

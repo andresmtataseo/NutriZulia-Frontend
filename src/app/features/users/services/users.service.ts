@@ -39,7 +39,7 @@ export class UsersService {
       httpParams = httpParams.set('sortBy', params.sortBy);
     }
     if (params.sortDirection) {
-      httpParams = httpParams.set('sortDirection', params.sortDirection);
+      httpParams = httpParams.set('sortDir', params.sortDirection);
     }
 
     return this.http.get<PageResponse<UserWithInstitutions>>(
