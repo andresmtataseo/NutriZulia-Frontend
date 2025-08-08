@@ -92,7 +92,9 @@ export class UserListComponent implements OnInit {
 
   onSearchChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.searchSubject.next(target.value);
+    if (target && target.value !== undefined) {
+      this.searchSubject.next(target.value);
+    }
   }
 
   onSearchEnter(): void {
@@ -179,6 +181,32 @@ export class UserListComponent implements OnInit {
     };
 
     return roleClasses[roleName] || 'bg-secondary-subtle text-secondary';
+  }
+
+  /**
+   * Maneja el hover sobre las filas de usuario para agrupar visualmente
+   */
+  onUserRowHover(userId: number, isHovering: boolean): void {
+    // Seleccionar todas las filas del mismo usuario
+    const rows = document.querySelectorAll(`tr[data-user-id="${userId}"]`);
+
+    rows.forEach(row => {
+      if (isHovering) {
+        row.classList.add('hovered');
+        // También agregar la clase a todas las celdas para asegurar el efecto
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+          cell.style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
+        });
+      } else {
+        row.classList.remove('hovered');
+        // Remover el estilo inline de las celdas
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+          cell.style.backgroundColor = '';
+        });
+      }
+    });
   }
 
   /**

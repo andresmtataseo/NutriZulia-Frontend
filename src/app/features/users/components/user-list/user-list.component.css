@@ -20,3 +20,25 @@
     font-size: 1rem;
   }
 }
+
+/* Hover effect para agrupar filas del mismo usuario */
+.user-row-group {
+  transition: background-color 0.2s ease;
+}
+
+.user-row-group:hover {
+  background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+.user-row-group.hovered {
+  background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+/* Hover effect específico para celdas con rowspan */
+.user-row-group.hovered td {
+  background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+.user-row-group:hover td {
+  background-color: rgba(0, 123, 255, 0.05) !important;
+}

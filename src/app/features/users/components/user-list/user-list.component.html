@@ -115,7 +115,7 @@
             </div>
           } @else {
             <div class="table-responsive">
-              <table class="table table-hover mb-0">
+              <table class="table mb-0">
                 <thead class="table-light">
                   <tr>
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
@@ -157,7 +157,10 @@
                     @if (user.instituciones && user.instituciones.length > 0) {
                       <!-- Usuario con instituciones asignadas -->
                       @for (institutionRole of user.instituciones; track $index; let isFirst = $first) {
-                        <tr>
+                        <tr class="user-row-group"
+                            [attr.data-user-id]="user.id"
+                            (mouseenter)="onUserRowHover(user.id, true)"
+                            (mouseleave)="onUserRowHover(user.id, false)">
                           @if (isFirst) {
                             <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
                               <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
@@ -231,7 +234,10 @@
                       }
                     } @else {
                       <!-- Usuario sin instituciones asignadas -->
-                      <tr>
+                      <tr class="user-row-group"
+                          [attr.data-user-id]="user.id"
+                          (mouseenter)="onUserRowHover(user.id, true)"
+                          (mouseleave)="onUserRowHover(user.id, false)">
                         <td class="align-middle border-end">
                           <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
                         </td>
