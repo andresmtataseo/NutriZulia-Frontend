@@ -1,4 +1,5 @@
 import { environment } from '../../../environments/environment';
+import { API_PREFIX } from '../constants/api-endpoints';
 
 /**
  * Configuración base de la API
@@ -19,7 +20,7 @@ export const API_CONFIG = {
  * @returns La URL completa de la API
  */
 export const getApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.BASE_URL}/api/${API_CONFIG.VERSION}${endpoint}`;
+  return `${API_CONFIG.BASE_URL}${API_PREFIX}${endpoint}`;
 };
 
 /**

@@ -1,4 +1,10 @@
 <div class="container py-4">
+  <!-- Componente de notificación -->
+  <app-notification
+    [notification]="notificationService.notification()"
+    (dismissed)="notificationService.hide()">
+  </app-notification>
+
   <!-- Header Section -->
   <div class="row mb-4">
     <div class="col-12">
@@ -103,11 +109,6 @@
               </div>
               <p class="text-muted mt-2">Cargando usuarios...</p>
             </div>
-          } @else if (error()) {
-            <div class="alert alert-danger m-3" role="alert">
-              <i class="bi bi-exclamation-triangle me-2"></i>
-              {{ error() }}
-            </div>
           } @else if (usersResponse()?.content?.length === 0) {
             <div class="text-center py-5">
               <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
@@ -160,7 +161,10 @@
                         <tr class="user-row-group"
                             [attr.data-user-id]="user.id"
                             (mouseenter)="onUserRowHover(user.id, true)"
-                            (mouseleave)="onUserRowHover(user.id, false)">
+                            (mouseleave)="onUserRowHover(user.id, false)"
+                            (click)="openDetailModal(user)"
+                            style="cursor: pointer;"
+                            title="Haz clic para ver detalles del usuario">
                           @if (isFirst) {
                             <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
                               <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
@@ -202,7 +206,7 @@
                               <ul class="dropdown-menu">
                                 <li>
                                   <a class="dropdown-item" href="#"
-                                     (click)="viewUserInstitutionDetails(user, institutionRole)">
+                                     (click)="openDetailModal(user)">
                                     <i class="bi bi-eye me-2"></i>Ver Detalles
                                   </a>
                                 </li>
@@ -237,7 +241,10 @@
                       <tr class="user-row-group"
                           [attr.data-user-id]="user.id"
                           (mouseenter)="onUserRowHover(user.id, true)"
-                          (mouseleave)="onUserRowHover(user.id, false)">
+                          (mouseleave)="onUserRowHover(user.id, false)"
+                          (click)="openDetailModal(user)"
+                          style="cursor: pointer;"
+                          title="Haz clic para ver detalles del usuario">
                         <td class="align-middle border-end">
                           <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
                         </td>
@@ -279,7 +286,7 @@
                             <ul class="dropdown-menu">
                               <li>
                                 <a class="dropdown-item" href="#"
-                                   (click)="viewUserDetails(user)">
+                                   (click)="openDetailModal(user)">
                                   <i class="bi bi-eye me-2"></i>Ver Detalles
                                 </a>
                               </li>
@@ -374,9 +381,17 @@
   </div>
 </div>
 
-<!-- Modal de Creación de Usuario -->
+<!-- Modal de creación de usuario -->
 <app-user-create-modal
   [show]="showCreateModal()"
   (close)="closeCreateModal()"
   (userCreated)="onUserCreated($event)">
 </app-user-create-modal>
+
+<!-- Modal de detalles de usuario -->
+<app-user-detail-modal
+  [show]="showDetailModal()"
+  [user]="selectedUser()"
+  (close)="closeDetailModal()"
+  (userUpdated)="onUserUpdated($event)">
+</app-user-detail-modal>

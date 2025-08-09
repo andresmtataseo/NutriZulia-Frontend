@@ -256,7 +256,7 @@ export class UserCreateModalComponent implements OnInit {
           : null,
         correo: formValue.correo.toLowerCase().trim(),
         clave: formValue.clave,
-        is_enabled: true,
+        isEnabled: true,
       };
       console.log(createUserRequest)
       this.usersService.createUser(createUserRequest).pipe(

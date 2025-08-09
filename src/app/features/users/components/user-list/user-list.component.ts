@@ -6,22 +6,26 @@ import { debounceTime, distinctUntilChanged, Subject, switchMap, catchError, of 
 import { UsersService } from '../../services/users.service';
 import { UserWithInstitutions, PageResponse, UserSearchParams, InstitutionRole, User } from '../../models/user.interface';
 import { UserCreateModalComponent } from '../user-create-modal/user-create-modal.component';
+import { UserDetailModalComponent } from '../user-detail-modal/user-detail-modal.component';
+import { UserDetail } from '../../../../core/models/user-detail.interface';
+import { NotificationService } from '../../../../shared/services/notification.service';
+import { NotificationComponent } from '../../../../shared/components/notification/notification.component';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserCreateModalComponent],
+  imports: [CommonModule, FormsModule, UserCreateModalComponent, UserDetailModalComponent, NotificationComponent],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.css']
 })
 export class UserListComponent implements OnInit {
   private usersService = inject(UsersService);
+  public notificationService = inject(NotificationService);
   private searchSubject = new Subject<string>();
 
   // Signals para el estado del componente
   usersResponse = signal<PageResponse<UserWithInstitutions> | null>(null);
   loading = signal<boolean>(false);
-  error = signal<string | null>(null);
 
   // Parámetros de búsqueda y paginación
   searchTerm = signal<string>('');
@@ -32,6 +36,10 @@ export class UserListComponent implements OnInit {
 
   // Signal para controlar el modal de creación
   showCreateModal = signal<boolean>(false);
+
+  // Signals para controlar el modal de detalles
+  showDetailModal = signal<boolean>(false);
+  selectedUser = signal<UserDetail | null>(null);
 
   ngOnInit(): void {
     this.setupSearch();
@@ -46,7 +54,6 @@ export class UserListComponent implements OnInit {
         this.searchTerm.set(searchTerm);
         this.currentPage.set(0);
         this.loading.set(true);
-        this.error.set(null);
         return this.performSearchRequest();
       })
     ).subscribe(response => {
@@ -69,7 +76,7 @@ export class UserListComponent implements OnInit {
     return this.usersService.getUsersWithInstitutions(params).pipe(
       catchError(error => {
         console.error('Error loading users:', error);
-        this.error.set('Error al cargar los usuarios. Por favor, intente nuevamente.');
+        this.notificationService.showError('Error al cargar los usuarios. Por favor, intente nuevamente.');
         return of(null);
       })
     );
@@ -77,7 +84,6 @@ export class UserListComponent implements OnInit {
 
   private performSearch() {
     this.loading.set(true);
-    this.error.set(null);
     return this.performSearchRequest();
   }
 
@@ -223,11 +229,23 @@ export class UserListComponent implements OnInit {
   }
 
   /**
-   * Ver detalles del usuario (sin institución específica)
+   * Abrir modal de detalles de usuario
    */
-  viewUserDetails(user: UserWithInstitutions): void {
-    console.log('Ver detalles del usuario:', user);
-    // TODO: Implementar modal o navegación para ver detalles del usuario
+  openDetailModal(user: UserWithInstitutions): void {
+    this.loading.set(true);
+
+    this.usersService.getUserDetail(user.id).subscribe({
+      next: (userDetail) => {
+        this.selectedUser.set(userDetail);
+        this.showDetailModal.set(true);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading user details:', error);
+        this.notificationService.showError('Error al cargar los detalles del usuario');
+        this.loading.set(false);
+      }
+    });
   }
 
   /**
@@ -325,6 +343,23 @@ export class UserListComponent implements OnInit {
     console.log('Usuario creado exitosamente:', user);
     this.closeCreateModal();
     // Recargar la lista de usuarios para mostrar el nuevo usuario
+    this.loadUsers();
+  }
+
+  /**
+   * Cerrar modal de detalles de usuario
+   */
+  closeDetailModal(): void {
+    this.showDetailModal.set(false);
+    this.selectedUser.set(null);
+  }
+
+  /**
+   * Manejar la actualización exitosa de un usuario
+   */
+  onUserUpdated(user: UserDetail): void {
+    console.log('Usuario actualizado exitosamente:', user);
+    // Recargar la lista de usuarios para mostrar los cambios
     this.loadUsers();
   }
 }

@@ -1,0 +1,455 @@
+<!-- Modal Backdrop -->
+<div class="modal fade"
+     [class.show]="show"
+     [style.display]="show ? 'block' : 'none'"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="userDetailModalLabel"
+     aria-hidden="!show"
+     (click)="onBackdropClick($event)">
+
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="userDetailModalLabel">
+          <i class="bi bi-person-circle me-2"></i>
+          @if (user) {
+            {{ user.nombres }} {{ user.apellidos }}
+          } @else {
+            Detalles del Usuario
+          }
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Cerrar"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body p-0">
+        @if (user) {
+          <!-- Navigation Tabs -->
+          <nav class="nav nav-tabs border-bottom" role="tablist">
+            <button class="nav-link"
+                    [class.active]="activeTab() === 'personal'"
+                    type="button"
+                    (click)="setActiveTab('personal')">
+              <i class="bi bi-person me-2"></i>
+              Datos Personales
+            </button>
+            <button class="nav-link"
+                    [class.active]="activeTab() === 'institutions'"
+                    type="button"
+                    (click)="setActiveTab('institutions')">
+              <i class="bi bi-building me-2"></i>
+              Instituciones Asignadas
+              @if (hasInstitutions()) {
+                <span class="badge bg-primary ms-1">{{ user.instituciones.length }}</span>
+              }
+            </button>
+            <button class="nav-link"
+                    [class.active]="activeTab() === 'assignment'"
+                    type="button"
+                    (click)="setActiveTab('assignment')">
+              <i class="bi bi-plus-circle me-2"></i>
+              Nueva Asignación
+            </button>
+            <button class="nav-link"
+                    [class.active]="activeTab() === 'history'"
+                    type="button"
+                    (click)="setActiveTab('history')">
+              <i class="bi bi-clock-history me-2"></i>
+              Historial
+            </button>
+          </nav>
+
+          <!-- Tab Content -->
+          <div class="tab-content p-4">
+            
+            <!-- Personal Data Tab -->
+            @if (activeTab() === 'personal') {
+              <div class="tab-pane fade show active">
+                <div class="row">
+                  <div class="col-md-8">
+                    <h6 class="text-primary mb-3">
+                      <i class="bi bi-person-badge me-2"></i>
+                      Información Personal
+                    </h6>
+
+                    <form [formGroup]="personalForm" (ngSubmit)="onPersonalFormSubmit()">
+                      <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <label for="cedula" class="form-label">Cédula <span class="text-danger">*</span></label>
+                          <input type="text" 
+                                 class="form-control" 
+                                 id="cedula" 
+                                 formControlName="cedula"
+                                 [class.is-invalid]="personalForm.get('cedula')?.invalid && personalForm.get('cedula')?.touched">
+                          @if (getFormControlError('cedula')) {
+                            <div class="invalid-feedback">{{ getFormControlError('cedula') }}</div>
+                          }
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                          <label for="correo" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                          <input type="email" 
+                                 class="form-control" 
+                                 id="correo" 
+                                 formControlName="correo"
+                                 [class.is-invalid]="personalForm.get('correo')?.invalid && personalForm.get('correo')?.touched">
+                          @if (getFormControlError('correo')) {
+                            <div class="invalid-feedback">{{ getFormControlError('correo') }}</div>
+                          }
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                          <label for="nombres" class="form-label">Nombres <span class="text-danger">*</span></label>
+                          <input type="text" 
+                                 class="form-control" 
+                                 id="nombres" 
+                                 formControlName="nombres"
+                                 [class.is-invalid]="personalForm.get('nombres')?.invalid && personalForm.get('nombres')?.touched">
+                          @if (getFormControlError('nombres')) {
+                            <div class="invalid-feedback">{{ getFormControlError('nombres') }}</div>
+                          }
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                          <label for="apellidos" class="form-label">Apellidos <span class="text-danger">*</span></label>
+                          <input type="text" 
+                                 class="form-control" 
+                                 id="apellidos" 
+                                 formControlName="apellidos"
+                                 [class.is-invalid]="personalForm.get('apellidos')?.invalid && personalForm.get('apellidos')?.touched">
+                          @if (getFormControlError('apellidos')) {
+                            <div class="invalid-feedback">{{ getFormControlError('apellidos') }}</div>
+                          }
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                          <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                          <input type="date" 
+                                 class="form-control" 
+                                 id="fechaNacimiento" 
+                                 formControlName="fechaNacimiento"
+                                 [class.is-invalid]="personalForm.get('fechaNacimiento')?.invalid && personalForm.get('fechaNacimiento')?.touched">
+                          @if (getFormControlError('fechaNacimiento')) {
+                            <div class="invalid-feedback">{{ getFormControlError('fechaNacimiento') }}</div>
+                          }
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                          <label for="genero" class="form-label">Género <span class="text-danger">*</span></label>
+                          <select class="form-select" 
+                                  id="genero" 
+                                  formControlName="genero"
+                                  [class.is-invalid]="personalForm.get('genero')?.invalid && personalForm.get('genero')?.touched">
+                            <option value="">Seleccione...</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Femenino</option>
+                          </select>
+                          @if (getFormControlError('genero')) {
+                            <div class="invalid-feedback">{{ getFormControlError('genero') }}</div>
+                          }
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                          <label for="telefono" class="form-label">Teléfono</label>
+                          <input type="tel" 
+                                 class="form-control" 
+                                 id="telefono" 
+                                 formControlName="telefono"
+                                 placeholder="Opcional">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="isEnabled" 
+                                   formControlName="isEnabled">
+                            <label class="form-check-label" for="isEnabled">
+                              Usuario Activo
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="d-flex justify-content-end">
+                        <button type="submit" 
+                                class="btn btn-primary"
+                                [disabled]="personalForm.invalid || loading()">
+                          @if (loading()) {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                          }
+                          <i class="bi bi-check-circle me-2"></i>
+                          Guardar Cambios
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="card bg-light">
+                      <div class="card-body text-center">
+                        <div class="avatar-circle bg-primary text-white mx-auto mb-3" style="width: 80px; height: 80px; line-height: 80px; font-size: 2rem;">
+                          {{ user.nombres.charAt(0) }}{{ user.apellidos.charAt(0) }}
+                        </div>
+                        <h6 class="card-title">{{ user.nombres }} {{ user.apellidos }}</h6>
+                        <p class="card-text text-muted">{{ user.correo }}</p>
+                        <span class="badge" [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
+                          {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Institutions Tab -->
+            @if (activeTab() === 'institutions') {
+              <div class="tab-pane fade show active">
+                <h6 class="text-primary mb-3">
+                  <i class="bi bi-building me-2"></i>
+                  Instituciones Asignadas
+                </h6>
+
+                @if (hasInstitutions()) {
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Institución</th>
+                          <th>Rol</th>
+                          <th>Fecha Inicio</th>
+                          <th>Fecha Fin</th>
+                          <th>Estado</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (assignment of user.instituciones; track assignment.id) {
+                          <tr>
+                            <td>
+                              <strong>{{ assignment.institucion.nombre }}</strong>
+                            </td>
+                            <td>
+                              <span class="badge" [class]="getRoleBadgeClass(assignment.rol.nombre)">
+                                <i class="bi bi-shield-check me-1"></i>
+                                {{ assignment.rol.nombre }}
+                              </span>
+                            </td>
+                            <td>{{ formatDate(assignment.fechaInicio) }}</td>
+                            <td>
+                              @if (assignment.fechaFin) {
+                                {{ formatDate(assignment.fechaFin) }}
+                              } @else {
+                                <span class="text-muted">Sin fecha fin</span>
+                              }
+                            </td>
+                            <td>
+                              <span class="badge" [class]="assignment.isEnabled ? 'bg-success' : 'bg-danger'">
+                                {{ assignment.isEnabled ? 'Activo' : 'Inactivo' }}
+                              </span>
+                            </td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary btn-sm"
+                                        (click)="updateInstitutionAssignment(assignment)"
+                                        title="Editar">
+                                  <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm"
+                                        (click)="toggleInstitutionAssignment(assignment)"
+                                        [title]="assignment.isEnabled ? 'Desactivar' : 'Activar'">
+                                  <i [class]="assignment.isEnabled ? 'bi bi-pause-circle' : 'bi bi-play-circle'"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm"
+                                        (click)="removeInstitutionAssignment(assignment)"
+                                        title="Remover">
+                                  <i class="bi bi-trash"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                } @else {
+                  <div class="text-center py-5">
+                    <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+                    <h6 class="text-muted mt-3">Sin instituciones asignadas</h6>
+                    <p class="text-muted">Este usuario no tiene instituciones asignadas actualmente.</p>
+                    <button class="btn btn-primary" (click)="setActiveTab('assignment')">
+                      <i class="bi bi-plus-circle me-2"></i>
+                      Asignar Institución
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Assignment Tab -->
+            @if (activeTab() === 'assignment') {
+              <div class="tab-pane fade show active">
+                <h6 class="text-primary mb-3">
+                  <i class="bi bi-plus-circle me-2"></i>
+                  Nueva Asignación Institucional
+                </h6>
+
+                <form [formGroup]="assignmentForm" (ngSubmit)="onAssignmentFormSubmit()">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="institucionId" class="form-label">Institución <span class="text-danger">*</span></label>
+                      <select class="form-select" 
+                              id="institucionId" 
+                              formControlName="institucionId"
+                              [class.is-invalid]="assignmentForm.get('institucionId')?.invalid && assignmentForm.get('institucionId')?.touched">
+                        <option value="">Seleccione una institución...</option>
+                        @for (institution of institutions(); track institution.id) {
+                          <option [value]="institution.id">{{ institution.nombre }}</option>
+                        }
+                      </select>
+                      @if (getFormControlError('institucionId', assignmentForm)) {
+                        <div class="invalid-feedback">{{ getFormControlError('institucionId', assignmentForm) }}</div>
+                      }
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <label for="rolId" class="form-label">Rol <span class="text-danger">*</span></label>
+                      <select class="form-select" 
+                              id="rolId" 
+                              formControlName="rolId"
+                              [class.is-invalid]="assignmentForm.get('rolId')?.invalid && assignmentForm.get('rolId')?.touched">
+                        <option value="">Seleccione un rol...</option>
+                        @for (role of roles(); track role.id) {
+                          <option [value]="role.id">{{ role.nombre }}</option>
+                        }
+                      </select>
+                      @if (getFormControlError('rolId', assignmentForm)) {
+                        <div class="invalid-feedback">{{ getFormControlError('rolId', assignmentForm) }}</div>
+                      }
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <label for="fechaInicio" class="form-label">Fecha de Inicio <span class="text-danger">*</span></label>
+                      <input type="date" 
+                             class="form-control" 
+                             id="fechaInicio" 
+                             formControlName="fechaInicio"
+                             [class.is-invalid]="assignmentForm.get('fechaInicio')?.invalid && assignmentForm.get('fechaInicio')?.touched">
+                      @if (getFormControlError('fechaInicio', assignmentForm)) {
+                        <div class="invalid-feedback">{{ getFormControlError('fechaInicio', assignmentForm) }}</div>
+                      }
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <label for="fechaFin" class="form-label">Fecha de Fin</label>
+                      <input type="date" 
+                             class="form-control" 
+                             id="fechaFin" 
+                             formControlName="fechaFin"
+                             placeholder="Opcional">
+                      <div class="form-text">Dejar vacío para asignación indefinida</div>
+                    </div>
+                  </div>
+
+                  <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-secondary me-2" (click)="assignmentForm.reset()">
+                      <i class="bi bi-arrow-clockwise me-2"></i>
+                      Limpiar
+                    </button>
+                    <button type="submit" 
+                            class="btn btn-primary"
+                            [disabled]="assignmentForm.invalid || loading()">
+                      @if (loading()) {
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                      }
+                      <i class="bi bi-check-circle me-2"></i>
+                      Asignar Usuario
+                    </button>
+                  </div>
+                </form>
+              </div>
+            }
+
+            <!-- History Tab -->
+            @if (activeTab() === 'history') {
+              <div class="tab-pane fade show active">
+                <h6 class="text-primary mb-3">
+                  <i class="bi bi-clock-history me-2"></i>
+                  Historial de Cambios
+                </h6>
+
+                @if (loading()) {
+                  <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="text-muted mt-2">Cargando historial...</p>
+                  </div>
+                } @else if (userHistory().length > 0) {
+                  <div class="timeline">
+                    @for (entry of userHistory(); track entry.id) {
+                      <div class="timeline-item mb-3">
+                        <div class="card">
+                          <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                              <div>
+                                <h6 class="card-title mb-1">{{ entry.accion }}</h6>
+                                <p class="card-text">{{ entry.descripcion }}</p>
+                                <small class="text-muted">
+                                  <i class="bi bi-person me-1"></i>{{ entry.usuarioAccion }}
+                                </small>
+                              </div>
+                              <small class="text-muted">
+                                <i class="bi bi-calendar me-1"></i>{{ formatDate(entry.fechaAccion) }}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="text-center py-5">
+                    <i class="bi bi-clock-history text-muted" style="font-size: 3rem;"></i>
+                    <h6 class="text-muted mt-3">Sin historial disponible</h6>
+                    <p class="text-muted">No hay registros de cambios para este usuario.</p>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+
+          <!-- Alert Messages -->
+          @if (error()) {
+            <div class="alert alert-danger alert-dismissible fade show mx-4 mb-0" role="alert">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              {{ error() }}
+              <button type="button" class="btn-close" (click)="error.set(null)"></button>
+            </div>
+          }
+
+          @if (success()) {
+            <div class="alert alert-success alert-dismissible fade show mx-4 mb-0" role="alert">
+              <i class="bi bi-check-circle me-2"></i>
+              {{ success() }}
+              <button type="button" class="btn-close" (click)="success.set(null)"></button>
+            </div>
+          }
+
+        } @else {
+          <div class="text-center py-5">
+            <i class="bi bi-person-x text-muted" style="font-size: 3rem;"></i>
+            <h6 class="text-muted mt-3">Usuario no encontrado</h6>
+            <p class="text-muted">No se pudo cargar la información del usuario.</p>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+</div>

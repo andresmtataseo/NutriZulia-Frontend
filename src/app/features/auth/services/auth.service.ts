@@ -11,10 +11,11 @@ import {
   LoginRequest,
   LoginResponse,
   User,
-  AuthState,
-  ForgotPasswordRequest
+  ForgotPasswordRequest,
+  AuthState
 } from '../../../core/models';
 import { AuthStorageService } from './auth-storage.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 /**
  * Servicio principal de autenticación
@@ -53,6 +54,19 @@ export class AuthService {
   }
 
   /**
+   * Solicita recuperación de contraseña
+   * @param request - Datos de la solicitud de recuperación
+   * @returns Observable con la respuesta
+   */
+  forgotPassword(request: ForgotPasswordRequest): Observable<ApiResponse<any>> {
+    const forgotPasswordUrl = getApiUrl(API_ENDPOINTS.AUTH.FORGOT_PASSWORD);
+    
+    return this.http.post<ApiResponse<any>>(forgotPasswordUrl, request).pipe(
+      catchError(error => this.handleAuthError(error))
+    );
+  }
+
+  /**
    * Inicializa el estado de autenticación al cargar la aplicación
    */
   private initializeAuthState(): void {
@@ -60,6 +74,16 @@ export class AuthService {
     const userData = this.authStorage.getUserData();
 
     if (token && !this.authStorage.isTokenExpired(token) && userData) {
+      // Verificar que el usuario tenga los roles requeridos
+      const requiredRoles = ['ROLE_SUPERVISOR_WEB', 'ROLE_ADMINISTRADOR_WEB'];
+      const hasRequiredRole = this.authStorage.hasAnyRole(requiredRoles, token);
+
+      if (!hasRequiredRole) {
+        // Si no tiene los roles requeridos, limpiar estado
+        this.clearAuthState();
+        return;
+      }
+
       this.updateAuthState({
         isAuthenticated: true,
         user: userData,
@@ -94,23 +118,24 @@ export class AuthService {
   }
 
   /**
-   * Solicita la recuperación de contraseña
-   * @param request - Datos de la solicitud (cédula)
-   * @returns Observable con la respuesta del servidor
-   */
-  forgotPassword(request: ForgotPasswordRequest): Observable<ApiResponse<any>> {
-    const forgotPasswordUrl = getApiUrl(API_ENDPOINTS.AUTH.FORGOT_PASSWORD);
-
-    return this.http.post<ApiResponse<any>>(forgotPasswordUrl, request).pipe(
-      catchError(error => this.handleAuthError(error))
-    );
-  }
-
-  /**
    * Maneja el éxito del login
    * @param loginData - Datos de respuesta del login
    */
   private handleLoginSuccess(loginData: LoginResponse): void {
+    // Verificar que el usuario tenga los roles requeridos
+    const requiredRoles = ['ROLE_SUPERVISOR_WEB', 'ROLE_ADMINISTRADOR_WEB'];
+    const hasRequiredRole = this.authStorage.hasAnyRole(requiredRoles, loginData.token);
+
+    if (!hasRequiredRole) {
+      // Si no tiene los roles requeridos, mostrar error y no autenticar
+      this.updateAuthState({
+        ...this.authState(),
+        isLoading: false,
+        error: 'No tienes permisos para acceder a esta aplicación. Se requiere rol de Supervisor Web o Administrador Web.'
+      });
+      return;
+    }
+
     // Guardar token y datos del usuario
     this.authStorage.saveToken(loginData.token);
     this.authStorage.saveUserData(loginData.user);
@@ -203,7 +228,14 @@ export class AuthService {
    */
   isUserAuthenticated(): boolean {
     const token = this.authStorage.getToken();
-    return token !== null && !this.authStorage.isTokenExpired(token);
+
+    if (!token || this.authStorage.isTokenExpired(token)) {
+      return false;
+    }
+
+    // Verificar que el usuario tenga los roles requeridos
+    const requiredRoles = ['ROLE_SUPERVISOR_WEB', 'ROLE_ADMINISTRADOR_WEB'];
+    return this.authStorage.hasAnyRole(requiredRoles, token);
   }
 
   /**
@@ -216,10 +248,13 @@ export class AuthService {
 
   /**
    * Verifica y actualiza el estado de autenticación
-   * Útil para verificar la validez del token
+   * Útil para verificar la validez del token y roles
    */
   checkAuthStatus(): void {
-    const isValid = this.isUserAuthenticated();
+    const token = this.authStorage.getToken();
+    const isValidToken = token && !this.authStorage.isTokenExpired(token);
+    const hasValidRoles = isValidToken && this.authStorage.hasAnyRole(['ROLE_SUPERVISOR_WEB', 'ROLE_ADMINISTRADOR_WEB'], token);
+    const isValid = isValidToken && hasValidRoles;
 
     if (!isValid && this.authState().isAuthenticated) {
       this.logout();

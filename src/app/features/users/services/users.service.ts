@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { API_ENDPOINTS } from '../../../core/constants/api-endpoints';
+import { API_ENDPOINTS, API_PREFIX } from '../../../core/constants/api-endpoints';
+import { ApiResponse } from '../../../core/models/api-response.interface';
 import {
   User,
   UserWithInstitutions,
@@ -11,6 +12,14 @@ import {
   UserSearchParams,
   CreateUserRequest
 } from '../models/user.interface';
+import {
+  UserDetail,
+  UserUpdateRequest,
+  InstitutionAssignmentRequest,
+  UserInstitutionUpdateRequest,
+  UserHistoryEntry
+} from '../../../core/models/user-detail.interface';
+import { Institucion, Rol } from '../../../core/models';
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +51,7 @@ export class UsersService {
     }
 
     return this.http.get<PageResponse<UserWithInstitutions>>(
-      `${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_WITH_INSTITUTIONS}`,
+      `${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_WITH_INSTITUTIONS}`,
       { params: httpParams }
     );
   }
@@ -51,15 +60,15 @@ export class UsersService {
    * Obtiene todos los usuarios (método original)
    */
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_GET_ALL}`);
+    return this.http.get<User[]>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_GET_ALL}`);
   }
 
 
   /**
-   * Crea un nuevo usuario
+   * Crear un nuevo usuario
    */
-  createUser(user: CreateUserRequest): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CREATE}`, user);
+  createUser(userData: CreateUserRequest): Observable<User> {
+    return this.http.post<User>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_CREATE}`, userData);
   }
 
   /**
@@ -67,7 +76,7 @@ export class UsersService {
    */
   checkCedulaAvailability(cedula: string): Observable<boolean> {
     const params = new HttpParams().set('cedula', cedula);
-    return this.http.get<boolean>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CHECK_CEDULA}`, { params });
+    return this.http.get<boolean>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_CHECK_CEDULA}`, { params });
   }
 
   /**
@@ -75,7 +84,7 @@ export class UsersService {
    */
   checkEmailAvailability(email: string): Observable<boolean> {
     const params = new HttpParams().set('email', email);
-    return this.http.get<boolean>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CHECK_EMAIL}`, { params });
+    return this.http.get<boolean>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_CHECK_EMAIL}`, { params });
   }
 
   /**
@@ -83,7 +92,67 @@ export class UsersService {
    */
   checkPhoneAvailability(phone: string): Observable<boolean> {
     const params = new HttpParams().set('phone', phone);
-    return this.http.get<boolean>(`${this.baseUrl}/api/v1${API_ENDPOINTS.USER.USERS_CHECK_PHONE}`, { params });
+    return this.http.get<boolean>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_CHECK_PHONE}`, { params });
+  }
+
+  /**
+   * Obtener detalles de un usuario específico
+   */
+  getUserDetail(userId: number): Observable<UserDetail> {
+    const params = new HttpParams().set('idUsuario', userId.toString());
+    return this.http.get<ApiResponse<UserDetail>>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_GET_DETAIL}`, { params })
+      .pipe(
+        map(response => response.data!)
+      );
+  }
+
+  /**
+   * Actualizar información de un usuario
+   */
+  updateUser(userId: number, userData: UserUpdateRequest): Observable<UserDetail> {
+    return this.http.put<UserDetail>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_UPDATE}/${userId}`, userData);
+  }
+
+  /**
+   * Asignar usuario a una institución
+   */
+  assignUserToInstitution(assignmentData: InstitutionAssignmentRequest): Observable<any> {
+    return this.http.post(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_ASSIGN_INSTITUTION}`, assignmentData);
+  }
+
+  /**
+   * Actualizar asignación de usuario a institución
+   */
+  updateUserInstitution(updateData: UserInstitutionUpdateRequest): Observable<any> {
+    return this.http.put(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_UPDATE_INSTITUTION}/${updateData.id}`, updateData);
+  }
+
+  /**
+   * Remover usuario de una institución
+   */
+  removeUserFromInstitution(assignmentId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_REMOVE_INSTITUTION}/${assignmentId}`);
+  }
+
+  /**
+   * Obtener historial de un usuario
+   */
+  getUserHistory(userId: number): Observable<UserHistoryEntry[]> {
+    return this.http.get<UserHistoryEntry[]>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_HISTORY}/${userId}`);
+  }
+
+  /**
+   * Obtener lista de instituciones
+   */
+  getInstitutions(): Observable<Institucion[]> {
+    return this.http.get<Institucion[]>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.INSTITUTIONS}`);
+  }
+
+  /**
+   * Obtener lista de roles
+   */
+  getRoles(): Observable<Rol[]> {
+    return this.http.get<Rol[]>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.ROLES}`);
   }
 
 }

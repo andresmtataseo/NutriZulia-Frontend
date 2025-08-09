@@ -7,6 +7,17 @@ export interface User {
   genero: string;
   telefono?: string;
   correo: string;
-  clave: string;
-  is_enabled: boolean;
+  clave?: string;
+  isEnabled: boolean;
+}
+
+export interface UserUpdateRequest {
+  cedula: string;
+  nombres: string;
+  apellidos: string;
+  fechaNacimiento: string;
+  genero: string;
+  telefono?: string;
+  correo: string;
+  isEnabled: boolean;
 }

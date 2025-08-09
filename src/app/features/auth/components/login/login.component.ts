@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -19,6 +19,7 @@ interface LoginState {
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [ReactiveFormsModule, NotificationComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
@@ -63,6 +64,14 @@ export class LoginComponent {
     this.loginForm.get('clave')?.valueChanges.subscribe(() => {
       if (this.state().hasInvalidCredentials) {
         this.state.update(state => ({ ...state, hasInvalidCredentials: false }));
+      }
+    });
+
+    // Suscribirse a los errores del estado de autenticación
+    effect(() => {
+      const authState = this.authService.authState();
+      if (authState.error && !authState.isLoading) {
+        this.notificationService.showError(authState.error);
       }
     });
   }

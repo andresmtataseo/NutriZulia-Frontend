@@ -52,7 +52,7 @@ export interface CreateUserRequest {
   telefono: string | null;
   correo: string;
   clave: string;
-  is_enabled: boolean;
+  isEnabled: boolean;
 }
 
 export interface UpdateUserRequest extends Partial<CreateUserRequest> {

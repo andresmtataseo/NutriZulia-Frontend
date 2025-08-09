@@ -102,4 +102,52 @@ export class AuthStorageService {
       return true;
     }
   }
+
+  /**
+   * Decodifica el payload del JWT
+   * @param token - Token a decodificar (opcional, usa el almacenado si no se proporciona)
+   * @returns El payload decodificado o null si hay error
+   */
+  decodeToken(token?: string): any | null {
+    const tokenToCheck = token || this.getToken();
+    
+    if (!tokenToCheck) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(atob(tokenToCheck.split('.')[1]));
+    } catch (error) {
+      console.error('Error al decodificar el token:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Obtiene los roles del usuario desde el JWT
+   * @param token - Token a verificar (opcional, usa el almacenado si no se proporciona)
+   * @returns Array de roles o array vacío si no hay roles
+   */
+  getUserRoles(token?: string): string[] {
+    const payload = this.decodeToken(token);
+    
+    if (!payload) {
+      return [];
+    }
+
+    // Los roles pueden estar en diferentes campos del JWT
+    // Verificamos las posibles ubicaciones
+    return payload.roles || payload.authorities || payload.role || [];
+  }
+
+  /**
+   * Verifica si el usuario tiene alguno de los roles especificados
+   * @param requiredRoles - Array de roles requeridos
+   * @param token - Token a verificar (opcional, usa el almacenado si no se proporciona)
+   * @returns true si el usuario tiene al menos uno de los roles requeridos
+   */
+  hasAnyRole(requiredRoles: string[], token?: string): boolean {
+    const userRoles = this.getUserRoles(token);
+    return requiredRoles.some(role => userRoles.includes(role));
+  }
 }
