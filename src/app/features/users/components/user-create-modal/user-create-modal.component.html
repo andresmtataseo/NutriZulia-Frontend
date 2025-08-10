@@ -6,7 +6,8 @@
      role="dialog"
      aria-labelledby="createUserModalLabel"
      aria-hidden="!show"
-     (click)="onBackdropClick($event)">
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
 
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
     <div class="modal-content">
@@ -188,7 +189,7 @@
                   <option value="0412">0412</option>
                   <option value="0426">0426</option>
                 </select>
-                <label for="prefijoTelefono">Prefijo</label>
+                <label for="prefijoTelefono">Prefijo <span class="text-danger">*</span></label>
               </div>
               <div class="form-floating flex-fill position-relative">
                 <input
@@ -202,7 +203,7 @@
                   inputmode="numeric"
                   (input)="onNumericInput($event)"
                   [class.is-invalid]="isFieldInvalid('numeroTelefono')">
-                <label for="numeroTelefono">Número de Teléfono</label>
+                <label for="numeroTelefono">Número de Teléfono <span class="text-danger">*</span></label>
                 <!-- Indicador de verificación de teléfono -->
                 <div class="position-absolute top-50 end-0 translate-middle-y me-3" *ngIf="checkingPhone()">
                   <div class="spinner-border spinner-border-sm text-primary" role="status">

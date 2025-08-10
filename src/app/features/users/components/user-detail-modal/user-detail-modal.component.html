@@ -6,7 +6,8 @@
      role="dialog"
      aria-labelledby="userDetailModalLabel"
      aria-hidden="!show"
-     (click)="onBackdropClick($event)">
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
 
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
     <div class="modal-content">
@@ -17,6 +18,9 @@
           <i class="bi bi-person-circle me-2"></i>
           @if (user) {
             {{ user.nombres }} {{ user.apellidos }}
+            <span class="badge ms-2" [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
+              {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
+            </span>
           } @else {
             Detalles del Usuario
           }
@@ -53,119 +57,193 @@
               <i class="bi bi-plus-circle me-2"></i>
               Nueva Asignación
             </button>
-            <button class="nav-link"
-                    [class.active]="activeTab() === 'history'"
-                    type="button"
-                    (click)="setActiveTab('history')">
-              <i class="bi bi-clock-history me-2"></i>
-              Historial
-            </button>
+
           </nav>
 
           <!-- Tab Content -->
           <div class="tab-content p-4">
-            
+
             <!-- Personal Data Tab -->
             @if (activeTab() === 'personal') {
               <div class="tab-pane fade show active">
                 <div class="row">
-                  <div class="col-md-8">
-                    <h6 class="text-primary mb-3">
-                      <i class="bi bi-person-badge me-2"></i>
-                      Información Personal
-                    </h6>
-
+                  <div class="col-md-12">
                     <form [formGroup]="personalForm" (ngSubmit)="onPersonalFormSubmit()">
                       <div class="row">
                         <div class="col-md-6 mb-3">
-                          <label for="cedula" class="form-label">Cédula <span class="text-danger">*</span></label>
-                          <input type="text" 
-                                 class="form-control" 
-                                 id="cedula" 
-                                 formControlName="cedula"
-                                 [class.is-invalid]="personalForm.get('cedula')?.invalid && personalForm.get('cedula')?.touched">
-                          @if (getFormControlError('cedula')) {
-                            <div class="invalid-feedback">{{ getFormControlError('cedula') }}</div>
+                          <div class="input-group">
+                            <div class="form-floating" style="max-width: 80px;">
+                              <select
+                                class="form-select"
+                                id="tipoCedula"
+                                formControlName="tipoCedula"
+                                [class.is-invalid]="isFieldInvalid('tipoCedula')">
+                                <option value="V">V</option>
+                                <option value="E">E</option>
+                              </select>
+                              <label for="tipoCedula">Tipo</label>
+                            </div>
+                            <div class="form-floating flex-fill">
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="numeroCedula"
+                                formControlName="numeroCedula"
+                                placeholder="12345678"
+                                maxlength="8"
+                                pattern="[0-9]{1,8}"
+                                inputmode="numeric"
+                                (input)="onCedulaInput($event)"
+                                [class.is-invalid]="isFieldInvalid('numeroCedula')">
+                              <label for="numeroCedula">Número de Cédula <span class="text-danger">*</span></label>
+                            </div>
+                          </div>
+                          @if (isFieldInvalid('tipoCedula')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('tipoCedula') }}</div>
+                          }
+                          @if (isFieldInvalid('numeroCedula')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('numeroCedula') }}</div>
+                          }
+                          @if (checkingCedula()) {
+                            <div class="text-info small">
+                              <i class="bi bi-hourglass-split me-1"></i>
+                              Verificando disponibilidad...
+                            </div>
                           }
                         </div>
 
                         <div class="col-md-6 mb-3">
-                          <label for="correo" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
-                          <input type="email" 
-                                 class="form-control" 
-                                 id="correo" 
-                                 formControlName="correo"
-                                 [class.is-invalid]="personalForm.get('correo')?.invalid && personalForm.get('correo')?.touched">
-                          @if (getFormControlError('correo')) {
-                            <div class="invalid-feedback">{{ getFormControlError('correo') }}</div>
+                          <div class="form-floating">
+                            <input type="email"
+                                   class="form-control"
+                                   id="correo"
+                                   formControlName="correo"
+                                   placeholder="usuario@ejemplo.com"
+                                   [class.is-invalid]="isFieldInvalid('correo')">
+                            <label for="correo">Correo Electrónico <span class="text-danger">*</span></label>
+                          </div>
+                          @if (isFieldInvalid('correo')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('correo') }}</div>
+                          }
+                          @if (checkingEmail()) {
+                            <div class="text-info small">
+                              <i class="bi bi-hourglass-split me-1"></i>
+                              Verificando disponibilidad...
+                            </div>
                           }
                         </div>
 
                         <div class="col-md-6 mb-3">
-                          <label for="nombres" class="form-label">Nombres <span class="text-danger">*</span></label>
-                          <input type="text" 
-                                 class="form-control" 
-                                 id="nombres" 
-                                 formControlName="nombres"
-                                 [class.is-invalid]="personalForm.get('nombres')?.invalid && personalForm.get('nombres')?.touched">
-                          @if (getFormControlError('nombres')) {
-                            <div class="invalid-feedback">{{ getFormControlError('nombres') }}</div>
+                          <div class="form-floating">
+                            <input type="text"
+                                   class="form-control"
+                                   id="nombres"
+                                   formControlName="nombres"
+                                   placeholder="Nombres"
+                                   [class.is-invalid]="isFieldInvalid('nombres')">
+                            <label for="nombres">Nombres <span class="text-danger">*</span></label>
+                          </div>
+                          @if (isFieldInvalid('nombres')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('nombres') }}</div>
                           }
                         </div>
 
                         <div class="col-md-6 mb-3">
-                          <label for="apellidos" class="form-label">Apellidos <span class="text-danger">*</span></label>
-                          <input type="text" 
-                                 class="form-control" 
-                                 id="apellidos" 
-                                 formControlName="apellidos"
-                                 [class.is-invalid]="personalForm.get('apellidos')?.invalid && personalForm.get('apellidos')?.touched">
-                          @if (getFormControlError('apellidos')) {
-                            <div class="invalid-feedback">{{ getFormControlError('apellidos') }}</div>
+                          <div class="form-floating">
+                            <input type="text"
+                                   class="form-control"
+                                   id="apellidos"
+                                   formControlName="apellidos"
+                                   placeholder="Apellidos"
+                                   [class.is-invalid]="isFieldInvalid('apellidos')">
+                            <label for="apellidos">Apellidos <span class="text-danger">*</span></label>
+                          </div>
+                          @if (isFieldInvalid('apellidos')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('apellidos') }}</div>
                           }
                         </div>
 
                         <div class="col-md-6 mb-3">
-                          <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento <span class="text-danger">*</span></label>
-                          <input type="date" 
-                                 class="form-control" 
-                                 id="fechaNacimiento" 
-                                 formControlName="fechaNacimiento"
-                                 [class.is-invalid]="personalForm.get('fechaNacimiento')?.invalid && personalForm.get('fechaNacimiento')?.touched">
-                          @if (getFormControlError('fechaNacimiento')) {
-                            <div class="invalid-feedback">{{ getFormControlError('fechaNacimiento') }}</div>
+                          <div class="form-floating">
+                            <input type="date"
+                                   class="form-control"
+                                   id="fechaNacimiento"
+                                   formControlName="fechaNacimiento"
+                                   [class.is-invalid]="isFieldInvalid('fechaNacimiento')">
+                            <label for="fechaNacimiento">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                          </div>
+                          @if (isFieldInvalid('fechaNacimiento')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('fechaNacimiento') }}</div>
                           }
                         </div>
 
                         <div class="col-md-6 mb-3">
-                          <label for="genero" class="form-label">Género <span class="text-danger">*</span></label>
-                          <select class="form-select" 
-                                  id="genero" 
-                                  formControlName="genero"
-                                  [class.is-invalid]="personalForm.get('genero')?.invalid && personalForm.get('genero')?.touched">
-                            <option value="">Seleccione...</option>
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
+                          <div class="form-floating">
+                            <select class="form-select"
+                                 id="genero"
+                                 formControlName="genero"
+                                 [class.is-invalid]="isFieldInvalid('genero')">
+                            <option value="">Seleccione género</option>
+                            <option value="MASCULINO">Masculino</option>
+                            <option value="FEMENINO">Femenino</option>
                           </select>
-                          @if (getFormControlError('genero')) {
-                            <div class="invalid-feedback">{{ getFormControlError('genero') }}</div>
+                            <label for="genero">Género <span class="text-danger">*</span></label>
+                          </div>
+                          @if (isFieldInvalid('genero')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('genero') }}</div>
                           }
                         </div>
 
                         <div class="col-md-6 mb-3">
-                          <label for="telefono" class="form-label">Teléfono</label>
-                          <input type="tel" 
-                                 class="form-control" 
-                                 id="telefono" 
-                                 formControlName="telefono"
-                                 placeholder="Opcional">
+                          <div class="input-group">
+                            <div class="form-floating" style="max-width: 100px;">
+                              <select
+                                class="form-select"
+                                id="prefijoTelefono"
+                                formControlName="prefijoTelefono"
+                                [class.is-invalid]="isFieldInvalid('prefijoTelefono')">
+                                <option value="">Prefijo</option>
+                                <option value="0424">0424</option>
+                                <option value="0414">0414</option>
+                                <option value="0412">0412</option>
+                                <option value="0426">0426</option>
+                              </select>
+                              <label for="prefijoTelefono">Prefijo</label>
+                            </div>
+                            <div class="form-floating flex-fill">
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="numeroTelefono"
+                                formControlName="numeroTelefono"
+                                placeholder="1234567"
+                                maxlength="7"
+                                pattern="[0-9]{7}"
+                                inputmode="numeric"
+                                (input)="onNumericInput($event)"
+                                [class.is-invalid]="isFieldInvalid('numeroTelefono')">
+                              <label for="numeroTelefono">Número de Teléfono</label>
+                            </div>
+                          </div>
+                          @if (isFieldInvalid('prefijoTelefono')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('prefijoTelefono') }}</div>
+                          }
+                          @if (isFieldInvalid('numeroTelefono')) {
+                            <div class="invalid-feedback d-block">{{ getFieldError('numeroTelefono') }}</div>
+                          }
+                          @if (checkingPhone()) {
+                            <div class="text-info small">
+                              <i class="bi bi-hourglass-split me-1"></i>
+                              Verificando disponibilidad...
+                            </div>
+                          }
                         </div>
 
                         <div class="col-md-6 mb-3">
                           <div class="form-check form-switch">
-                            <input class="form-check-input" 
-                                   type="checkbox" 
-                                   id="isEnabled" 
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="isEnabled"
                                    formControlName="isEnabled">
                             <label class="form-check-label" for="isEnabled">
                               Usuario Activo
@@ -175,7 +253,7 @@
                       </div>
 
                       <div class="d-flex justify-content-end">
-                        <button type="submit" 
+                        <button type="submit"
                                 class="btn btn-primary"
                                 [disabled]="personalForm.invalid || loading()">
                           @if (loading()) {
@@ -187,21 +265,6 @@
                       </div>
                     </form>
                   </div>
-
-                  <div class="col-md-4">
-                    <div class="card bg-light">
-                      <div class="card-body text-center">
-                        <div class="avatar-circle bg-primary text-white mx-auto mb-3" style="width: 80px; height: 80px; line-height: 80px; font-size: 2rem;">
-                          {{ user.nombres.charAt(0) }}{{ user.apellidos.charAt(0) }}
-                        </div>
-                        <h6 class="card-title">{{ user.nombres }} {{ user.apellidos }}</h6>
-                        <p class="card-text text-muted">{{ user.correo }}</p>
-                        <span class="badge" [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
-                          {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             }
@@ -209,11 +272,6 @@
             <!-- Institutions Tab -->
             @if (activeTab() === 'institutions') {
               <div class="tab-pane fade show active">
-                <h6 class="text-primary mb-3">
-                  <i class="bi bi-building me-2"></i>
-                  Instituciones Asignadas
-                </h6>
-
                 @if (hasInstitutions()) {
                   <div class="table-responsive">
                     <table class="table table-hover">
@@ -234,9 +292,9 @@
                               <strong>{{ assignment.institucion.nombre }}</strong>
                             </td>
                             <td>
-                              <span class="badge" [class]="getRoleBadgeClass(assignment.rol.nombre)">
+                              <span class="badge" [class]="getRoleBadgeClass(assignment.rol.descripcion)">
                                 <i class="bi bi-shield-check me-1"></i>
-                                {{ assignment.rol.nombre }}
+                                {{ assignment.rol.descripcion }}
                               </span>
                             </td>
                             <td>{{ formatDate(assignment.fechaInicio) }}</td>
@@ -293,64 +351,67 @@
             <!-- Assignment Tab -->
             @if (activeTab() === 'assignment') {
               <div class="tab-pane fade show active">
-                <h6 class="text-primary mb-3">
-                  <i class="bi bi-plus-circle me-2"></i>
-                  Nueva Asignación Institucional
-                </h6>
-
                 <form [formGroup]="assignmentForm" (ngSubmit)="onAssignmentFormSubmit()">
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <label for="institucionId" class="form-label">Institución <span class="text-danger">*</span></label>
-                      <select class="form-select" 
-                              id="institucionId" 
-                              formControlName="institucionId"
-                              [class.is-invalid]="assignmentForm.get('institucionId')?.invalid && assignmentForm.get('institucionId')?.touched">
-                        <option value="">Seleccione una institución...</option>
-                        @for (institution of institutions(); track institution.id) {
-                          <option [value]="institution.id">{{ institution.nombre }}</option>
-                        }
-                      </select>
+                      <div class="form-floating">
+                        <select class="form-select"
+                                id="institucionId"
+                                formControlName="institucionId"
+                                [class.is-invalid]="assignmentForm.get('institucionId')?.invalid && assignmentForm.get('institucionId')?.touched">
+                          <option value="">Seleccione una institución...</option>
+                          @for (institution of institutions(); track institution.id) {
+                            <option [value]="institution.id">{{ institution.nombre }}</option>
+                          }
+                        </select>
+                        <label for="institucionId">Institución <span class="text-danger">*</span></label>
+                      </div>
                       @if (getFormControlError('institucionId', assignmentForm)) {
-                        <div class="invalid-feedback">{{ getFormControlError('institucionId', assignmentForm) }}</div>
+                        <div class="invalid-feedback d-block">{{ getFormControlError('institucionId', assignmentForm) }}</div>
                       }
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <label for="rolId" class="form-label">Rol <span class="text-danger">*</span></label>
-                      <select class="form-select" 
-                              id="rolId" 
-                              formControlName="rolId"
-                              [class.is-invalid]="assignmentForm.get('rolId')?.invalid && assignmentForm.get('rolId')?.touched">
-                        <option value="">Seleccione un rol...</option>
-                        @for (role of roles(); track role.id) {
-                          <option [value]="role.id">{{ role.nombre }}</option>
-                        }
-                      </select>
+                      <div class="form-floating">
+                        <select class="form-select"
+                                id="rolId"
+                                formControlName="rolId"
+                                [class.is-invalid]="assignmentForm.get('rolId')?.invalid && assignmentForm.get('rolId')?.touched">
+                          <option value="">Seleccione un rol...</option>
+                          @for (role of roles(); track role.id) {
+                            <option [value]="role.id">{{ role.nombre }}</option>
+                          }
+                        </select>
+                        <label for="rolId">Rol <span class="text-danger">*</span></label>
+                      </div>
                       @if (getFormControlError('rolId', assignmentForm)) {
-                        <div class="invalid-feedback">{{ getFormControlError('rolId', assignmentForm) }}</div>
+                        <div class="invalid-feedback d-block">{{ getFormControlError('rolId', assignmentForm) }}</div>
                       }
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <label for="fechaInicio" class="form-label">Fecha de Inicio <span class="text-danger">*</span></label>
-                      <input type="date" 
-                             class="form-control" 
-                             id="fechaInicio" 
-                             formControlName="fechaInicio"
-                             [class.is-invalid]="assignmentForm.get('fechaInicio')?.invalid && assignmentForm.get('fechaInicio')?.touched">
+                      <div class="form-floating">
+                        <input type="date"
+                               class="form-control"
+                               id="fechaInicio"
+                               formControlName="fechaInicio"
+                               [class.is-invalid]="assignmentForm.get('fechaInicio')?.invalid && assignmentForm.get('fechaInicio')?.touched">
+                        <label for="fechaInicio">Fecha de Inicio <span class="text-danger">*</span></label>
+                      </div>
                       @if (getFormControlError('fechaInicio', assignmentForm)) {
-                        <div class="invalid-feedback">{{ getFormControlError('fechaInicio', assignmentForm) }}</div>
+                        <div class="invalid-feedback d-block">{{ getFormControlError('fechaInicio', assignmentForm) }}</div>
                       }
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <label for="fechaFin" class="form-label">Fecha de Fin</label>
-                      <input type="date" 
-                             class="form-control" 
-                             id="fechaFin" 
-                             formControlName="fechaFin"
-                             placeholder="Opcional">
+                      <div class="form-floating">
+                        <input type="date"
+                               class="form-control"
+                               id="fechaFin"
+                               formControlName="fechaFin"
+                               placeholder="Fecha de Fin">
+                        <label for="fechaFin">Fecha de Fin</label>
+                      </div>
                       <div class="form-text">Dejar vacío para asignación indefinida</div>
                     </div>
                   </div>
@@ -360,7 +421,7 @@
                       <i class="bi bi-arrow-clockwise me-2"></i>
                       Limpiar
                     </button>
-                    <button type="submit" 
+                    <button type="submit"
                             class="btn btn-primary"
                             [disabled]="assignmentForm.invalid || loading()">
                       @if (loading()) {
@@ -374,82 +435,35 @@
               </div>
             }
 
-            <!-- History Tab -->
-            @if (activeTab() === 'history') {
-              <div class="tab-pane fade show active">
-                <h6 class="text-primary mb-3">
-                  <i class="bi bi-clock-history me-2"></i>
-                  Historial de Cambios
-                </h6>
 
-                @if (loading()) {
-                  <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                      <span class="visually-hidden">Cargando...</span>
-                    </div>
-                    <p class="text-muted mt-2">Cargando historial...</p>
-                  </div>
-                } @else if (userHistory().length > 0) {
-                  <div class="timeline">
-                    @for (entry of userHistory(); track entry.id) {
-                      <div class="timeline-item mb-3">
-                        <div class="card">
-                          <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                              <div>
-                                <h6 class="card-title mb-1">{{ entry.accion }}</h6>
-                                <p class="card-text">{{ entry.descripcion }}</p>
-                                <small class="text-muted">
-                                  <i class="bi bi-person me-1"></i>{{ entry.usuarioAccion }}
-                                </small>
-                              </div>
-                              <small class="text-muted">
-                                <i class="bi bi-calendar me-1"></i>{{ formatDate(entry.fechaAccion) }}
-                              </small>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <div class="text-center py-5">
-                    <i class="bi bi-clock-history text-muted" style="font-size: 3rem;"></i>
-                    <h6 class="text-muted mt-3">Sin historial disponible</h6>
-                    <p class="text-muted">No hay registros de cambios para este usuario.</p>
-                  </div>
-                }
-              </div>
-            }
 
           </div>
 
-          <!-- Alert Messages -->
-          @if (error()) {
-            <div class="alert alert-danger alert-dismissible fade show mx-4 mb-0" role="alert">
-              <i class="bi bi-exclamation-triangle me-2"></i>
-              {{ error() }}
-              <button type="button" class="btn-close" (click)="error.set(null)"></button>
-            </div>
-          }
+        <!-- Modal Footer -->
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">
+            <i class="bi bi-x-circle me-2"></i>
+            Cerrar
+          </button>
+        </div>
 
-          @if (success()) {
-            <div class="alert alert-success alert-dismissible fade show mx-4 mb-0" role="alert">
-              <i class="bi bi-check-circle me-2"></i>
-              {{ success() }}
-              <button type="button" class="btn-close" (click)="success.set(null)"></button>
-            </div>
-          }
-
-        } @else {
-          <div class="text-center py-5">
-            <i class="bi bi-person-x text-muted" style="font-size: 3rem;"></i>
-            <h6 class="text-muted mt-3">Usuario no encontrado</h6>
-            <p class="text-muted">No se pudo cargar la información del usuario.</p>
+      } @else {
+        <!-- Loading State -->
+        <div class="modal-body text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
           </div>
-        }
-      </div>
+          <p class="text-muted">No se pudo cargar la información del usuario.</p>
+        </div>
+      }
+
+    </div>
 
     </div>
   </div>
 </div>
+
+<!-- Modal Backdrop -->
+@if (show) {
+  <div class="modal-backdrop fade show"></div>
+}

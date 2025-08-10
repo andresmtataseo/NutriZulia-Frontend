@@ -3,7 +3,7 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 1050;
+  z-index: 1060; /* Mayor que el z-index de los modales de Bootstrap (1055) */
   width: 90%;
   max-width: 400px;
 }

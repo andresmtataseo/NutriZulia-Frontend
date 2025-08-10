@@ -145,14 +145,20 @@ export class UsersService {
    * Obtener lista de instituciones
    */
   getInstitutions(): Observable<Institucion[]> {
-    return this.http.get<Institucion[]>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.INSTITUTIONS}`);
+    return this.http.get<ApiResponse<Institucion[]>>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.INSTITUTIONS}`)
+      .pipe(
+        map(response => response.data!)
+      );
   }
 
   /**
    * Obtener lista de roles
    */
   getRoles(): Observable<Rol[]> {
-    return this.http.get<Rol[]>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.ROLES}`);
+    return this.http.get<ApiResponse<Rol[]>>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.ROLES}`)
+      .pipe(
+        map(response => response.data!)
+      );
   }
 
 }

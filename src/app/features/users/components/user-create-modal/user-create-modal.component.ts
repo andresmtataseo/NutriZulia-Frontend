@@ -5,6 +5,9 @@ import { catchError, of, debounceTime, distinctUntilChanged, switchMap } from 'r
 
 import { UsersService } from '../../services/users.service';
 import { CreateUserRequest, User } from '../../models/user.interface';
+import { NotificationService } from '../../../../shared/services/notification.service';
+import { numeroCedulaValidator } from '../../../auth/validators/auth.validators';
+import { venezuelanPhonePrefixValidator, phoneNumberValidator } from '../../../../shared/validators/phone.validators';
 
 @Component({
   selector: 'app-user-create-modal',
@@ -59,9 +62,13 @@ export class UserCreateModalComponent implements OnInit {
         this.dateValidator
       ]],
       genero: ['', Validators.required],
-      prefijoTelefono: [''],
+      prefijoTelefono: ['', [
+        Validators.required,
+        venezuelanPhonePrefixValidator()
+      ]],
       numeroTelefono: ['', [
-        Validators.pattern(/^\d{7}$/),
+        Validators.required,
+        phoneNumberValidator(),
         Validators.minLength(7),
         Validators.maxLength(7)
       ]],
@@ -338,6 +345,8 @@ export class UserCreateModalComponent implements OnInit {
     if (errors['tooYoung']) return 'Debe ser mayor de 18 años';
     if (errors['passwordStrength']) return 'Debe contener mayúscula, minúscula, número y carácter especial';
     if (errors['passwordMismatch']) return 'Las contraseñas no coinciden';
+    if (errors['invalidVenezuelanPhonePrefix']) return 'Prefijo inválido. Use: 0414, 0424, 0412, 0416 o 0426';
+    if (errors['invalidPhoneNumber']) return 'Número inválido. Debe tener exactamente 7 dígitos';
 
     return 'Campo inválido';
   }
@@ -412,12 +421,5 @@ export class UserCreateModalComponent implements OnInit {
     // Actualizar el valor del input y el form control
     input.value = limitedValue;
     this.userForm.get('numeroTelefono')?.setValue(limitedValue);
-  }
-
-  // Método para manejar el backdrop click
-  onBackdropClick(event: Event): void {
-    if (event.target === event.currentTarget) {
-      this.onClose();
-    }
   }
 }
