@@ -109,8 +109,9 @@ export class UsersService {
   /**
    * Actualizar información de un usuario
    */
-  updateUser(userId: number, userData: UserUpdateRequest): Observable<UserDetail> {
-    return this.http.put<UserDetail>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_UPDATE}/${userId}`, userData);
+  updateUser(userId: number, userData: UserUpdateRequest): Observable<ApiResponse<UserDetail>> {
+    const params = new HttpParams().set('idUsuario', userId.toString());
+    return this.http.put<ApiResponse<UserDetail>>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_UPDATE}`, userData, { params });
   }
 
   /**

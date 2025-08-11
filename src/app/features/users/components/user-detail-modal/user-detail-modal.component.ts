@@ -375,11 +375,20 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     console.log('Update request:', updateRequest);
 
     this.usersService.updateUser(this.user.id, updateRequest).subscribe({
-      next: (updatedUser) => {
-        // Usar mensaje por defecto ya que UserDetail no tiene propiedad message
-        this.notificationService.showSuccess('Datos personales actualizados correctamente');
-        this.userUpdated.emit(updatedUser);
+      next: (response) => {
+        // Usar el mensaje del servidor si está disponible
+        const successMessage = response.message || 'Datos personales actualizados correctamente';
+        this.notificationService.showSuccess(successMessage);
+        
+        // Actualizar los datos locales con la respuesta del servidor
+        if (response.data) {
+          this.user = response.data;
+          this.userUpdated.emit(response.data);
+        }
         this.loading.set(false);
+        
+        // Cerrar el modal después de una actualización exitosa
+        this.closeModal();
       },
       error: (error) => {
         console.error('Error updating user:', error);
