@@ -63,11 +63,9 @@ export class UserCreateModalComponent implements OnInit {
       ]],
       genero: ['', Validators.required],
       prefijoTelefono: ['', [
-        Validators.required,
         venezuelanPhonePrefixValidator()
       ]],
       numeroTelefono: ['', [
-        Validators.required,
         phoneNumberValidator(),
         Validators.minLength(7),
         Validators.maxLength(7)
@@ -166,9 +164,14 @@ export class UserCreateModalComponent implements OnInit {
          distinctUntilChanged(),
          switchMap(numeroValue => {
            // Solo validar si hay un número de teléfono, prefijo válido y es válido
+           // Ahora que el teléfono es opcional, solo validar si ambos campos tienen valor
            if (!numeroValue || numeroValue.trim() === '' ||
-               !prefijoTelefonoControl.value || prefijoTelefonoControl.value.trim() === '' ||
-               numeroTelefonoControl.invalid) {
+               !prefijoTelefonoControl.value || prefijoTelefonoControl.value.trim() === '') {
+             return of(null);
+           }
+
+           // Verificar que el número sea válido antes de hacer la consulta
+           if (numeroTelefonoControl.invalid) {
              return of(null);
            }
 
@@ -251,11 +254,11 @@ export class UserCreateModalComponent implements OnInit {
       this.error.set(null);
 
       const formValue = this.userForm.value;
-      const createUserRequest: CreateUserRequest = {
+      const createUserRequest: any = {
         cedula: `${formValue.tipoCedula}-${this.padCedulaWithZeros(formValue.numeroCedula)}`,
         nombres: formValue.nombres.trim().toUpperCase(),
         apellidos: formValue.apellidos.trim().toUpperCase(),
-        fechaNacimiento: this.formatDateToISO(formValue.fechaNacimiento),
+        fecha_nacimiento: this.formatDateToISO(formValue.fechaNacimiento),
         genero: this.normalizeGender(formValue.genero),
         telefono: formValue.numeroTelefono && formValue.numeroTelefono.trim() !== '' &&
                   formValue.prefijoTelefono && formValue.prefijoTelefono.trim() !== ''
@@ -263,7 +266,7 @@ export class UserCreateModalComponent implements OnInit {
           : null,
         correo: formValue.correo.toLowerCase().trim(),
         clave: formValue.clave,
-        isEnabled: true,
+        is_enabled: true,
       };
       console.log(createUserRequest)
       this.usersService.createUser(createUserRequest).pipe(

@@ -33,13 +33,15 @@
           <!-- Numero de cedula -->
           <div class="form-floating flex-grow-1">
             <input
-              type="number"
+              type="text"
               class="form-control"
               id="numeroCedula"
               formControlName="numeroCedula"
               placeholder="Número de cédula"
               [class.is-invalid]="hasFieldError('numeroCedula')"
-              aria-describedby="numeroCedula-error" />
+              aria-describedby="numeroCedula-error"
+              (input)="onCedulaInput($event)"
+              maxlength="8" />
             <label for="numeroCedula">Número de cédula</label>
           </div>
         </div>
@@ -171,13 +173,15 @@
                 <!-- Numero de cedula -->
                 <div class="form-floating flex-grow-1">
                   <input
-                    type="number"
+                    type="text"
                     class="form-control"
                     id="forgotNumeroCedula"
                     formControlName="numeroCedula"
                     placeholder="Número de cédula"
                     [class.is-invalid]="hasForgotPasswordFieldError('numeroCedula')"
-                    [disabled]="state().isForgotPasswordLoading" />
+                    [disabled]="state().isForgotPasswordLoading"
+                    (input)="onCedulaInput($event)"
+                    maxlength="8" />
                   <label for="forgotNumeroCedula">Número de cédula</label>
                 </div>
               </div>

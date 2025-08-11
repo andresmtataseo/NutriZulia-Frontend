@@ -107,7 +107,7 @@ export class LoginComponent {
    */
   private performLogin(): void {
     const formValue = this.loginForm.value;
-    const cedula = `${formValue.tipoCedula}-${formValue.numeroCedula}`;
+    const cedula = `${formValue.tipoCedula}-${this.padCedulaWithZeros(formValue.numeroCedula)}`;
 
     const loginRequest: LoginRequest = {
       cedula,
@@ -254,7 +254,7 @@ export class LoginComponent {
    */
   private performForgotPassword(): void {
     const formValue = this.forgotPasswordForm.value;
-    const cedula = `${formValue.tipoCedula}-${formValue.numeroCedula}`;
+    const cedula = `${formValue.tipoCedula}-${this.padCedulaWithZeros(formValue.numeroCedula)}`;
 
     const request: ForgotPasswordRequest = { cedula };
 
@@ -325,5 +325,37 @@ export class LoginComponent {
   hasForgotPasswordFieldError(controlName: string): boolean {
     const control = this.forgotPasswordForm.get(controlName);
     return !!(control && control.invalid && control.touched);
+  }
+
+  /**
+   * Método para rellenar la cédula con ceros a la izquierda
+   */
+  private padCedulaWithZeros(cedula: string): string {
+    if (!cedula) return '';
+    return cedula.toString().padStart(8, '0');
+  }
+
+  /**
+   * Método para manejar input de cédula (solo números, máximo 8 dígitos)
+   */
+  onCedulaInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+
+    // Remover cualquier carácter que no sea dígito
+    const numericValue = value.replace(/[^0-9]/g, '');
+
+    // Limitar a 8 dígitos máximo
+    const limitedValue = numericValue.slice(0, 8);
+
+    // Actualizar el valor del input y el form control
+    input.value = limitedValue;
+    
+    // Determinar qué formulario actualizar basado en el ID del input
+    if (input.id === 'numeroCedula') {
+      this.loginForm.get('numeroCedula')?.setValue(limitedValue);
+    } else if (input.id === 'forgotNumeroCedula') {
+      this.forgotPasswordForm.get('numeroCedula')?.setValue(limitedValue);
+    }
   }
 }
