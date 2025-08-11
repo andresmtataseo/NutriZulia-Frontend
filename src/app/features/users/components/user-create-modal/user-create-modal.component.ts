@@ -6,19 +6,22 @@ import { catchError, of, debounceTime, distinctUntilChanged, switchMap } from 'r
 import { UsersService } from '../../services/users.service';
 import { CreateUserRequest, User } from '../../models/user.interface';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { NotificationComponent } from '../../../../shared/components/notification/notification.component';
+import { ApiResponse } from '../../../../core/models/api-response.interface';
 import { numeroCedulaValidator } from '../../../auth/validators/auth.validators';
 import { venezuelanPhonePrefixValidator, phoneNumberValidator } from '../../../../shared/validators/phone.validators';
 
 @Component({
   selector: 'app-user-create-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NotificationComponent],
   templateUrl: './user-create-modal.component.html',
   styleUrls: ['./user-create-modal.component.css']
 })
 export class UserCreateModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private usersService = inject(UsersService);
+  public notificationService = inject(NotificationService);
 
   @Input() show = false;
   @Output() close = new EventEmitter<void>();
@@ -62,9 +65,7 @@ export class UserCreateModalComponent implements OnInit {
         this.dateValidator
       ]],
       genero: ['', Validators.required],
-      prefijoTelefono: ['', [
-        venezuelanPhonePrefixValidator()
-      ]],
+      prefijoTelefono: [''],
       numeroTelefono: ['', [
         phoneNumberValidator(),
         Validators.minLength(7),
@@ -74,18 +75,8 @@ export class UserCreateModalComponent implements OnInit {
         Validators.required,
         Validators.email,
         Validators.maxLength(100)
-      ]],
-      clave: ['', [
-        Validators.required,
-        Validators.minLength(8),
-        this.passwordValidator
-      ]],
-      confirmarClave: ['', [
-        Validators.required
       ]]
-    }, {
-      validators: this.passwordMatchValidator
-    });
+    }, { validators: this.phoneValidator.bind(this) });
   }
 
   private setupAvailabilityValidation(): void {
@@ -220,32 +211,30 @@ export class UserCreateModalComponent implements OnInit {
     return null;
   }
 
-  // Validador personalizado para contraseñas
-  private passwordValidator(control: AbstractControl): {[key: string]: any} | null {
-    if (!control.value) return null;
+  // Validador personalizado para teléfono
+  private phoneValidator(form: AbstractControl): {[key: string]: any} | null {
+    const prefijoTelefono = form.get('prefijoTelefono')?.value;
+    const numeroTelefono = form.get('numeroTelefono')?.value;
 
-    const password = control.value;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    const valid = hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar;
-
-    if (!valid) {
-      return { 'passwordStrength': true };
+    // Si hay número de teléfono pero no hay prefijo
+    if (numeroTelefono && numeroTelefono.trim() !== '' && (!prefijoTelefono || prefijoTelefono.trim() === '')) {
+      return { 'phoneRequiresPrefix': true };
     }
+
+    // Si hay prefijo pero no hay número
+    if (prefijoTelefono && prefijoTelefono.trim() !== '' && (!numeroTelefono || numeroTelefono.trim() === '')) {
+      return { 'prefixRequiresPhone': true };
+    }
+
+    // Si hay prefijo, validar que sea válido
+    if (prefijoTelefono && prefijoTelefono.trim() !== '') {
+      const validPrefixes = ['0414', '0424', '0412', '0416', '0426'];
+      if (!validPrefixes.includes(prefijoTelefono)) {
+        return { 'invalidVenezuelanPhonePrefix': true };
+      }
+    }
+
     return null;
-  }
-
-  // Validador para confirmar contraseña
-  private passwordMatchValidator(group: AbstractControl): {[key: string]: any} | null {
-    const password = group.get('clave');
-    const confirmPassword = group.get('confirmarClave');
-
-    if (!password || !confirmPassword) return null;
-
-    return password.value === confirmPassword.value ? null : { 'passwordMismatch': true };
   }
 
   onSubmit(): void {
@@ -254,7 +243,7 @@ export class UserCreateModalComponent implements OnInit {
       this.error.set(null);
 
       const formValue = this.userForm.value;
-      const createUserRequest: any = {
+      const createUserRequest: CreateUserRequest = {
         cedula: `${formValue.tipoCedula}-${this.padCedulaWithZeros(formValue.numeroCedula)}`,
         nombres: formValue.nombres.trim().toUpperCase(),
         apellidos: formValue.apellidos.trim().toUpperCase(),
@@ -265,29 +254,36 @@ export class UserCreateModalComponent implements OnInit {
           ? `${formValue.prefijoTelefono}-${formValue.numeroTelefono}`
           : null,
         correo: formValue.correo.toLowerCase().trim(),
-        clave: formValue.clave,
         is_enabled: true,
       };
       console.log(createUserRequest)
       this.usersService.createUser(createUserRequest).pipe(
         catchError(error => {
           console.error('Error creating user:', error);
+          
+          // Obtener mensaje del servidor si está disponible
           let errorMessage = 'Error al crear el usuario. Por favor, intente nuevamente.';
-
-          if (error.status === 400) {
+          
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 400) {
             errorMessage = 'Datos inválidos. Verifique la información ingresada.';
           } else if (error.status === 409) {
             errorMessage = 'Ya existe un usuario con esta cédula o correo electrónico.';
           }
 
-          this.error.set(errorMessage);
+          this.notificationService.showError(errorMessage);
           this.submitting.set(false);
           return of(null);
         })
-      ).subscribe(user => {
+      ).subscribe((response: ApiResponse<User> | null) => {
         this.submitting.set(false);
-        if (user) {
-          this.userCreated.emit(user);
+        if (response && response.data) {
+          // Mostrar mensaje de éxito del servidor
+          const successMessage = response.message || 'Usuario creado exitosamente';
+          this.notificationService.showSuccess(successMessage);
+          
+          this.userCreated.emit(response.data);
           this.resetForm();
         }
       });
@@ -323,12 +319,36 @@ export class UserCreateModalComponent implements OnInit {
   // Métodos auxiliares para el template
   isFieldInvalid(fieldName: string): boolean {
     const field = this.userForm.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
+    const fieldInvalid = !!(field && field.invalid && (field.dirty || field.touched));
+    
+    // También verificar errores a nivel de formulario para campos de teléfono
+    if ((fieldName === 'prefijoTelefono' || fieldName === 'numeroTelefono') && this.userForm.errors) {
+      const hasPhoneErrors = !!(this.userForm.errors['phoneRequiresPrefix'] || 
+                               this.userForm.errors['prefixRequiresPhone'] || 
+                               this.userForm.errors['invalidVenezuelanPhonePrefix']);
+      return fieldInvalid || hasPhoneErrors;
+    }
+    
+    return fieldInvalid;
   }
 
   getFieldError(fieldName: string): string {
     const field = this.userForm.get(fieldName);
-    if (!field || !field.errors) return '';
+    if (!field || !field.errors) {
+      // Verificar errores a nivel de formulario para campos de teléfono
+      if ((fieldName === 'prefijoTelefono' || fieldName === 'numeroTelefono') && this.userForm.errors) {
+        if (this.userForm.errors['phoneRequiresPrefix']) {
+          return 'Si ingresa un número de teléfono, debe seleccionar un prefijo';
+        }
+        if (this.userForm.errors['prefixRequiresPhone']) {
+          return 'Si selecciona un prefijo, debe ingresar un número de teléfono';
+        }
+        if (this.userForm.errors['invalidVenezuelanPhonePrefix']) {
+          return 'Prefijo inválido. Use: 0414, 0424, 0412, 0416 o 0426';
+        }
+      }
+      return '';
+    }
 
     const errors = field.errors;
 
@@ -346,8 +366,6 @@ export class UserCreateModalComponent implements OnInit {
     if (errors['futureDate']) return 'La fecha no puede ser futura';
     if (errors['tooOld']) return 'Fecha de nacimiento muy antigua';
     if (errors['tooYoung']) return 'Debe ser mayor de 18 años';
-    if (errors['passwordStrength']) return 'Debe contener mayúscula, minúscula, número y carácter especial';
-    if (errors['passwordMismatch']) return 'Las contraseñas no coinciden';
     if (errors['invalidVenezuelanPhonePrefix']) return 'Prefijo inválido. Use: 0414, 0424, 0412, 0416 o 0426';
     if (errors['invalidPhoneNumber']) return 'Número inválido. Debe tener exactamente 7 dígitos';
 
@@ -364,9 +382,7 @@ export class UserCreateModalComponent implements OnInit {
       'genero': 'Género',
       'prefijoTelefono': 'Prefijo telefónico',
       'numeroTelefono': 'Número de teléfono',
-      'correo': 'Correo electrónico',
-      'clave': 'Contraseña',
-      'confirmarClave': 'Confirmación de contraseña'
+      'correo': 'Correo electrónico'
     };
     return labels[fieldName] || fieldName;
   }

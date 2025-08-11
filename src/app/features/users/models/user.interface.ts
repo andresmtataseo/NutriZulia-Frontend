@@ -47,14 +47,14 @@ export interface CreateUserRequest {
   cedula: string;
   nombres: string;
   apellidos: string;
-  fechaNacimiento: string;
+  fecha_nacimiento: string;
   genero: string;
   telefono: string | null;
   correo: string;
-  clave: string;
-  isEnabled: boolean;
+  clave?: string;
+  is_enabled: boolean;
 }
 
 export interface UpdateUserRequest extends Partial<CreateUserRequest> {
-  isEnabled?: boolean;
+  is_enabled?: boolean;
 }

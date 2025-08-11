@@ -9,6 +9,12 @@
      data-bs-backdrop="static"
      data-bs-keyboard="false">
 
+  <!-- Componente de notificación -->
+  <app-notification
+    [notification]="notificationService.notification()"
+    (dismissed)="notificationService.hide()">
+  </app-notification>
+
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
     <div class="modal-content">
 
@@ -28,19 +34,6 @@
 
       <!-- Modal Body -->
       <div class="modal-body">
-
-        <!-- Error Alert -->
-        @if (error()) {
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            {{ error() }}
-            <button type="button"
-                    class="btn-close"
-                    aria-label="Cerrar"
-                    (click)="error.set(null)">
-            </button>
-          </div>
-        }
 
         <!-- Form -->
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()" novalidate>
@@ -248,41 +241,9 @@
         <div class="row">
           <div class="col-12">
             <h6 class="text-muted mb-3">Credenciales de Acceso</h6>
-          </div>
-        </div>
-
-        <!-- Contraseña -->
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <div class="form-floating">
-              <input
-                type="password"
-                class="form-control"
-                id="clave"
-                formControlName="clave"
-                placeholder="Contraseña"
-                [class.is-invalid]="isFieldInvalid('clave')">
-              <label for="clave">Contraseña <span class="text-danger">*</span></label>
-            </div>
-            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('clave')">
-              {{ getFieldError('clave') }}
-            </div>
-          </div>
-
-          <!-- Confirmar Contraseña -->
-          <div class="col-md-6">
-            <div class="form-floating">
-              <input
-                type="password"
-                class="form-control"
-                id="confirmarClave"
-                formControlName="confirmarClave"
-                placeholder="Confirmar Contraseña"
-                [class.is-invalid]="isFieldInvalid('confirmarClave') || userForm.hasError('passwordMismatch')">
-              <label for="confirmarClave">Confirmar Contraseña <span class="text-danger">*</span></label>
-            </div>
-            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('confirmarClave') || userForm.hasError('passwordMismatch')">
-              {{ getFieldError('confirmarClave') }}
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              La contraseña será generada automáticamente y enviada al correo electrónico del usuario.
             </div>
           </div>
         </div>

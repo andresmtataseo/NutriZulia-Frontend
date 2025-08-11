@@ -67,8 +67,8 @@ export class UsersService {
   /**
    * Crear un nuevo usuario
    */
-  createUser(userData: CreateUserRequest): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_CREATE}`, userData);
+  createUser(userData: CreateUserRequest): Observable<ApiResponse<User>> {
+    return this.http.post<ApiResponse<User>>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_CREATE}`, userData);
   }
 
   /**

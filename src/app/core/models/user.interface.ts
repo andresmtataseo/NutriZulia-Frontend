@@ -15,9 +15,9 @@ export interface UserUpdateRequest {
   cedula: string;
   nombres: string;
   apellidos: string;
-  fechaNacimiento: string;
+  fecha_nacimiento: string;
   genero: string;
   telefono?: string;
   correo: string;
-  isEnabled: boolean;
+  is_enabled: boolean;
 }

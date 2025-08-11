@@ -123,7 +123,7 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
       // Separar teléfono en prefijo y número
       let prefijoTelefono = '';
       let numeroTelefono = '';
-      
+
       if (this.user.telefono) {
         if (this.user.telefono.includes('-')) {
           // Si tiene guión, usar el guión como separador
@@ -203,7 +203,7 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
           }
 
           const cedulaCompleta = `${tipoCedulaControl.value}-${this.padCedulaWithZeros(numeroValue)}`;
-          
+
           // No validar si es la misma cédula del usuario actual
           if (this.user && this.user.cedula === cedulaCompleta) {
             return of(null);
@@ -241,7 +241,7 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
           }
 
           const normalizedEmail = email.toLowerCase().trim();
-          
+
           // No validar si es el mismo correo del usuario actual
           if (this.user && this.user.correo.toLowerCase() === normalizedEmail) {
             return of(null);
@@ -283,7 +283,7 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
           }
 
           const telefonoCompleto = `${prefijoTelefonoControl.value}-${numeroValue}`;
-          
+
           // No validar si es el mismo teléfono del usuario actual
           if (this.user && this.user.telefono === telefonoCompleto) {
             return of(null);
@@ -356,20 +356,20 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     this.clearMessages();
 
     const formValue = this.personalForm.value;
-    
+
     // Normalizar y validar datos como en user-create-modal
     const updateRequest: UserUpdateRequest = {
       cedula: `${formValue.tipoCedula}-${this.padCedulaWithZeros(formValue.numeroCedula)}`,
       nombres: formValue.nombres.trim().toUpperCase(),
       apellidos: formValue.apellidos.trim().toUpperCase(),
-      fechaNacimiento: this.formatDateToISO(formValue.fechaNacimiento),
+      fecha_nacimiento: this.formatDateToISO(formValue.fechaNacimiento),
       genero: this.normalizeGender(formValue.genero),
       telefono: formValue.numeroTelefono && formValue.numeroTelefono.trim() !== '' &&
                  formValue.prefijoTelefono && formValue.prefijoTelefono.trim() !== ''
          ? `${formValue.prefijoTelefono}-${formValue.numeroTelefono}`
          : undefined,
       correo: formValue.correo.toLowerCase().trim(),
-      isEnabled: formValue.isEnabled
+      is_enabled: formValue.isEnabled
     };
 
     console.log('Update request:', updateRequest);
@@ -534,7 +534,7 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     if (!field || !field.errors) return '';
 
     const errors = field.errors;
-    
+
     if (errors['required']) return `${this.getFieldLabel(fieldName)} es requerido`;
     if (errors['email']) return 'Formato de correo electrónico inválido';
     if (errors['minlength']) return `${this.getFieldLabel(fieldName)} debe tener al menos ${errors['minlength'].requiredLength} caracteres`;
@@ -581,10 +581,10 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
   // Métodos auxiliares para normalización de datos
    private formatDateToISO(dateString: string): string {
     if (!dateString) return '';
-    
+
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '';
-    
+
     return date.toISOString().split('T')[0];
   }
 
