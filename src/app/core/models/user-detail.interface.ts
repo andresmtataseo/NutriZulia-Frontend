@@ -16,15 +16,11 @@ export interface InstitutionAssignmentRequest {
   usuarioId: number;
   institucionId: number;
   rolId: number;
-  fechaInicio: string;
-  fechaFin?: string;
 }
 
 export interface UserInstitutionUpdateRequest {
   id: number;
-  rolId?: number;
-  fechaInicio: string;
-  fechaFin?: string | null;
+  rolId: number;
   isEnabled: boolean;
 }
 

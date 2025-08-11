@@ -137,15 +137,16 @@
                         <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
                     </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado Usuario</th>
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
                       <div class="d-flex align-items-center">
-                        Rol
+                        Institución
                         <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
                     </th>
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
                       <div class="d-flex align-items-center">
-                        Institución
+                        Rol
                         <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
                     </th>
@@ -176,7 +177,17 @@
                                 {{ user.correo }}
                               </a>
                             </td>
+                            <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
+                              <span class="badge"
+                                    [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
+                                <i [class]="user.isEnabled ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
+                                {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
+                              </span>
+                            </td>
                           }
+                          <td class="align-middle border-end">
+                            <span class="text-muted">{{ institutionRole.institucionNombre }}</span>
+                          </td>
                           <td class="align-middle border-end">
                             <span class="badge"
                                   [class]="getRoleBadgeClass(institutionRole.rolNombre)">
@@ -184,14 +195,11 @@
                               {{ institutionRole.rolNombre || 'Sin rol' }}
                             </span>
                           </td>
-                          <td class="align-middle border-end">
-                            <span class="text-muted">{{ institutionRole.institucionNombre }}</span>
-                          </td>
                           <td class="align-middle">
                             <span class="badge"
-                                  [class]="institutionRole.isEnabled ? 'bg-success' : 'bg-warning'">
-                              <i [class]="institutionRole.isEnabled ? 'bi bi-check-circle me-1' : 'bi bi-pause-circle me-1'"></i>
-                              {{ institutionRole.isEnabled ? 'Activo' : 'Suspendido' }}
+                                  [class]="institutionRole.isEnabled ? 'bg-success' : 'bg-danger'">
+                              <i [class]="institutionRole.isEnabled ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
+                              {{ institutionRole.isEnabled ? 'Activo' : 'Inactivo' }}
                             </span>
                           </td>
                         </tr>
@@ -217,15 +225,22 @@
                           </a>
                         </td>
                         <td class="align-middle border-end">
-                          <span class="badge bg-light text-muted border">
-                            <i class="bi bi-dash-circle me-1"></i>
-                            Sin rol asignado
+                          <span class="badge"
+                                [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
+                            <i [class]="user.isEnabled ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
+                            {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
                           </span>
                         </td>
                         <td class="align-middle border-end">
                           <span class="text-muted fst-italic">
                             <i class="bi bi-building-slash me-1"></i>
                             Sin institución asignada
+                          </span>
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="badge bg-light text-muted border">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            Sin rol asignado
                           </span>
                         </td>
                         <td class="align-middle">

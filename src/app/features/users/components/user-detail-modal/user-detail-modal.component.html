@@ -19,6 +19,7 @@
           @if (user) {
             {{ user.nombres }} {{ user.apellidos }}
             <span class="badge ms-2" [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
+              <i [class]="user.isEnabled ? 'bi bi-check-circle' : 'bi bi-x-circle'" class="me-1"></i>
               {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
             </span>
           } @else {
@@ -282,12 +283,11 @@
                           <th>Fecha Inicio</th>
                           <th>Fecha Fin</th>
                           <th>Estado</th>
-                          <th>Acciones</th>
                         </tr>
                       </thead>
                       <tbody>
-                        @for (assignment of user.instituciones; track assignment.id) {
-                          <tr>
+                        @for (assignment of userInstitutions(); track assignment.id) {
+                          <tr class="assignment-row" (click)="openManageModal(assignment)" style="cursor: pointer;" title="Clic para gestionar esta asignación">
                             <td>
                               <strong>{{ assignment.institucion.nombre }}</strong>
                             </td>
@@ -307,27 +307,9 @@
                             </td>
                             <td>
                               <span class="badge" [class]="assignment.isEnabled ? 'bg-success' : 'bg-danger'">
+                                <i [class]="assignment.isEnabled ? 'bi bi-check-circle' : 'bi bi-x-circle'" class="me-1"></i>
                                 {{ assignment.isEnabled ? 'Activo' : 'Inactivo' }}
                               </span>
-                            </td>
-                            <td>
-                              <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-primary btn-sm"
-                                        (click)="updateInstitutionAssignment(assignment)"
-                                        title="Editar">
-                                  <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-outline-warning btn-sm"
-                                        (click)="toggleInstitutionAssignment(assignment)"
-                                        [title]="assignment.isEnabled ? 'Desactivar' : 'Activar'">
-                                  <i [class]="assignment.isEnabled ? 'bi bi-pause-circle' : 'bi bi-play-circle'"></i>
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm"
-                                        (click)="removeInstitutionAssignment(assignment)"
-                                        title="Remover">
-                                  <i class="bi bi-trash"></i>
-                                </button>
-                              </div>
                             </td>
                           </tr>
                         }
@@ -379,7 +361,7 @@
                                 [class.is-invalid]="assignmentForm.get('rolId')?.invalid && assignmentForm.get('rolId')?.touched">
                           <option value="">Seleccione un rol...</option>
                           @for (role of roles(); track role.id) {
-                            <option [value]="role.id">{{ role.nombre }}</option>
+                            <option [value]="role.id">{{ role.descripcion }}</option>
                           }
                         </select>
                         <label for="rolId">Rol <span class="text-danger">*</span></label>
@@ -388,32 +370,11 @@
                         <div class="invalid-feedback d-block">{{ getFormControlError('rolId', assignmentForm) }}</div>
                       }
                     </div>
+                  </div>
 
-                    <div class="col-md-6 mb-3">
-                      <div class="form-floating">
-                        <input type="date"
-                               class="form-control"
-                               id="fechaInicio"
-                               formControlName="fechaInicio"
-                               [class.is-invalid]="assignmentForm.get('fechaInicio')?.invalid && assignmentForm.get('fechaInicio')?.touched">
-                        <label for="fechaInicio">Fecha de Inicio <span class="text-danger">*</span></label>
-                      </div>
-                      @if (getFormControlError('fechaInicio', assignmentForm)) {
-                        <div class="invalid-feedback d-block">{{ getFormControlError('fechaInicio', assignmentForm) }}</div>
-                      }
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                      <div class="form-floating">
-                        <input type="date"
-                               class="form-control"
-                               id="fechaFin"
-                               formControlName="fechaFin"
-                               placeholder="Fecha de Fin">
-                        <label for="fechaFin">Fecha de Fin</label>
-                      </div>
-                      <div class="form-text">Dejar vacío para asignación indefinida</div>
-                    </div>
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Nota:</strong> La fecha de inicio se asignará automáticamente como la fecha actual cuando se cree la asignación.
                   </div>
 
                   <div class="d-flex justify-content-end">
@@ -467,3 +428,12 @@
 @if (show) {
   <div class="modal-backdrop fade show"></div>
 }
+
+<!-- Manage Assignment Modal -->
+<app-manage-assignment-modal
+  [show]="showManageModal()"
+  [assignment]="selectedAssignment()"
+  [roles]="roles()"
+  (assignmentUpdated)="onAssignmentUpdated()"
+  (modalClosed)="onManageModalClosed()">
+</app-manage-assignment-modal>

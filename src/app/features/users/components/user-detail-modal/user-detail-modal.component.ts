@@ -3,16 +3,18 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { catchError, of, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 
+import { User } from '../../models/user.interface';
 import { UsersService } from '../../services/users.service';
 import { UserDetail, UserUpdateRequest, InstitutionAssignmentRequest, UserInstitutionUpdateRequest, UserInstitutionDetail } from '../../../../core/models/user-detail.interface';
 import { Institucion, Rol } from '../../../../core/models';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { venezuelanPhonePrefixValidator, phoneNumberValidator } from '../../../../shared/validators/phone.validators';
+import { ManageAssignmentModalComponent } from '../manage-assignment-modal/manage-assignment-modal.component';
 
 @Component({
   selector: 'app-user-detail-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ManageAssignmentModalComponent],
   templateUrl: './user-detail-modal.component.html',
   styleUrls: ['./user-detail-modal.component.css']
 })
@@ -35,6 +37,13 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
   checkingEmail = signal<boolean>(false);
   checkingPhone = signal<boolean>(false);
 
+  // Modal states
+  showManageModal = signal(false);
+  selectedAssignment = signal<UserInstitutionDetail | null>(null);
+
+  // Signal para las instituciones del usuario actual
+  userInstitutions = signal<UserInstitutionDetail[]>([]);
+
   // Formularios
   personalForm!: FormGroup;
   assignmentForm!: FormGroup;
@@ -42,12 +51,9 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
   // Signals computados
   canEdit = computed(() => this.user?.isEnabled ?? false);
   hasInstitutions = computed(() => {
-    const hasInst = (this.user?.instituciones?.length ?? 0) > 0;
+    const hasInst = this.userInstitutions().length > 0;
     console.log('hasInstitutions computed:', hasInst);
-    console.log('user?.instituciones:', this.user?.instituciones);
-    if (this.user?.instituciones && this.user.instituciones.length > 0) {
-      console.log('First institution:', this.user.instituciones[0]);
-    }
+    console.log('userInstitutions signal:', this.userInstitutions());
     return hasInst;
   });
 
@@ -60,6 +66,10 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     if (changes['user'] && this.user) {
       console.log('User data received in modal:', this.user);
       console.log('User institutions:', this.user.instituciones);
+
+      // Actualizar el signal de instituciones del usuario
+      this.userInstitutions.set(this.user.instituciones || []);
+
       this.updatePersonalForm();
     }
   }
@@ -107,11 +117,11 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
 
     this.assignmentForm = this.fb.group({
       institucionId: ['', Validators.required],
-      rolId: ['', Validators.required],
-      fechaInicio: ['', Validators.required],
-      fechaFin: ['']
+      rolId: ['', Validators.required]
     });
   }
+
+
 
   private updatePersonalForm(): void {
     if (this.user) {
@@ -333,6 +343,9 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     return null;
   }
 
+  // Validador para fechas de inicio (no puede ser en el pasado)
+
+
   setActiveTab(tab: 'personal' | 'institutions' | 'assignment'): void {
     this.activeTab.set(tab);
     this.clearMessages();
@@ -379,14 +392,14 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
         // Usar el mensaje del servidor si está disponible
         const successMessage = response.message || 'Datos personales actualizados correctamente';
         this.notificationService.showSuccess(successMessage);
-        
+
         // Actualizar los datos locales con la respuesta del servidor
         if (response.data) {
           this.user = response.data;
           this.userUpdated.emit(response.data);
         }
         this.loading.set(false);
-        
+
         // Cerrar el modal después de una actualización exitosa
         this.closeModal();
       },
@@ -416,63 +429,71 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     this.loading.set(true);
     this.clearMessages();
 
+    const formValue = this.assignmentForm.value;
     const assignmentRequest: InstitutionAssignmentRequest = {
       usuarioId: this.user.id,
-      ...this.assignmentForm.value
+      institucionId: parseInt(formValue.institucionId),
+      rolId: parseInt(formValue.rolId)
     };
 
+    console.log('Assignment request:', assignmentRequest);
+
     this.usersService.assignUserToInstitution(assignmentRequest).subscribe({
-      next: (assignment) => {
-        // Usar mensaje por defecto ya que la respuesta puede no tener propiedad message
-        this.notificationService.showSuccess('Usuario asignado a la institución correctamente');
+      next: (response) => {
+        console.log('Assignment response:', response);
+        // Usar el mensaje del servidor si está disponible
+        const successMessage = response.message || 'Usuario asignado a la institución correctamente';
+        this.notificationService.showSuccess(successMessage);
         this.assignmentForm.reset();
-        // Recargar datos del usuario
-        this.reloadUserData();
+
+        // Agregar un pequeño delay para asegurar que la base de datos se haya actualizado
+        setTimeout(() => {
+          console.log('Reloading user data after assignment...');
+          this.reloadUserData();
+        }, 500);
+
         this.loading.set(false);
+        // Cambiar a la pestaña de instituciones para ver la nueva asignación
+        this.setActiveTab('institutions');
       },
       error: (error) => {
         console.error('Error assigning user to institution:', error);
-        const errorMessage = error.error?.message || 'Error al asignar el usuario a la institución';
+        let errorMessage = 'Error al asignar el usuario a la institución';
+
+        // Manejar diferentes tipos de errores del servidor
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error.status === 409) {
+          errorMessage = 'El usuario ya está asignado a esta institución con este rol';
+        } else if (error.status === 404) {
+          errorMessage = 'Usuario, institución o rol no encontrado';
+        } else if (error.status === 400) {
+          errorMessage = 'Datos inválidos. Verifique la información ingresada';
+        }
+
         this.notificationService.showError(errorMessage);
         this.loading.set(false);
       }
     });
   }
 
-  updateInstitutionAssignment(assignment: UserInstitutionDetail): void {
-    // TODO: Implementar modal o formulario inline para editar asignación
-    console.log('Update assignment:', assignment);
+  openManageModal(assignment: UserInstitutionDetail): void {
+    this.selectedAssignment.set(assignment);
+    this.showManageModal.set(true);
   }
 
-  toggleInstitutionAssignment(assignment: UserInstitutionDetail): void {
-    if (!this.user) return;
+  onManageModalClosed(): void {
+    this.showManageModal.set(false);
+    this.selectedAssignment.set(null);
+  }
 
-    this.loading.set(true);
-    this.clearMessages();
+  onAssignmentUpdated(): void {
+    this.reloadUserData();
+    this.onManageModalClosed();
+  }
 
-    const updateRequest: UserInstitutionUpdateRequest = {
-      id: assignment.id,
-      rolId: assignment.rolId,
-      fechaInicio: assignment.fechaInicio,
-      fechaFin: assignment.fechaFin,
-      isEnabled: !assignment.isEnabled
-    };
-
-    this.usersService.updateUserInstitution(updateRequest).subscribe({
-      next: (response) => {
-        const action = assignment.isEnabled ? 'desactivada' : 'activada';
-        // Usar mensaje por defecto ya que la respuesta puede no tener propiedad message
-        this.notificationService.showSuccess(`Asignación ${action} correctamente`);
-        this.reloadUserData();
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error updating institution assignment:', error);
-        const errorMessage = error.error?.message || 'Error al actualizar la asignación';
-        this.notificationService.showError(errorMessage);
-        this.loading.set(false);
-      }
-    });
+  get userFullName(): string {
+    return this.user ? `${this.user.nombres} ${this.user.apellidos}` : '';
   }
 
   removeInstitutionAssignment(assignment: UserInstitutionDetail): void {
@@ -505,9 +526,17 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
   private reloadUserData(): void {
     if (!this.user) return;
 
+    console.log('Reloading user data for user ID:', this.user.id);
+
     this.usersService.getUserDetail(this.user.id).subscribe({
       next: (userDetail) => {
+        console.log('User data reloaded:', userDetail);
+        console.log('User institutions after reload:', userDetail.instituciones);
         this.user = userDetail;
+
+        // Actualizar el signal de instituciones del usuario
+        this.userInstitutions.set(userDetail.instituciones || []);
+
         this.userUpdated.emit(userDetail);
       },
       error: (error) => {
@@ -580,12 +609,36 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     if (!control || !control.errors || !control.touched) return null;
 
     const errors = control.errors;
-    if (errors['required']) return `${controlName} es requerido`;
+    if (errors['required']) return `${this.getControlLabel(controlName, formGroup)} es requerido`;
     if (errors['email']) return 'Formato de correo inválido';
     if (errors['pattern']) return 'Formato inválido';
     if (errors['minlength']) return `Mínimo ${errors['minlength'].requiredLength} caracteres`;
 
     return 'Campo inválido';
+  }
+
+  private getControlLabel(controlName: string, formGroup: FormGroup): string {
+    if (formGroup === this.assignmentForm) {
+      const assignmentLabels: { [key: string]: string } = {
+        'institucionId': 'Institución',
+        'rolId': 'Rol'
+      };
+      return assignmentLabels[controlName] || controlName;
+    }
+
+    // Labels para formulario personal (existente)
+    const personalLabels: { [key: string]: string } = {
+      'tipoCedula': 'Tipo de cédula',
+      'numeroCedula': 'Número de cédula',
+      'nombres': 'Nombres',
+      'apellidos': 'Apellidos',
+      'fechaNacimiento': 'Fecha de nacimiento',
+      'genero': 'Género',
+      'prefijoTelefono': 'Prefijo telefónico',
+      'numeroTelefono': 'Número de teléfono',
+      'correo': 'Correo electrónico'
+    };
+    return personalLabels[controlName] || controlName;
   }
   // Métodos auxiliares para normalización de datos
    private formatDateToISO(dateString: string): string {

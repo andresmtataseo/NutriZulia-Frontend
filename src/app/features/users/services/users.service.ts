@@ -117,15 +117,31 @@ export class UsersService {
   /**
    * Asignar usuario a una institución
    */
-  assignUserToInstitution(assignmentData: InstitutionAssignmentRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_ASSIGN_INSTITUTION}`, assignmentData);
+  assignUserToInstitution(assignmentData: InstitutionAssignmentRequest): Observable<ApiResponse<any>> {
+    // Mapear los datos al formato esperado por el backend
+    const backendRequest = {
+      usuario_id: assignmentData.usuarioId,
+      institucion_id: assignmentData.institucionId,
+      rol_id: assignmentData.rolId,
+      is_enabled: true
+    };
+
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_ASSIGN_INSTITUTION}`, backendRequest);
   }
 
   /**
    * Actualizar asignación de usuario a institución
    */
   updateUserInstitution(updateData: UserInstitutionUpdateRequest): Observable<any> {
-    return this.http.put(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_UPDATE_INSTITUTION}/${updateData.id}`, updateData);
+    // Mapear los datos al formato esperado por el backend
+    const backendRequest = {
+      rol_id: updateData.rolId,
+      is_enabled: updateData.isEnabled
+    };
+
+    const params = new HttpParams().set('id', updateData.id.toString());
+
+    return this.http.put(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.USER.USERS_UPDATE_INSTITUTION}`, backendRequest, { params });
   }
 
   /**
