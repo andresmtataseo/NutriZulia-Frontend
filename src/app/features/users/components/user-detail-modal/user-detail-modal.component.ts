@@ -673,4 +673,30 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     const value = input.value.replace(/\D/g, '');
     input.value = value;
   }
+
+  /**
+   * Maneja el hover sobre las filas de asignaciones de instituciones
+   */
+  onAssignmentRowHover(assignmentId: number, isHovering: boolean): void {
+    // Seleccionar la fila específica de la asignación
+    const row = document.querySelector(`tr[data-assignment-id="${assignmentId}"]`);
+
+    if (row) {
+      if (isHovering) {
+        row.classList.add('hovered');
+        // También agregar el efecto a todas las celdas para asegurar el hover
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+          (cell as HTMLElement).style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
+        });
+      } else {
+        row.classList.remove('hovered');
+        // Remover el estilo inline para que vuelva al CSS normal
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+          (cell as HTMLElement).style.backgroundColor = '';
+        });
+      }
+    }
+  }
 }

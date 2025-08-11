@@ -1,26 +1,3 @@
-/* Estilos personalizados específicos para el componente */
-
-/* Avatar Circle - Estilo personalizado no disponible en Bootstrap */
-.avatar-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-
-/* Responsive adjustments para avatares */
-@media (max-width: 768px) {
-  .avatar-circle {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
-  }
-}
-
 /* Hover effect para agrupar filas del mismo usuario */
 .user-row-group {
   transition: background-color 0.2s ease;
@@ -41,4 +18,16 @@
 
 .user-row-group:hover td {
   background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+/* Estilos para la columna de cédula */
+.cedula-column {
+  width: 1%;
+  white-space: nowrap;
+  min-width: max-content;
+}
+
+.cedula-cell {
+  white-space: nowrap;
+  font-family: 'Courier New', Consolas, monospace;
 }
