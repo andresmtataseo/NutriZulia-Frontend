@@ -53,8 +53,8 @@
                   [value]="sortBy()"
                   (change)="onSortByChange($event)">
                   <option value="nombre">Nombre</option>
-                  <option value="tipo">Tipo</option>
-                  <option value="municipio">Municipio</option>
+                  <option value="tipoInstitucion.nombre">Tipo</option>
+                  <option value="municipioSanitario.nombre">Municipio</option>
                 </select>
                 <label for="sortBySelect">
                   <i class="bi bi-sort-alpha-down me-2"></i>Ordenar por
@@ -156,18 +156,17 @@
                           @if (isFirst) {
                             <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
                               <div class="fw-semibold">{{ institution.nombre }}</div>
-                              <small class="text-muted">{{ institution.descripcion }}</small>
                             </td>
                             <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
                               <span class="badge bg-info text-dark">
                                 <i class="bi bi-building me-1"></i>
-                                {{ institution.tipo }}
+                                {{ institution.tipo_institucion.nombre }}
                               </span>
                             </td>
                             <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
                               <span class="text-muted">
                                 <i class="bi bi-geo-alt me-1"></i>
-                                {{ institution.municipio }}
+                                {{ institution.municipio_sanitario.nombre }}
                               </span>
                             </td>
                           }
@@ -180,9 +179,9 @@
                           </td>
                           <td class="align-middle">
                             <span class="badge"
-                                  [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
-                              <i [class]="user.isEnabled ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
-                              {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
+                                  [class]="user.is_enabled ? 'bg-success' : 'bg-danger'">
+                              <i [class]="user.is_enabled ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
+                              {{ user.is_enabled ? 'Activo' : 'Inactivo' }}
                             </span>
                           </td>
                         </tr>
@@ -198,18 +197,17 @@
                           title="Haz clic para ver detalles de la institución">
                         <td class="align-middle border-end">
                           <div class="fw-semibold">{{ institution.nombre }}</div>
-                          <small class="text-muted">{{ institution.descripcion }}</small>
                         </td>
                         <td class="align-middle border-end">
                           <span class="badge bg-info text-dark">
                             <i class="bi bi-building me-1"></i>
-                            {{ institution.tipo }}
+                            {{ institution.tipo_institucion.nombre }}
                           </span>
                         </td>
                         <td class="align-middle border-end">
                           <span class="text-muted">
                             <i class="bi bi-geo-alt me-1"></i>
-                            {{ institution.municipio }}
+                            {{ institution.municipio_sanitario.nombre }}
                           </span>
                         </td>
                         <td class="align-middle border-end">

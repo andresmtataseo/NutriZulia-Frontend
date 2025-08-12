@@ -1,9 +1,11 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { NotificationComponent } from '../../../../shared/components/notification/notification.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { InstitutionService } from '../../services/institution.service';
+import { InstitucionConUsuarios, PageResponse, InstitutionSearchParams } from '../../models/institution.interface';
 
 @Component({
   selector: 'app-institution-list',
@@ -12,55 +14,88 @@ import { NotificationService } from '../../../../shared/services/notification.se
   templateUrl: './institution-list.component.html',
   styleUrl: './institution-list.component.css'
 })
-export class InstitutionListComponent {
+export class InstitutionListComponent implements OnInit {
   // Servicios inyectados
   public notificationService = inject(NotificationService);
+  private institutionService = inject(InstitutionService);
 
   // Signals para el estado del componente
   loading = signal(false);
-  institutionsResponse = signal<any>(null);
-  selectedInstitution = signal<any>(null);
+  institutionsResponse = signal<PageResponse<InstitucionConUsuarios> | null>(null);
+  selectedInstitution = signal<InstitucionConUsuarios | null>(null);
   showCreateModal = signal(false);
   showDetailModal = signal(false);
 
   // Signals para filtros y búsqueda
   searchTerm = signal('');
   sortBy = signal('nombre');
-  sortDirection = signal('asc');
+  sortDirection = signal<'ASC' | 'DESC'>('ASC');
+  currentPage = signal(0);
   pageSize = signal(10);
 
-  constructor() {
-    // TODO: Inyectar servicios adicionales cuando estén disponibles
-    // private institutionService = inject(InstitutionService);
+  ngOnInit(): void {
+    this.loadInstitutions();
   }
 
   // Métodos de búsqueda y filtros
   onSearchChange(event: any): void {
     this.searchTerm.set(event.target.value);
-    // TODO: Implementar lógica de búsqueda
+    this.currentPage.set(0); // Reset to first page when searching
+    this.loadInstitutions();
   }
 
   onSearchEnter(): void {
-    // TODO: Implementar búsqueda al presionar Enter
+    this.currentPage.set(0);
+    this.loadInstitutions();
   }
 
   onSortByChange(event: any): void {
     this.sortBy.set(event.target.value);
-    // TODO: Implementar lógica de ordenamiento
+    this.currentPage.set(0);
+    this.loadInstitutions();
   }
 
   onSortDirectionChange(event: any): void {
     this.sortDirection.set(event.target.value);
-    // TODO: Implementar lógica de ordenamiento
+    this.currentPage.set(0);
+    this.loadInstitutions();
+  }
+
+  // Métodos de paginación
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+    this.loadInstitutions();
   }
 
   onPageSizeChange(event: any): void {
-    this.pageSize.set(Number(event.target.value));
-    // TODO: Implementar cambio de tamaño de página
+    this.pageSize.set(parseInt(event.target.value));
+    this.currentPage.set(0);
+    this.loadInstitutions();
   }
 
-  onPageChange(page: number): void {
-    // TODO: Implementar cambio de página
+  // Método principal para cargar instituciones
+  private loadInstitutions(): void {
+    this.loading.set(true);
+
+    const params: InstitutionSearchParams = {
+      page: this.currentPage(),
+      size: this.pageSize(),
+      sortBy: this.sortBy(),
+      sortDir: this.sortDirection(),
+      search: this.searchTerm() || undefined
+    };
+
+    this.institutionService.getInstitutionsWithUsers(params).subscribe({
+      next: (response) => {
+        this.institutionsResponse.set(response);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading institutions:', error);
+        this.notificationService.showError('Error al cargar las instituciones');
+        this.loading.set(false);
+      }
+    });
   }
 
   // Métodos de hover para efectos visuales
@@ -94,7 +129,7 @@ export class InstitutionListComponent {
     this.showCreateModal.set(false);
   }
 
-  openDetailModal(institution: any): void {
+  openDetailModal(institution: InstitucionConUsuarios): void {
     this.selectedInstitution.set(institution);
     this.showDetailModal.set(true);
   }
@@ -105,27 +140,29 @@ export class InstitutionListComponent {
   }
 
   // Métodos de eventos
-  onInstitutionCreated(institution: any): void {
-    // TODO: Implementar lógica después de crear institución
+  onInstitutionCreated(institution: InstitucionConUsuarios): void {
     this.closeCreateModal();
+    this.loadInstitutions(); // Reload data after creation
+    this.notificationService.showSuccess('Institución creada exitosamente');
   }
 
-  onInstitutionUpdated(institution: any): void {
-    // TODO: Implementar lógica después de actualizar institución
+  onInstitutionUpdated(institution: InstitucionConUsuarios): void {
     this.closeDetailModal();
+    this.loadInstitutions(); // Reload data after update
+    this.notificationService.showSuccess('Institución actualizada exitosamente');
   }
 
-  // Métodos auxiliares para paginación
-  getStartRecord(response: any): number {
+  // Métodos auxiliares para la vista
+  getStartRecord(response: PageResponse<InstitucionConUsuarios>): number {
     return response.page * response.size + 1;
   }
 
-  getEndRecord(response: any): number {
+  getEndRecord(response: PageResponse<InstitucionConUsuarios>): number {
     const end = (response.page + 1) * response.size;
     return Math.min(end, response.totalElements);
   }
 
-  getPageNumbers(response: any): number[] {
+  getPageNumbers(response: PageResponse<InstitucionConUsuarios>): number[] {
     const totalPages = response.totalPages;
     const currentPage = response.page;
     const pages: number[] = [];
