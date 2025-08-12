@@ -48,11 +48,30 @@ export class InstitutionService {
   }
 
   /**
+   * Obtiene una institución específica por ID con sus usuarios
+   */
+  getInstitutionById(id: number): Observable<ApiResponse<InstitucionConUsuarios>> {
+    return this.http.get<ApiResponse<InstitucionConUsuarios>>(
+      `${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.INSTITUTIONS}/${id}`
+    );
+  }
+
+  /**
    * Crea una nueva institución
    */
   createInstitution(institutionData: Omit<Institucion, 'id'>): Observable<ApiResponse<Institucion>> {
     return this.http.post<ApiResponse<Institucion>>(
       `${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.INSTITUTIONS}`,
+      institutionData
+    );
+  }
+
+  /**
+   * Actualiza una institución existente
+   */
+  updateInstitution(id: number, institutionData: Partial<Institucion>): Observable<ApiResponse<Institucion>> {
+    return this.http.put<ApiResponse<Institucion>>(
+      `${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.INSTITUTIONS}/${id}`,
       institutionData
     );
   }

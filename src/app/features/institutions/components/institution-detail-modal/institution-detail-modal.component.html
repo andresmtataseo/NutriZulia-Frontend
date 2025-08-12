@@ -1,0 +1,321 @@
+<!-- Modal Backdrop -->
+<div class="modal fade" [class.show]="show" [style.display]="show ? 'block' : 'none'" tabindex="-1" role="dialog"
+  aria-labelledby="institutionDetailModalLabel" aria-hidden="!show" data-bs-backdrop="static" data-bs-keyboard="false">
+
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="institutionDetailModalLabel">
+          <i class="bi bi-building me-2"></i>
+          @if (currentInstitution) {
+          {{ currentInstitution.nombre }}
+          <span class="badge ms-2 bg-light text-primary">
+            <i class="bi bi-geo-alt me-1"></i>
+            {{ currentInstitution.municipio_sanitario.nombre }}
+          </span>
+          } @else {
+          Detalles de la Institución
+          }
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Cerrar"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body p-0">
+        @if (currentInstitution) {
+        <!-- Navigation Tabs -->
+        <nav class="nav nav-tabs border-bottom" role="tablist">
+          <button class="nav-link" [class.active]="activeTab() === 'details'" type="button"
+            (click)="setActiveTab('details')">
+            <i class="bi bi-info-circle me-2"></i>
+            Información General
+          </button>
+          <button class="nav-link" [class.active]="activeTab() === 'users'" type="button"
+            (click)="setActiveTab('users')">
+            <i class="bi bi-people me-2"></i>
+            Usuarios Asignados
+            @if (hasUsers()) {
+            <span class="badge bg-primary ms-1">{{ totalUsers() }}</span>
+            }
+          </button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div class="tab-content p-4">
+
+          <!-- Institution Details Tab -->
+          @if (activeTab() === 'details') {
+          <div class="tab-pane fade show active">
+            <div class="row">
+              <div class="col-md-12">
+                <!-- Institution Information Card -->
+                <div class="card mb-4">
+                  <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                      <i class="bi bi-building me-2"></i>
+                      Información de la Institución
+                    </h6>
+                  </div>
+                  <div class="card-body">
+                    <form [formGroup]="institutionForm" (ngSubmit)="onFormSubmit()">
+                      <div class="row">
+                        <!-- Nombre -->
+                        <div class="col-md-12 mb-3">
+                          <div class="form-floating">
+                            <input type="text" class="form-control" id="nombre" formControlName="nombre"
+                              placeholder="Nombre de la institución" [class.is-invalid]="isFieldInvalid('nombre')">
+                            <label for="nombre">Nombre de la Institución <span class="text-danger">*</span></label>
+                          </div>
+                          @if (isFieldInvalid('nombre')) {
+                          <div class="invalid-feedback d-block">{{ getFieldError('nombre') }}</div>
+                          }
+                        </div>
+
+                        <!-- Tipo de Institución -->
+                        <div class="col-md-6 mb-3">
+                          <div class="form-floating">
+                            <select class="form-control" id="tipoInstitucion"
+                              formControlName="tipo_institucion_id"
+                              [class.is-invalid]="isFieldInvalid('tipo_institucion_id')">
+                              <option value="">Seleccione un tipo de institución</option>
+                              @if (loadingCatalogs()) {
+                                <option disabled>Cargando...</option>
+                              } @else {
+                                @for (tipo of tiposInstituciones(); track tipo.id) {
+                                  <option [value]="tipo.id">{{ tipo.nombre }}</option>
+                                }
+                              }
+                            </select>
+                            <label for="tipoInstitucion">Tipo de Institución <span class="text-danger">*</span></label>
+                          </div>
+                          @if (isFieldInvalid('tipo_institucion_id')) {
+                          <div class="invalid-feedback d-block">{{ getFieldError('tipo_institucion_id') }}</div>
+                          }
+                        </div>
+
+                        <!-- Municipio Sanitario -->
+                        <div class="col-md-6 mb-3">
+                          <div class="form-floating">
+                            <select class="form-control" id="municipioSanitario"
+                              formControlName="municipio_sanitario_id"
+                              [class.is-invalid]="isFieldInvalid('municipio_sanitario_id')">
+                              <option value="">Seleccione un municipio sanitario</option>
+                              @if (loadingCatalogs()) {
+                                <option disabled>Cargando...</option>
+                              } @else {
+                                @for (municipio of municipiosSanitarios(); track municipio.id) {
+                                  <option [value]="municipio.id">{{ municipio.nombre }}</option>
+                                }
+                              }
+                            </select>
+                            <label for="municipioSanitario">Municipio Sanitario <span class="text-danger">*</span></label>
+                          </div>
+                          @if (isFieldInvalid('municipio_sanitario_id')) {
+                          <div class="invalid-feedback d-block">{{ getFieldError('municipio_sanitario_id') }}</div>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Action Buttons -->
+                      <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-primary" [disabled]="updating() || !institutionForm.valid">
+                          @if (updating()) {
+                          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          }
+                          <i class="bi bi-check-circle me-2"></i>
+                          Guardar Cambios
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Statistics Card -->
+                <div class="card">
+                  <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                      <i class="bi bi-bar-chart me-2"></i>
+                      Estadísticas
+                    </h6>
+                  </div>
+                  <div class="card-body">
+                    @if (loading()) {
+                      <!-- Loading State -->
+                      <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Cargando estadísticas...</span>
+                        </div>
+                        <p class="text-muted mt-2 mb-0">Cargando estadísticas...</p>
+                      </div>
+                    } @else {
+                      <!-- Statistics Content -->
+                      <div class="row text-center">
+                        <div class="col-md-4">
+                          <div class="border-end">
+                            <h4 class="text-primary mb-1">{{ userStats().total }}</h4>
+                            <small class="text-muted">Total Usuarios</small>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="border-end">
+                            <h4 class="text-success mb-1">{{ userStats().active }}</h4>
+                            <small class="text-muted">Usuarios Activos</small>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <h4 class="text-danger mb-1">{{ userStats().inactive }}</h4>
+                          <small class="text-muted">Usuarios Inactivos</small>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Users Tab -->
+          @if (activeTab() === 'users') {
+          <div class="tab-pane fade show active">
+            @if (loading()) {
+              <!-- Loading State -->
+              <div class="card">
+                <div class="card-body text-center py-5">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando usuarios...</span>
+                  </div>
+                  <p class="text-muted mt-3 mb-0">Cargando información de usuarios...</p>
+                </div>
+              </div>
+            } @else if (hasUsers()) {
+            <div class="card">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                  <i class="bi bi-people me-2"></i>
+                  Usuarios Asignados
+                </h6>
+                <div class="d-flex gap-2">
+                  <span class="badge bg-success">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Activos: {{ userStats().active }}
+                  </span>
+                  <span class="badge bg-danger">
+                    <i class="bi bi-x-circle me-1"></i>
+                    Inactivos: {{ userStats().inactive }}
+                  </span>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th scope="col" class="border-top-0">Usuario</th>
+                        <th scope="col" class="border-top-0">Cédula</th>
+                        <th scope="col" class="border-top-0">Rol</th>
+                        <th scope="col" class="border-top-0">Fecha Inicio</th>
+                        <th scope="col" class="border-top-0">Fecha Fin</th>
+                        <th scope="col" class="border-top-0">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (user of currentInstitution.usuarios; track user.id) {
+                      <tr>
+                        <td class="align-middle">
+                          <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center text-muted me-3" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                              <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                              <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
+                              <small class="text-muted">{{ user.correo }}</small>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="align-middle">
+                          <span class="font-monospace">{{ user.cedula }}</span>
+                        </td>
+                        <td class="align-middle">
+                          <span class="badge" [class]="getRoleBadgeClass(user.usuario_institucion.rol.descripcion)">
+                            <i class="bi bi-shield-check me-1"></i>
+                            {{ user.usuario_institucion.rol.descripcion }}
+                          </span>
+                        </td>
+                        <td class="align-middle">
+                          <small class="text-muted">
+                            <i class="bi bi-calendar-plus me-1"></i>
+                            {{ formatDate(user.usuario_institucion.fecha_inicio) }}
+                          </small>
+                        </td>
+                        <td class="align-middle">
+                          @if (user.usuario_institucion.fecha_fin) {
+                          <small class="text-muted">
+                            <i class="bi bi-calendar-x me-1"></i>
+                            {{ formatDate(user.usuario_institucion.fecha_fin) }}
+                          </small>
+                          } @else {
+                          <span class="text-muted">-</span>
+                          }
+                        </td>
+                        <td class="align-middle">
+                          @let userStatus = getUserStatus(user);
+                          <span class="badge" [class]="userStatus.statusClass">
+                            <i [class]="userStatus.iconClass + ' me-1'"></i>
+                            {{ userStatus.statusText }}
+                          </span>
+                        </td>
+                      </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card-footer bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <small class="text-muted">
+                    <i class="bi bi-people me-1"></i>
+                    Total de usuarios: {{ userStats().total }}
+                  </small>
+                </div>
+              </div>
+            </div>
+            } @else {
+            <div class="text-center py-5">
+              <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+              <h6 class="text-muted mt-3">Sin usuarios asignados</h6>
+              <p class="text-muted">Esta institución no tiene usuarios asignados actualmente.</p>
+            </div>
+            }
+          </div>
+          }
+
+        </div>
+        } @else {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="text-muted mt-2">Cargando información de la institución...</p>
+        </div>
+        }
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-top">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          <i class="bi bi-x-circle me-2"></i>
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+@if (show) {
+<div class="modal-backdrop fade show"></div>
+}

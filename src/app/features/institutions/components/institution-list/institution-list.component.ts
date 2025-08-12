@@ -8,11 +8,12 @@ import { InstitutionService } from '../../services/institution.service';
 import { InstitucionConUsuarios, PageResponse, InstitutionSearchParams } from '../../models/institution.interface';
 import { Institucion } from '../../../../core/models';
 import { InstitutionCreateModalComponent } from '../institution-create-modal/institution-create-modal.component';
+import { InstitutionDetailModalComponent } from '../institution-detail-modal/institution-detail-modal.component';
 
 @Component({
   selector: 'app-institution-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, NotificationComponent, InstitutionCreateModalComponent],
+  imports: [CommonModule, FormsModule, NotificationComponent, InstitutionCreateModalComponent, InstitutionDetailModalComponent],
   templateUrl: './institution-list.component.html',
   styleUrl: './institution-list.component.css'
 })
