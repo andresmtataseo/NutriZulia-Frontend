@@ -183,4 +183,38 @@ export class InstitutionListComponent implements OnInit {
 
     return pages;
   }
+
+  // Método para determinar el estado completo del usuario en la institución
+  getUserStatus(user: any): { isActive: boolean; statusText: string; statusClass: string; iconClass: string } {
+    const userEnabled = user.is_enabled;
+    const institutionUserEnabled = user.usuario_institucion?.is_enabled;
+    
+    // Determinar el estado final basado solo en los flags de habilitación
+    const isActive = userEnabled && institutionUserEnabled;
+    
+    let statusText = '';
+    let statusClass = '';
+    let iconClass = '';
+    
+    if (!userEnabled) {
+      statusText = 'Usuario Inactivo';
+      statusClass = 'bg-danger';
+      iconClass = 'bi bi-person-x';
+    } else if (!institutionUserEnabled) {
+      statusText = 'Deshabilitado en Institución';
+      statusClass = 'bg-warning text-dark';
+      iconClass = 'bi bi-building-x';
+    } else {
+      statusText = 'Activo';
+      statusClass = 'bg-success';
+      iconClass = 'bi bi-check-circle';
+    }
+    
+    return {
+      isActive,
+      statusText,
+      statusClass,
+      iconClass
+    };
+  }
 }

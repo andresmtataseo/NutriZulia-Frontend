@@ -178,10 +178,10 @@
                             <span class="font-monospace">{{ user.cedula }}</span>
                           </td>
                           <td class="align-middle">
-                            <span class="badge"
-                                  [class]="user.is_enabled ? 'bg-success' : 'bg-danger'">
-                              <i [class]="user.is_enabled ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
-                              {{ user.is_enabled ? 'Activo' : 'Inactivo' }}
+                            @let userStatus = getUserStatus(user);
+                            <span class="badge" [class]="userStatus.statusClass">
+                              <i [class]="userStatus.iconClass + ' me-1'"></i>
+                              {{ userStatus.statusText }}
                             </span>
                           </td>
                         </tr>
