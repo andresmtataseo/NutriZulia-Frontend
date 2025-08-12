@@ -55,6 +55,7 @@
                   id="tipoCedula"
                   formControlName="tipoCedula"
                   [class.is-invalid]="isFieldInvalid('tipoCedula')">
+                  <option value="" disabled class="text-muted">Tipo</option>
                   <option value="V">V</option>
                   <option value="E">E</option>
                 </select>
@@ -148,6 +149,7 @@
                 id="genero"
                 formControlName="genero"
                 [class.is-invalid]="isFieldInvalid('genero')">
+                <option value="" disabled class="text-muted">Seleccionar género</option>
                 <option value="MASCULINO">Masculino</option>
                 <option value="FEMENINO">Femenino</option>
               </select>
@@ -176,7 +178,7 @@
                   id="prefijoTelefono"
                   formControlName="prefijoTelefono"
                   [class.is-invalid]="isFieldInvalid('prefijoTelefono')">
-                  <option></option>
+                  <option value="" disabled class="text-muted">Prefijo</option>
                   <option value="0424">0424</option>
                   <option value="0414">0414</option>
                   <option value="0412">0412</option>

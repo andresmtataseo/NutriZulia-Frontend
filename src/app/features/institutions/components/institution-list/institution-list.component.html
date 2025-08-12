@@ -68,8 +68,8 @@
                   id="sortDirectionSelect"
                   [value]="sortDirection()"
                   (change)="onSortDirectionChange($event)">
-                  <option value="asc">Ascendente</option>
-                  <option value="desc">Descendente</option>
+                  <option value="ASC">Ascendente</option>
+                  <option value="DESC">Descendente</option>
                 </select>
                 <label for="sortDirectionSelect">
                   <i class="bi bi-arrow-up-down me-2"></i>Dirección
@@ -293,14 +293,14 @@
 </div>
 
 <!-- Modales -->
-<!-- TODO: Crear componentes de modales cuando sean necesarios -->
-<!--
 <app-institution-create-modal
   [show]="showCreateModal()"
   (institutionCreated)="onInstitutionCreated($event)"
-  (modalClosed)="closeCreateModal()">
+  (close)="closeCreateModal()">
 </app-institution-create-modal>
 
+<!-- TODO: Crear componente de modal de detalle cuando sea necesario -->
+<!--
 <app-institution-detail-modal
   [show]="showDetailModal()"
   [institution]="selectedInstitution()"

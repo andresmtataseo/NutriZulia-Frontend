@@ -3,7 +3,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { API_PREFIX } from '../../../core/constants/api-endpoints';
+import { API_ENDPOINTS, API_PREFIX } from '../../../core/constants/api-endpoints';
+import { ApiResponse } from '../../../core/models/api-response.interface';
+import { Institucion } from '../../../core/models/catalog/institucion.interface';
 import {
   InstitucionConUsuarios,
   PageResponse,
@@ -42,6 +44,16 @@ export class InstitutionService {
     return this.http.get<PageResponse<InstitucionConUsuarios>>(
       `${this.baseUrl}${API_PREFIX}/catalog/institutions/get-all/users`,
       { params: httpParams }
+    );
+  }
+
+  /**
+   * Crea una nueva institución
+   */
+  createInstitution(institutionData: Omit<Institucion, 'id'>): Observable<ApiResponse<Institucion>> {
+    return this.http.post<ApiResponse<Institucion>>(
+      `${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.INSTITUTIONS}`,
+      institutionData
     );
   }
 }

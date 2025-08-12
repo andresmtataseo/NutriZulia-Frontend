@@ -49,7 +49,7 @@
                           id="rolId"
                           formControlName="rolId"
                           [class.is-invalid]="form.get('rolId')?.invalid && form.get('rolId')?.touched">
-                    <option value="">Seleccione un rol...</option>
+                    <option value="" disabled class="text-muted">Seleccione un rol...</option>
                     @for (role of roles; track role.id) {
                       <option [value]="role.id">{{ role.descripcion }}</option>
                     }

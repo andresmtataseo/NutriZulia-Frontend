@@ -6,11 +6,13 @@ import { NotificationComponent } from '../../../../shared/components/notificatio
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { InstitutionService } from '../../services/institution.service';
 import { InstitucionConUsuarios, PageResponse, InstitutionSearchParams } from '../../models/institution.interface';
+import { Institucion } from '../../../../core/models';
+import { InstitutionCreateModalComponent } from '../institution-create-modal/institution-create-modal.component';
 
 @Component({
   selector: 'app-institution-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, NotificationComponent],
+  imports: [CommonModule, FormsModule, NotificationComponent, InstitutionCreateModalComponent],
   templateUrl: './institution-list.component.html',
   styleUrl: './institution-list.component.css'
 })
@@ -140,7 +142,7 @@ export class InstitutionListComponent implements OnInit {
   }
 
   // Métodos de eventos
-  onInstitutionCreated(institution: InstitucionConUsuarios): void {
+  onInstitutionCreated(institution: Institucion): void {
     this.closeCreateModal();
     this.loadInstitutions(); // Reload data after creation
     this.notificationService.showSuccess('Institución creada exitosamente');
