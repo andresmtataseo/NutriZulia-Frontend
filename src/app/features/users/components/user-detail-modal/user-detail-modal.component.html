@@ -224,55 +224,59 @@
                 </div>
               </div>
               <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Nombre</th>
-                      <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Rol</th>
-                      <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Fecha Inicio</th>
-                      <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Fecha Fin</th>
-                      <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (assignment of userInstitutions(); track assignment.id) {
-                    <tr class="assignment-row" [attr.data-assignment-id]="assignment.id"
-                      (mouseenter)="onAssignmentRowHover(assignment.id, true)"
-                      (mouseleave)="onAssignmentRowHover(assignment.id, false)" (click)="openManageModal(assignment)"
-                      style="cursor: pointer;" title="Clic para gestionar esta asignación">
-                      <td class="align-middle border-end">
-                        {{ assignment.institucion.nombre }}
-                      </td>
-                      <td class="align-middle border-end">
-                        <span class="badge" [class]="getRoleBadgeClass(assignment.rol.descripcion)">
-                          <i class="bi bi-shield-check me-1"></i>
-                          {{ assignment.rol.descripcion }}
-                        </span>
-                      </td>
-                      <td class="align-middle border-end">{{ formatDate(assignment.fechaInicio) }}</td>
-                      <td class="align-middle border-end">
-                        @if (assignment.fechaFin) {
-                        {{ formatDate(assignment.fechaFin) }}
-                        } @else {
-                        <span class="text-muted">Sin fecha fin</span>
-                        }
-                      </td>
-                      <td class="align-middle">
-                        <span class="badge" [class]="assignment.isEnabled ? 'bg-success' : 'bg-danger'">
-                          <i [class]="assignment.isEnabled ? 'bi bi-check-circle' : 'bi bi-x-circle'" class="me-1"></i>
-                          {{ assignment.isEnabled ? 'Activo' : 'Inactivo' }}
-                        </span>
-                      </td>
-                    </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+                <div class="table-responsive">
+                  <table class="table mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="border-top-0 border-start-0 border-bottom border-end">Nombre</th>
+                        <th class="border-top-0 border-start-0 border-bottom border-end">Rol</th>
+                        <th class="border-top-0 border-start-0 border-bottom border-end">Fecha Inicio</th>
+                        <th class="border-top-0 border-start-0 border-bottom border-end">Fecha Fin</th>
+                        <th class="border-top-0 border-start-0 border-bottom border-end">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (assignment of userInstitutions(); track assignment.id) {
+                      <tr class="assignment-row" [attr.data-assignment-id]="assignment.id"
+                        (mouseenter)="onAssignmentRowHover(assignment.id, true)"
+                        (mouseleave)="onAssignmentRowHover(assignment.id, false)" (click)="openManageModal(assignment)"
+                        style="cursor: pointer;" title="Clic para gestionar esta asignación">
+                        <td class="align-middle border-end">
+                          {{ assignment.institucion.nombre }}
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="badge" [class]="getRoleBadgeClass(assignment.rol.descripcion)">
+                            <i class="bi bi-shield-check me-1"></i>
+                            {{ assignment.rol.descripcion }}
+                          </span>
+                        </td>
+                        <td class="align-middle border-end">{{ formatDate(assignment.fechaInicio) }}</td>
+                        <td class="align-middle border-end">
+                          @if (assignment.fechaFin) {
+                          {{ formatDate(assignment.fechaFin) }}
+                          } @else {
+                          <span class="text-muted">Sin fecha fin</span>
+                          }
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="badge" [class]="assignment.isEnabled ? 'bg-success' : 'bg-danger'">
+                            <i [class]="assignment.isEnabled ? 'bi bi-check-circle' : 'bi bi-x-circle'"
+                              class="me-1"></i>
+                            {{ assignment.isEnabled ? 'Activo' : 'Inactivo' }}
+                          </span>
+                        </td>
+                      </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
               </div>
               <div class="card-footer bg-white py-3">
                 <div class="d-flex justify-content-between align-items-center">
-                  <span class="text-muted">Total: {{ userInstitutions().length }}</span>
+                  <small class="text-muted">
+                    <i class="bi bi-building me-1"></i>
+                    Total de instituciones: {{ user.instituciones.length }}
+                  </small>
                 </div>
               </div>
             </div>

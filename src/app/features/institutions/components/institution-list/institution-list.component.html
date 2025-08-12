@@ -1,4 +1,312 @@
-<div class="institution-list-container">
-  <h1>Instituciones</h1>
-  <!-- Institution list content will go here -->
+<div class="container py-4">
+  <!-- Componente de notificación -->
+  <app-notification
+    [notification]="notificationService.notification()"
+    (dismissed)="notificationService.hide()">
+  </app-notification>
+
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h3 mb-1 text-gray-800">
+            <i class="bi bi-building me-2 text-primary"></i>
+            Gestión de Instituciones
+          </h1>
+          <p class="text-muted mb-0">Administra las instituciones del sistema NutriZulia</p>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          <i class="bi bi-plus-circle me-2"></i>
+          Nueva Institución
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchInput"
+                  placeholder="Buscar instituciones..."
+                  [value]="searchTerm()"
+                  (input)="onSearchChange($event)"
+                  (keyup.enter)="onSearchEnter()">
+                <label for="searchInput">
+                  <i class="bi bi-search me-2"></i>Buscador de instituciones
+                </label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <select
+                  class="form-select"
+                  id="sortBySelect"
+                  [value]="sortBy()"
+                  (change)="onSortByChange($event)">
+                  <option value="nombre">Nombre</option>
+                  <option value="tipo">Tipo</option>
+                  <option value="municipio">Municipio</option>
+                </select>
+                <label for="sortBySelect">
+                  <i class="bi bi-sort-alpha-down me-2"></i>Ordenar por
+                </label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <select
+                  class="form-select"
+                  id="sortDirectionSelect"
+                  [value]="sortDirection()"
+                  (change)="onSortDirectionChange($event)">
+                  <option value="asc">Ascendente</option>
+                  <option value="desc">Descendente</option>
+                </select>
+                <label for="sortDirectionSelect">
+                  <i class="bi bi-arrow-up-down me-2"></i>Dirección
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Institutions Table Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Instituciones</h6>
+            <div class="d-flex align-items-center">
+              <span class="text-muted me-3">
+                @if (institutionsResponse(); as response) {
+                  Mostrando {{ getStartRecord(response) }}-{{ getEndRecord(response) }} de {{ response.totalElements }} instituciones
+                } @else {
+                  Cargando...
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          @if (loading()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <p class="text-muted mt-2">Cargando instituciones...</p>
+            </div>
+          } @else if (institutionsResponse()?.content?.length === 0) {
+            <div class="text-center py-5">
+              <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-2">No se encontraron instituciones</p>
+            </div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                      <div class="d-flex align-items-center">
+                        Institución
+                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
+                      </div>
+                    </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                      <div class="d-flex align-items-center">
+                        Tipo
+                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
+                      </div>
+                    </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                      <div class="d-flex align-items-center">
+                        Municipio
+                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
+                      </div>
+                    </th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Usuario</th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end cedula-column">Cédula</th>
+                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado Usuario</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (institution of institutionsResponse()?.content; track institution.id) {
+                    @if (institution.usuarios && institution.usuarios.length > 0) {
+                      <!-- Institución con usuarios asignados -->
+                      @for (user of institution.usuarios; track $index; let isFirst = $first) {
+                        <tr class="institution-row-group"
+                            [attr.data-institution-id]="institution.id"
+                            (mouseenter)="onInstitutionRowHover(institution.id, true)"
+                            (mouseleave)="onInstitutionRowHover(institution.id, false)"
+                            (click)="openDetailModal(institution)"
+                            style="cursor: pointer;"
+                            title="Haz clic para ver detalles de la institución">
+                          @if (isFirst) {
+                            <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
+                              <div class="fw-semibold">{{ institution.nombre }}</div>
+                              <small class="text-muted">{{ institution.descripcion }}</small>
+                            </td>
+                            <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
+                              <span class="badge bg-info text-dark">
+                                <i class="bi bi-building me-1"></i>
+                                {{ institution.tipo }}
+                              </span>
+                            </td>
+                            <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
+                              <span class="text-muted">
+                                <i class="bi bi-geo-alt me-1"></i>
+                                {{ institution.municipio }}
+                              </span>
+                            </td>
+                          }
+                          <td class="align-middle border-end">
+                            <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
+                            <small class="text-muted">{{ user.correo }}</small>
+                          </td>
+                          <td class="align-middle border-end cedula-cell">
+                            <span class="font-monospace">{{ user.cedula }}</span>
+                          </td>
+                          <td class="align-middle">
+                            <span class="badge"
+                                  [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">
+                              <i [class]="user.isEnabled ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
+                              {{ user.isEnabled ? 'Activo' : 'Inactivo' }}
+                            </span>
+                          </td>
+                        </tr>
+                      }
+                    } @else {
+                      <!-- Institución sin usuarios asignados -->
+                      <tr class="institution-row-group"
+                          [attr.data-institution-id]="institution.id"
+                          (mouseenter)="onInstitutionRowHover(institution.id, true)"
+                          (mouseleave)="onInstitutionRowHover(institution.id, false)"
+                          (click)="openDetailModal(institution)"
+                          style="cursor: pointer;"
+                          title="Haz clic para ver detalles de la institución">
+                        <td class="align-middle border-end">
+                          <div class="fw-semibold">{{ institution.nombre }}</div>
+                          <small class="text-muted">{{ institution.descripcion }}</small>
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="badge bg-info text-dark">
+                            <i class="bi bi-building me-1"></i>
+                            {{ institution.tipo }}
+                          </span>
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="text-muted">
+                            <i class="bi bi-geo-alt me-1"></i>
+                            {{ institution.municipio }}
+                          </span>
+                        </td>
+                        <td class="align-middle border-end">
+                          <span class="text-muted fst-italic">
+                            <i class="bi bi-person-slash me-1"></i>
+                            Sin usuarios asignados
+                          </span>
+                        </td>
+                        <td class="align-middle border-end cedula-cell">
+                          <span class="text-muted">-</span>
+                        </td>
+                        <td class="align-middle">
+                          <span class="badge bg-light text-muted border">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            Sin estado
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="card-footer bg-white py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <span class="text-muted me-3">Mostrar</span>
+              <select
+                class="form-select form-select-sm"
+                style="width: auto;"
+                [value]="pageSize()"
+                (change)="onPageSizeChange($event)">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span class="text-muted ms-3">registros por página</span>
+            </div>
+
+            @if (institutionsResponse(); as response) {
+              <nav aria-label="Paginación de instituciones">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item" [class.disabled]="response.first">
+                    <button
+                      class="page-link"
+                      [disabled]="response.first"
+                      (click)="onPageChange(response.page - 1)">
+                      <i class="bi bi-chevron-left"></i>
+                    </button>
+                  </li>
+
+                  @for (pageNum of getPageNumbers(response); track pageNum) {
+                    <li class="page-item" [class.active]="pageNum === response.page">
+                      <button
+                        class="page-link"
+                        (click)="onPageChange(pageNum)">
+                        {{ pageNum + 1 }}
+                      </button>
+                    </li>
+                  }
+
+                  <li class="page-item" [class.disabled]="response.last">
+                    <button
+                      class="page-link"
+                      [disabled]="response.last"
+                      (click)="onPageChange(response.page + 1)">
+                      <i class="bi bi-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Modales -->
+<!-- TODO: Crear componentes de modales cuando sean necesarios -->
+<!--
+<app-institution-create-modal
+  [show]="showCreateModal()"
+  (institutionCreated)="onInstitutionCreated($event)"
+  (modalClosed)="closeCreateModal()">
+</app-institution-create-modal>
+
+<app-institution-detail-modal
+  [show]="showDetailModal()"
+  [institution]="selectedInstitution()"
+  (institutionUpdated)="onInstitutionUpdated($event)"
+  (modalClosed)="closeDetailModal()">
+</app-institution-detail-modal>
+-->
