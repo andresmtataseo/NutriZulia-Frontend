@@ -36,6 +36,7 @@ export const API_ENDPOINTS = {
     STATES: '/catalog/states',
     HEALTH_MUNICIPALITIES: '/catalog/health-municipalities',
     INSTITUTIONS: '/catalog/institutions',
+    INSTITUTIONS_BY_MUNICIPIO_SANITARIO: '/catalog/institutions/get-by-municipio-sanitario',
     INSTITUTIONS_TYPES: '/catalog/institution-types',
     ROLES: '/catalog/roles',
   }

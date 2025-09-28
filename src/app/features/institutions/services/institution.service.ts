@@ -75,4 +75,16 @@ export class InstitutionService {
       institutionData
     );
   }
+
+  /**
+   * Obtiene instituciones filtradas por municipio sanitario
+   */
+  getInstitutionsByMunicipioSanitario(municipioSanitarioId: number): Observable<ApiResponse<Institucion[]>> {
+    const httpParams = new HttpParams().set('municipioSanitarioId', municipioSanitarioId.toString());
+
+    return this.http.get<ApiResponse<Institucion[]>>(
+      `${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.CATALOG.INSTITUTIONS_BY_MUNICIPIO_SANITARIO}`,
+      { params: httpParams }
+    );
+  }
 }

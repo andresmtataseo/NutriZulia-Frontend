@@ -1,4 +1,333 @@
-<div class="report-list-container">
-  <h1>Reportes</h1>
-  <!-- Report list content will go here -->
+<div class="container py-4">
+  <!-- Componente de notificación -->
+  <app-notification
+    [notification]="notificationService.notification()"
+    (dismissed)="notificationService.hide()">
+  </app-notification>
+
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h3 mb-1 text-gray-800">
+            <i class="bi bi-graph-up me-2 text-primary"></i>
+            Gestión de Reportes
+          </h1>
+          <p class="text-muted mb-0">Visualiza y analiza los datos de nutricionistas del sistema NutriZulia</p>
+        </div>
+        <button type="button" class="btn btn-success">
+          <i class="bi bi-file-earmark-excel me-2"></i>
+          Exportar a Excel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <div class="form-floating">
+                <select 
+                  class="form-select" 
+                  id="municipioSelect"
+                  [value]="selectedMunicipioId() || ''"
+                  (change)="onMunicipioChange($event)">
+                  <option value="">Seleccionar municipio sanitario</option>
+                  @for (municipio of municipiosSanitarios(); track municipio.id) {
+                    <option [value]="municipio.id">{{ municipio.nombre }}</option>
+                  }
+                </select>
+                <label for="municipioSelect">
+                  <i class="bi bi-geo-alt me-2"></i>Municipio Sanitario
+                </label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <select 
+                  class="form-select" 
+                  id="institucionSelect"
+                  [value]="selectedInstitucionId() || ''"
+                  [disabled]="!selectedMunicipioId() || isLoadingInstituciones()"
+                  (change)="onInstitucionChange($event)">
+                  <option value="">Todas las instituciones</option>
+                  @if (isLoadingInstituciones()) {
+                    <option disabled>Cargando instituciones...</option>
+                  } @else {
+                    @for (institucion of instituciones(); track institucion.id) {
+                      <option [value]="institucion.id">{{ institucion.nombre }}</option>
+                    }
+                  }
+                </select>
+                <label for="institucionSelect">
+                  <i class="bi bi-building me-2"></i>Institución
+                </label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fechaInicio"
+                  value="2024-01-01">
+                <label for="fechaInicio">
+                  <i class="bi bi-calendar-event me-2"></i>Fecha Inicio
+                </label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fechaFin"
+                  value="2024-12-31">
+                <label for="fechaFin">
+                  <i class="bi bi-calendar-check me-2"></i>Fecha Fin
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports Table Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Reportes</h6>
+            <div class="d-flex align-items-center">
+              <span class="text-muted me-3">
+                Mostrando 1-10 de 247 reportes
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                    <div class="d-flex align-items-center">
+                      Institución
+                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
+                    </div>
+                  </th>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                    <div class="d-flex align-items-center">
+                      Municipio
+                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
+                    </div>
+                  </th>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
+                    <div class="d-flex align-items-center">
+                      Nutricionista
+                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
+                    </div>
+                  </th>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Consultas</th>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Fecha</th>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
+                  <td class="align-middle border-end">
+                    <div class="fw-semibold">Hospital Universitario de Maracaibo</div>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="text-muted">
+                      <i class="bi bi-geo-alt me-1"></i>
+                      Maracaibo
+                    </span>
+                  </td>
+                  <td class="align-middle border-end">
+                     <div class="fw-semibold">Dra. María González</div>
+                     <small class="text-muted">maria.gonzalez&#64;nutriZulia.gob.ve</small>
+                   </td>
+                  <td class="align-middle border-end">
+                    <span class="badge bg-primary">45</span>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="font-monospace">2024-01-15</span>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge bg-success">
+                      <i class="bi bi-check-circle me-1"></i>
+                      Completado
+                    </span>
+                  </td>
+                </tr>
+                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
+                  <td class="align-middle border-end">
+                    <div class="fw-semibold">Ambulatorio San Francisco</div>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="text-muted">
+                      <i class="bi bi-geo-alt me-1"></i>
+                      San Francisco
+                    </span>
+                  </td>
+                  <td class="align-middle border-end">
+                     <div class="fw-semibold">Lic. Carlos Rodríguez</div>
+                     <small class="text-muted">carlos.rodriguez&#64;nutriZulia.gob.ve</small>
+                   </td>
+                  <td class="align-middle border-end">
+                    <span class="badge bg-primary">32</span>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="font-monospace">2024-01-14</span>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge bg-success">
+                      <i class="bi bi-check-circle me-1"></i>
+                      Completado
+                    </span>
+                  </td>
+                </tr>
+                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
+                  <td class="align-middle border-end">
+                    <div class="fw-semibold">Centro de Salud Cabimas</div>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="text-muted">
+                      <i class="bi bi-geo-alt me-1"></i>
+                      Cabimas
+                    </span>
+                  </td>
+                  <td class="align-middle border-end">
+                     <div class="fw-semibold">Dra. Ana Martínez</div>
+                     <small class="text-muted">ana.martinez&#64;nutriZulia.gob.ve</small>
+                   </td>
+                  <td class="align-middle border-end">
+                    <span class="badge bg-primary">28</span>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="font-monospace">2024-01-13</span>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge bg-warning text-dark">
+                      <i class="bi bi-clock me-1"></i>
+                      Pendiente
+                    </span>
+                  </td>
+                </tr>
+                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
+                  <td class="align-middle border-end">
+                    <div class="fw-semibold">Clínica Popular Ciudad Ojeda</div>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="text-muted">
+                      <i class="bi bi-geo-alt me-1"></i>
+                      Ciudad Ojeda
+                    </span>
+                  </td>
+                  <td class="align-middle border-end">
+                     <div class="fw-semibold">Lic. Pedro Hernández</div>
+                     <small class="text-muted">pedro.hernandez&#64;nutriZulia.gob.ve</small>
+                   </td>
+                  <td class="align-middle border-end">
+                    <span class="badge bg-primary">51</span>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="font-monospace">2024-01-12</span>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge bg-success">
+                      <i class="bi bi-check-circle me-1"></i>
+                      Completado
+                    </span>
+                  </td>
+                </tr>
+                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
+                  <td class="align-middle border-end">
+                    <div class="fw-semibold">Hospital General Lagunillas</div>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="text-muted">
+                      <i class="bi bi-geo-alt me-1"></i>
+                      Lagunillas
+                    </span>
+                  </td>
+                  <td class="align-middle border-end">
+                     <div class="fw-semibold">Dra. Laura Pérez</div>
+                     <small class="text-muted">laura.perez&#64;nutriZulia.gob.ve</small>
+                   </td>
+                  <td class="align-middle border-end">
+                    <span class="badge bg-primary">37</span>
+                  </td>
+                  <td class="align-middle border-end">
+                    <span class="font-monospace">2024-01-11</span>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge bg-danger">
+                      <i class="bi bi-x-circle me-1"></i>
+                      Error
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="card-footer bg-white py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <span class="text-muted me-3">Mostrar</span>
+              <select
+                class="form-select form-select-sm"
+                style="width: auto;">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span class="text-muted ms-3">registros por página</span>
+            </div>
+
+            <nav aria-label="Paginación de reportes">
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item disabled">
+                  <button
+                    class="page-link"
+                    disabled>
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+                </li>
+
+                <li class="page-item active">
+                  <button class="page-link">1</button>
+                </li>
+                <li class="page-item">
+                  <button class="page-link">2</button>
+                </li>
+                <li class="page-item">
+                  <button class="page-link">3</button>
+                </li>
+
+                <li class="page-item">
+                  <button class="page-link">
+                    <i class="bi bi-chevron-right"></i>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

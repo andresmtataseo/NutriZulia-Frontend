@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { AuthService } from '../../../features/auth/services/auth.service';
+import { AuthStorageService } from '../../../features/auth/services/auth-storage.service';
 import { User } from '../../../core/models';
 
 declare var bootstrap: any;
@@ -25,8 +26,37 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
+    private authStorageService: AuthStorageService,
     private router: Router
   ) {}
+
+  /**
+   * Obtiene el nombre completo del usuario desde localStorage
+   */
+  get userFullName(): string {
+    const userData = this.authStorageService.getUserData();
+    if (userData && userData.nombres && userData.apellidos) {
+      return `${userData.nombres} ${userData.apellidos}`;
+    }
+    return 'Usuario';
+  }
+
+  /**
+   * Obtiene el rol del usuario desde el token JWT
+   */
+  get userRole(): string {
+    const roles = this.authStorageService.getUserRoles();
+    if (roles && roles.length > 0) {
+      // Mapear roles técnicos a nombres más amigables
+      const roleMap: { [key: string]: string } = {
+        'ADMIN': 'Administrador',
+        'USER': 'Usuario',
+        'MODERATOR': 'Moderador'
+      };
+      return roleMap[roles[0]] || roles[0];
+    }
+    return 'Usuario';
+  }
 
   ngOnInit(): void {
     // No necesitamos suscribirnos ya que usamos signals
