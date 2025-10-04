@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080',
-  appName: 'NutriZulia',
-  version: '1.0.0',
+  apiUrl: (window as any).__env?.API_URL ?? 'http://localhost:8080',
+  appName: (window as any).__env?.APP_NAME ?? 'NutriZulia',
+  version: (window as any).__env?.VERSION ?? '1.0.0',
 };

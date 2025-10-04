@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://nutrizulia-backend.onrender.com',
-  appName: 'NutriZulia',
-  version: '1.0.0',
+  apiUrl: (window as any).__env?.API_URL ?? 'https://nutrizulia-backend.onrender.com',
+  appName: (window as any).__env?.APP_NAME ?? 'NutriZulia',
+  version: (window as any).__env?.VERSION ?? '1.0.0',
 };
