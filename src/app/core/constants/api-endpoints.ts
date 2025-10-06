@@ -39,6 +39,9 @@ export const API_ENDPOINTS = {
     INSTITUTIONS_BY_MUNICIPIO_SANITARIO: '/catalog/institutions/get-by-municipio-sanitario',
     INSTITUTIONS_TYPES: '/catalog/institution-types',
     ROLES: '/catalog/roles',
+  },
+  REPORT: {
+    ANNUAL: '/report/annual',
   }
 } as const;
 

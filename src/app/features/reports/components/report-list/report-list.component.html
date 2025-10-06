@@ -1,8 +1,6 @@
 <div class="container py-4">
   <!-- Componente de notificación -->
-  <app-notification
-    [notification]="notificationService.notification()"
-    (dismissed)="notificationService.hide()">
+  <app-notification [notification]="notificationService.notification()" (dismissed)="notificationService.hide()">
   </app-notification>
 
   <!-- Header Section -->
@@ -16,9 +14,10 @@
           </h1>
           <p class="text-muted mb-0">Visualiza y analiza los datos de nutricionistas del sistema NutriZulia</p>
         </div>
-        <button type="button" class="btn btn-success">
+        <button type="button" class="btn btn-success" [disabled]="!selectedMunicipioId() || isGeneratingReport()"
+          (click)="exportAnnualReport()">
           <i class="bi bi-file-earmark-excel me-2"></i>
-          Exportar a Excel
+          {{ isGeneratingReport() ? 'Generando...' : 'Exportar a Excel' }}
         </button>
       </div>
     </div>
@@ -30,16 +29,13 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-floating">
-                <select 
-                  class="form-select" 
-                  id="municipioSelect"
-                  [value]="selectedMunicipioId() || ''"
-                  (change)="onMunicipioChange($event)">
+                <select class="form-select" id="municipioSelect" [value]="selectedMunicipioId() || ''"
+                  [disabled]="isGeneratingReport()" (change)="onMunicipioChange($event)">
                   <option value="">Seleccionar municipio sanitario</option>
                   @for (municipio of municipiosSanitarios(); track municipio.id) {
-                    <option [value]="municipio.id">{{ municipio.nombre }}</option>
+                  <option [value]="municipio.id">{{ municipio.nombre }}</option>
                   }
                 </select>
                 <label for="municipioSelect">
@@ -47,21 +43,19 @@
                 </label>
               </div>
             </div>
-            <div class="col-md-3">
+            <!-- Dropdown de Institución oculto temporalmente -->
+            <div class="col-md-3 d-none">
               <div class="form-floating">
-                <select 
-                  class="form-select" 
-                  id="institucionSelect"
-                  [value]="selectedInstitucionId() || ''"
+                <select class="form-select" id="institucionSelect" [value]="selectedInstitucionId() || ''"
                   [disabled]="!selectedMunicipioId() || isLoadingInstituciones()"
                   (change)="onInstitucionChange($event)">
                   <option value="">Todas las instituciones</option>
                   @if (isLoadingInstituciones()) {
-                    <option disabled>Cargando instituciones...</option>
+                  <option disabled>Cargando instituciones...</option>
                   } @else {
-                    @for (institucion of instituciones(); track institucion.id) {
-                      <option [value]="institucion.id">{{ institucion.nombre }}</option>
-                    }
+                  @for (institucion of instituciones(); track institucion.id) {
+                  <option [value]="institucion.id">{{ institucion.nombre }}</option>
+                  }
                   }
                 </select>
                 <label for="institucionSelect">
@@ -71,28 +65,34 @@
             </div>
             <div class="col-md-3">
               <div class="form-floating">
-                <input
-                  type="date"
-                  class="form-control"
-                  id="fechaInicio"
-                  value="2024-01-01">
-                <label for="fechaInicio">
-                  <i class="bi bi-calendar-event me-2"></i>Fecha Inicio
+                <select class="form-select" id="yearSelect" [value]="selectedYear()"
+                  [disabled]="!selectedMunicipioId() || isGeneratingReport()" (change)="onYearChange($event)">
+                  @for (year of availableYears(); track year) {
+                  <option [value]="year">{{ year }}</option>
+                  }
+                </select>
+                <label for="yearSelect">
+                  <i class="bi bi-calendar3 me-2"></i>Año
                 </label>
               </div>
             </div>
             <div class="col-md-3">
               <div class="form-floating">
-                <input
-                  type="date"
-                  class="form-control"
-                  id="fechaFin"
-                  value="2024-12-31">
-                <label for="fechaFin">
-                  <i class="bi bi-calendar-check me-2"></i>Fecha Fin
+                <select class="form-select" id="periodSelect" [value]="selectedPeriod()"
+                  [disabled]="!selectedMunicipioId() || isGeneratingReport()" (change)="onPeriodChange($event)">
+                  <option value="TRIMESTRE I">Trimestre I</option>
+                  <option value="TRIMESTRE II">Trimestre II</option>
+                  <option value="TRIMESTRE III">Trimestre III</option>
+                  <option value="TRIMESTRE IV">Trimestre IV</option>
+                  <option value="ANUAL">Anual</option>
+                </select>
+                <label for="periodSelect">
+                  <i class="bi bi-calendar-range me-2"></i>Periodo
                 </label>
               </div>
             </div>
+            <input type="hidden" id="fechaInicio" [value]="selectedFechaInicio()">
+            <input type="hidden" id="fechaFin" [value]="selectedFechaFin()">
           </div>
         </div>
       </div>
@@ -100,7 +100,7 @@
   </div>
 
   <!-- Reports Table Section -->
-  <div class="row">
+  <div class="row d-none">
     <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
@@ -153,9 +153,9 @@
                     </span>
                   </td>
                   <td class="align-middle border-end">
-                     <div class="fw-semibold">Dra. María González</div>
-                     <small class="text-muted">maria.gonzalez&#64;nutriZulia.gob.ve</small>
-                   </td>
+                    <div class="fw-semibold">Dra. María González</div>
+                    <small class="text-muted">maria.gonzalez&#64;nutriZulia.gob.ve</small>
+                  </td>
                   <td class="align-middle border-end">
                     <span class="badge bg-primary">45</span>
                   </td>
@@ -180,9 +180,9 @@
                     </span>
                   </td>
                   <td class="align-middle border-end">
-                     <div class="fw-semibold">Lic. Carlos Rodríguez</div>
-                     <small class="text-muted">carlos.rodriguez&#64;nutriZulia.gob.ve</small>
-                   </td>
+                    <div class="fw-semibold">Lic. Carlos Rodríguez</div>
+                    <small class="text-muted">carlos.rodriguez&#64;nutriZulia.gob.ve</small>
+                  </td>
                   <td class="align-middle border-end">
                     <span class="badge bg-primary">32</span>
                   </td>
@@ -207,9 +207,9 @@
                     </span>
                   </td>
                   <td class="align-middle border-end">
-                     <div class="fw-semibold">Dra. Ana Martínez</div>
-                     <small class="text-muted">ana.martinez&#64;nutriZulia.gob.ve</small>
-                   </td>
+                    <div class="fw-semibold">Dra. Ana Martínez</div>
+                    <small class="text-muted">ana.martinez&#64;nutriZulia.gob.ve</small>
+                  </td>
                   <td class="align-middle border-end">
                     <span class="badge bg-primary">28</span>
                   </td>
@@ -234,9 +234,9 @@
                     </span>
                   </td>
                   <td class="align-middle border-end">
-                     <div class="fw-semibold">Lic. Pedro Hernández</div>
-                     <small class="text-muted">pedro.hernandez&#64;nutriZulia.gob.ve</small>
-                   </td>
+                    <div class="fw-semibold">Lic. Pedro Hernández</div>
+                    <small class="text-muted">pedro.hernandez&#64;nutriZulia.gob.ve</small>
+                  </td>
                   <td class="align-middle border-end">
                     <span class="badge bg-primary">51</span>
                   </td>
@@ -261,9 +261,9 @@
                     </span>
                   </td>
                   <td class="align-middle border-end">
-                     <div class="fw-semibold">Dra. Laura Pérez</div>
-                     <small class="text-muted">laura.perez&#64;nutriZulia.gob.ve</small>
-                   </td>
+                    <div class="fw-semibold">Dra. Laura Pérez</div>
+                    <small class="text-muted">laura.perez&#64;nutriZulia.gob.ve</small>
+                  </td>
                   <td class="align-middle border-end">
                     <span class="badge bg-primary">37</span>
                   </td>
@@ -287,9 +287,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
               <span class="text-muted me-3">Mostrar</span>
-              <select
-                class="form-select form-select-sm"
-                style="width: auto;">
+              <select class="form-select form-select-sm" style="width: auto;">
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -301,9 +299,7 @@
             <nav aria-label="Paginación de reportes">
               <ul class="pagination pagination-sm mb-0">
                 <li class="page-item disabled">
-                  <button
-                    class="page-link"
-                    disabled>
+                  <button class="page-link" disabled>
                     <i class="bi bi-chevron-left"></i>
                   </button>
                 </li>
