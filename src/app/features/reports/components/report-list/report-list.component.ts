@@ -38,7 +38,7 @@ export class ReportListComponent implements OnInit {
   selectedFechaInicio = signal<string>('');
   selectedFechaFin = signal<string>('');
 
-  // Estado de frescura de datos
+  // Estado de actualización de datos
   isLoadingFreshness = signal<boolean>(false);
   institucionFreshnessList = signal<any[]>([]);
 
@@ -70,7 +70,7 @@ export class ReportListComponent implements OnInit {
   onMunicipioChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const municipioId = target.value ? parseInt(target.value, 10) : null;
-    
+
     this.selectedMunicipioId.set(municipioId);
     this.selectedInstitucionId.set(null); // Reset institución seleccionada
     this.instituciones.set([]); // Limpiar lista de instituciones
@@ -95,7 +95,7 @@ export class ReportListComponent implements OnInit {
    */
   private loadInstituciones(municipioId: number): void {
     this.isLoadingInstituciones.set(true);
-    
+
     this.institutionService.getInstitutionsByMunicipioSanitario(municipioId).subscribe({
       next: (response) => {
         this.instituciones.set(response.data || []);
@@ -235,12 +235,12 @@ export class ReportListComponent implements OnInit {
   }
 
   /**
-   * Carga/Actualiza la frescura de datos por municipio sanitario seleccionado.
+   * Carga/Actualiza la actualización de datos por municipio sanitario seleccionado.
    */
   fetchDataFreshness(): void {
     const municipioId = this.selectedMunicipioId();
     if (!municipioId) {
-      this.notificationService.showInfo('Seleccione un municipio sanitario para consultar la frescura de datos');
+      this.notificationService.showInfo('Seleccione un municipio sanitario para consultar la actualización de datos');
       return;
     }
 
@@ -256,8 +256,8 @@ export class ReportListComponent implements OnInit {
         this.isLoadingFreshness.set(false);
       },
       error: (error) => {
-        console.error('Error al obtener frescura de datos:', error);
-        const message = (error?.error?.message) ? error.error.message : 'Error al consultar la frescura de datos';
+        console.error('Error al obtener actualización de datos:', error);
+        const message = (error?.error?.message) ? error.error.message : 'Error al consultar la actualización de datos';
         this.notificationService.showError(message);
         this.isLoadingFreshness.set(false);
       }
@@ -289,36 +289,5 @@ export class ReportListComponent implements OnInit {
     return { label: 'Desactualizado', cls: 'danger' };
   }
 
-  /**
-   * Descarga el Excel de frescura de datos
-   */
-  exportDataFreshnessExcel(): void {
-    const municipioId = this.selectedMunicipioId();
-    if (!municipioId) {
-      this.notificationService.showError('Seleccione un municipio sanitario para exportar el Excel');
-      return;
-    }
-    this.isGeneratingReport.set(true);
-    this.reportService.downloadDataFreshnessExcel(municipioId).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        a.download = `frescura_datos_municipio_${municipioId}_${timestamp}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        this.notificationService.showSuccess('Excel de frescura de datos descargado exitosamente');
-        this.isGeneratingReport.set(false);
-      },
-      error: (error) => {
-        console.error('Error al descargar Excel de frescura de datos:', error);
-        const message = (error?.error?.message) ? error.error.message : 'Error al descargar el Excel';
-        this.notificationService.showError(message);
-        this.isGeneratingReport.set(false);
-      }
-    });
-  }
+
 }
