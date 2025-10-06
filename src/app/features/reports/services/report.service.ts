@@ -23,4 +23,20 @@ export class ReportService {
       { params, responseType: 'blob' }
     );
   }
+
+  /**
+   * Obtiene la frescura de datos (JSON) por municipio sanitario.
+   */
+  getDataFreshnessByMunicipio(municipioSanitarioId: number): Observable<any> {
+    const params = new HttpParams().set('municipioSanitarioId', municipioSanitarioId);
+    return this.http.get(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.REPORT.DATA_FRESHNESS}`, { params });
+  }
+
+  /**
+   * Descarga el Excel de frescura de datos por municipio sanitario.
+   */
+  downloadDataFreshnessExcel(municipioSanitarioId: number): Observable<Blob> {
+    const params = new HttpParams().set('municipioSanitarioId', municipioSanitarioId);
+    return this.http.get(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.REPORT.DATA_FRESHNESS_EXCEL}`, { params, responseType: 'blob' });
+  }
 }

@@ -99,187 +99,70 @@
     </div>
   </div>
 
-  <!-- Reports Table Section -->
-  <div class="row d-none">
+  <!-- Data Freshness Table Section -->
+  <div class="row" aria-live="polite">
     <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
           <div class="d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Lista de Reportes</h6>
-            <div class="d-flex align-items-center">
-              <span class="text-muted me-3">
-                Mostrando 1-10 de 247 reportes
-              </span>
+            <h6 class="m-0 font-weight-bold text-primary">Frescura de datos por institución</h6>
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-outline-primary" [disabled]="!selectedMunicipioId() || isLoadingFreshness()" (click)="fetchDataFreshness()">
+                <i class="bi bi-arrow-clockwise me-1"></i>
+                {{ isLoadingFreshness() ? 'Actualizando...' : 'Actualizar' }}
+              </button>
+              <button type="button" class="btn btn-success" [disabled]="!selectedMunicipioId() || isGeneratingReport()" (click)="exportDataFreshnessExcel()">
+                <i class="bi bi-file-earmark-excel me-1"></i>
+                {{ isGeneratingReport() ? 'Generando...' : 'Descargar Excel' }}
+              </button>
             </div>
           </div>
         </div>
         <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table mb-0">
+          @if (!selectedMunicipioId()) {
+            <div class="p-4 text-center text-muted">Seleccione un municipio sanitario para ver la frescura de datos</div>
+          } @else if (isLoadingFreshness()) {
+            <div class="p-4 text-center text-muted"><i class="bi bi-hourglass-split me-2"></i>Cargando datos...</div>
+          } @else if (!institucionFreshnessList().length) {
+            <div class="p-4 text-center text-muted"><i class="bi bi-info-circle me-2"></i>No hay datos para mostrar</div>
+          } @else {
+          <div class="table-responsive" role="region" aria-label="Tabla de frescura de datos">
+            <table class="table table-hover mb-0 align-middle">
               <thead class="table-light">
                 <tr>
-                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
-                    <div class="d-flex align-items-center">
-                      Institución
-                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                    </div>
-                  </th>
-                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
-                    <div class="d-flex align-items-center">
-                      Municipio
-                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                    </div>
-                  </th>
-                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
-                    <div class="d-flex align-items-center">
-                      Nutricionista
-                      <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                    </div>
-                  </th>
-                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Consultas</th>
-                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Fecha</th>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Institución</th>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Nutricionista</th>
+                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Última actualización</th>
                   <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado</th>
                 </tr>
               </thead>
               <tbody>
-                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Hospital Universitario de Maracaibo</div>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="text-muted">
-                      <i class="bi bi-geo-alt me-1"></i>
-                      Maracaibo
-                    </span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Dra. María González</div>
-                    <small class="text-muted">maria.gonzalez&#64;nutriZulia.gob.ve</small>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="badge bg-primary">45</span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="font-monospace">2024-01-15</span>
-                  </td>
-                  <td class="align-middle">
-                    <span class="badge bg-success">
-                      <i class="bi bi-check-circle me-1"></i>
-                      Completado
-                    </span>
-                  </td>
-                </tr>
-                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Ambulatorio San Francisco</div>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="text-muted">
-                      <i class="bi bi-geo-alt me-1"></i>
-                      San Francisco
-                    </span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Lic. Carlos Rodríguez</div>
-                    <small class="text-muted">carlos.rodriguez&#64;nutriZulia.gob.ve</small>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="badge bg-primary">32</span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="font-monospace">2024-01-14</span>
-                  </td>
-                  <td class="align-middle">
-                    <span class="badge bg-success">
-                      <i class="bi bi-check-circle me-1"></i>
-                      Completado
-                    </span>
-                  </td>
-                </tr>
-                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Centro de Salud Cabimas</div>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="text-muted">
-                      <i class="bi bi-geo-alt me-1"></i>
-                      Cabimas
-                    </span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Dra. Ana Martínez</div>
-                    <small class="text-muted">ana.martinez&#64;nutriZulia.gob.ve</small>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="badge bg-primary">28</span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="font-monospace">2024-01-13</span>
-                  </td>
-                  <td class="align-middle">
-                    <span class="badge bg-warning text-dark">
-                      <i class="bi bi-clock me-1"></i>
-                      Pendiente
-                    </span>
-                  </td>
-                </tr>
-                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Clínica Popular Ciudad Ojeda</div>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="text-muted">
-                      <i class="bi bi-geo-alt me-1"></i>
-                      Ciudad Ojeda
-                    </span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Lic. Pedro Hernández</div>
-                    <small class="text-muted">pedro.hernandez&#64;nutriZulia.gob.ve</small>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="badge bg-primary">51</span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="font-monospace">2024-01-12</span>
-                  </td>
-                  <td class="align-middle">
-                    <span class="badge bg-success">
-                      <i class="bi bi-check-circle me-1"></i>
-                      Completado
-                    </span>
-                  </td>
-                </tr>
-                <tr style="cursor: pointer;" title="Haz clic para ver detalles del reporte">
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Hospital General Lagunillas</div>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="text-muted">
-                      <i class="bi bi-geo-alt me-1"></i>
-                      Lagunillas
-                    </span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <div class="fw-semibold">Dra. Laura Pérez</div>
-                    <small class="text-muted">laura.perez&#64;nutriZulia.gob.ve</small>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="badge bg-primary">37</span>
-                  </td>
-                  <td class="align-middle border-end">
-                    <span class="font-monospace">2024-01-11</span>
-                  </td>
-                  <td class="align-middle">
-                    <span class="badge bg-danger">
-                      <i class="bi bi-x-circle me-1"></i>
-                      Error
-                    </span>
-                  </td>
-                </tr>
+                @for (inst of institucionFreshnessList(); track inst.institucionId) {
+                  @for (user of inst.usuarios; track user.usuarioInstitucionId) {
+                  <tr>
+                    <td class="align-middle border-end">
+                      <div class="fw-semibold">{{ inst.institucionNombre }}</div>
+                    </td>
+                    <td class="align-middle border-end">
+                      <div class="fw-semibold">{{ getFullName(user) }}</div>
+                      <small class="text-muted">Cédula: {{ user.cedula }} | Rol: {{ user.rolNombre }}</small>
+                    </td>
+                    <td class="align-middle border-end">
+                      <span class="font-monospace">{{ formatDate(user.ultimaActualizacion) }}</span>
+                    </td>
+                    <td class="align-middle">
+                      <span class="badge" [ngClass]="'bg-' + getFreshnessStatus(user.ultimaActualizacion).cls">
+                        <i class="bi" [ngClass]="getFreshnessStatus(user.ultimaActualizacion).cls.includes('warning') ? 'bi-clock' : (getFreshnessStatus(user.ultimaActualizacion).cls === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle')"></i>
+                        {{ getFreshnessStatus(user.ultimaActualizacion).label }}
+                      </span>
+                    </td>
+                  </tr>
+                  }
+                }
               </tbody>
             </table>
           </div>
+          }
         </div>
 
         <!-- Pagination Footer -->

@@ -42,6 +42,8 @@ export const API_ENDPOINTS = {
   },
   REPORT: {
     ANNUAL: '/report/annual',
+    DATA_FRESHNESS: '/report/data-freshness',
+    DATA_FRESHNESS_EXCEL: '/report/data-freshness/excel'
   }
 } as const;
 

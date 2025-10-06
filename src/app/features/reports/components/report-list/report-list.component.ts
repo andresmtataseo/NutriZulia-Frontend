@@ -38,6 +38,10 @@ export class ReportListComponent implements OnInit {
   selectedFechaInicio = signal<string>('');
   selectedFechaFin = signal<string>('');
 
+  // Estado de frescura de datos
+  isLoadingFreshness = signal<boolean>(false);
+  institucionFreshnessList = signal<any[]>([]);
+
   ngOnInit(): void {
     this.loadMunicipiosSanitarios();
     // Inicializar años disponibles y el rango de fechas por defecto
@@ -76,8 +80,13 @@ export class ReportListComponent implements OnInit {
     this.selectedPeriod.set('ANUAL');
     this.computeDatesForSelection();
 
+    // Limpiar tabla de frescura
+    this.institucionFreshnessList.set([]);
+
     if (municipioId) {
       this.loadInstituciones(municipioId);
+      // Cargar frescura de datos automáticamente al seleccionar municipio
+      this.fetchDataFreshness();
     }
   }
 
@@ -219,6 +228,94 @@ export class ReportListComponent implements OnInit {
       error: (error) => {
         console.error('Error al generar/descargar reporte anual:', error);
         const message = (error?.error?.message) ? error.error.message : 'Error al generar el reporte anual';
+        this.notificationService.showError(message);
+        this.isGeneratingReport.set(false);
+      }
+    });
+  }
+
+  /**
+   * Carga/Actualiza la frescura de datos por municipio sanitario seleccionado.
+   */
+  fetchDataFreshness(): void {
+    const municipioId = this.selectedMunicipioId();
+    if (!municipioId) {
+      this.notificationService.showInfo('Seleccione un municipio sanitario para consultar la frescura de datos');
+      return;
+    }
+
+    this.isLoadingFreshness.set(true);
+
+    this.reportService.getDataFreshnessByMunicipio(municipioId).subscribe({
+      next: (response) => {
+        // La API generalmente responde con { data: InstitucionDataFreshness[] }
+        const list = Array.isArray(response?.data)
+          ? response.data
+          : (Array.isArray(response) ? response : []);
+        this.institucionFreshnessList.set(list);
+        this.isLoadingFreshness.set(false);
+      },
+      error: (error) => {
+        console.error('Error al obtener frescura de datos:', error);
+        const message = (error?.error?.message) ? error.error.message : 'Error al consultar la frescura de datos';
+        this.notificationService.showError(message);
+        this.isLoadingFreshness.set(false);
+      }
+    });
+  }
+
+  /**
+   * Helpers para presentación en la tabla de frescura
+   */
+  getFullName(user: any): string {
+    return `${user.nombres} ${user.apellidos}`.trim();
+  }
+
+  formatDate(iso: string | null): string {
+    if (!iso) return 'Sin registros';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return 'Fecha inválida';
+    return d.toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  }
+
+  getFreshnessStatus(iso: string | null): { label: string; cls: string } {
+    if (!iso) return { label: 'Sin registros', cls: 'secondary' };
+    const now = new Date().getTime();
+    const ts = new Date(iso).getTime();
+    if (isNaN(ts)) return { label: 'Fecha inválida', cls: 'secondary' };
+    const diffDays = Math.floor((now - ts) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 30) return { label: 'Actualizado', cls: 'success' };
+    if (diffDays <= 60) return { label: 'Reciente', cls: 'warning text-dark' };
+    return { label: 'Desactualizado', cls: 'danger' };
+  }
+
+  /**
+   * Descarga el Excel de frescura de datos
+   */
+  exportDataFreshnessExcel(): void {
+    const municipioId = this.selectedMunicipioId();
+    if (!municipioId) {
+      this.notificationService.showError('Seleccione un municipio sanitario para exportar el Excel');
+      return;
+    }
+    this.isGeneratingReport.set(true);
+    this.reportService.downloadDataFreshnessExcel(municipioId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        a.download = `frescura_datos_municipio_${municipioId}_${timestamp}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        this.notificationService.showSuccess('Excel de frescura de datos descargado exitosamente');
+        this.isGeneratingReport.set(false);
+      },
+      error: (error) => {
+        console.error('Error al descargar Excel de frescura de datos:', error);
+        const message = (error?.error?.message) ? error.error.message : 'Error al descargar el Excel';
         this.notificationService.showError(message);
         this.isGeneratingReport.set(false);
       }
