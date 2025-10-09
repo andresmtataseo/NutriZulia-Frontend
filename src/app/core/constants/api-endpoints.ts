@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
   },
   REPORT: {
     ANNUAL: '/report/annual',
+    QUARTERLY: '/report/quarterly',
     DATA_FRESHNESS: '/report/data-freshness',
     DATA_FRESHNESS_EXCEL: '/report/data-freshness/excel'
   }

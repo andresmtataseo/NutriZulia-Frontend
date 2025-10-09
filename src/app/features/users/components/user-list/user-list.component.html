@@ -125,18 +125,8 @@
                         <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
                     </th>
-                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end cedula-column">
-                      <div class="d-flex align-items-center">
-                        Cédula
-                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                      </div>
-                    </th>
-                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
-                      <div class="d-flex align-items-center">
-                        Email
-                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                      </div>
-                    </th>
+                    <!-- Eliminada columna Cédula -->
+                    <!-- Eliminada columna Email -->
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado Usuario</th>
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
                       <div class="d-flex align-items-center">
@@ -168,14 +158,7 @@
                           @if (isFirst) {
                             <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
                               <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
-                            </td>
-                            <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end cedula-cell">
-                              <span class="font-monospace">{{ user.cedula }}</span>
-                            </td>
-                            <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
-                              <a [href]="'mailto:' + user.correo" class="text-decoration-none">
-                                {{ user.correo }}
-                              </a>
+                              <small class="text-muted">Cédula: {{ user.cedula }}</small>
                             </td>
                             <td [attr.rowspan]="user.instituciones.length" class="align-middle border-end">
                               <span class="badge"
@@ -186,7 +169,7 @@
                             </td>
                           }
                           <td class="align-middle border-end">
-                            <span class="text-muted">{{ institutionRole.institucionNombre }}</span>
+                            <div class="fw-semibold">{{ institutionRole.institucionNombre }}</div>
                           </td>
                           <td class="align-middle border-end">
                             <span class="badge"
@@ -215,15 +198,10 @@
                           title="Haz clic para ver detalles del usuario">
                         <td class="align-middle border-end">
                           <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
+                          <small class="text-muted">Cédula: {{ user.cedula }}</small>
                         </td>
-                        <td class="align-middle border-end cedula-cell">
-                          <span class="font-monospace">{{ user.cedula }}</span>
-                        </td>
-                        <td class="align-middle border-end">
-                          <a [href]="'mailto:' + user.correo" class="text-decoration-none">
-                            {{ user.correo }}
-                          </a>
-                        </td>
+                        <!-- Eliminada celda Cédula -->
+                        <!-- Eliminada celda Email -->
                         <td class="align-middle border-end">
                           <span class="badge"
                                 [class]="user.isEnabled ? 'bg-success' : 'bg-danger'">

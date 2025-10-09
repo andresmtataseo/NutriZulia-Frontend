@@ -1,14 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { catchError, of, Observable, forkJoin } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { catchError, of, forkJoin } from 'rxjs';
 
 import { InstitucionConUsuarios } from '../../models/institution.interface';
 import { InstitutionService } from '../../services/institution.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { Institucion } from '../../../../core/models/catalog/institucion.interface';
-import { ApiResponse } from '../../../../core/models/api-response.interface';
 import { CatalogService } from '../../../../core/services/catalog.service';
 import { TipoInstitucion } from '../../../../core/models/catalog/tipo-institucion.interface';
 import { MunicipioSanitario } from '../../../../core/models/catalog/municipio-sanitario.interface';
@@ -17,8 +15,7 @@ import { MunicipioSanitario } from '../../../../core/models/catalog/municipio-sa
   selector: 'app-institution-detail-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './institution-detail-modal.component.html',
-  styleUrls: ['./institution-detail-modal.component.css']
+  templateUrl: './institution-detail-modal.component.html'
 })
 export class InstitutionDetailModalComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
@@ -35,10 +32,10 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
   activeTab = signal<'details' | 'users'>('details');
   loading = signal(false);
   updating = signal(false);
-  
+
   // Signal interno para manejar los datos de la institución
   private institutionData = signal<InstitucionConUsuarios | null>(null);
-  
+
   // Signals para los catálogos
   tiposInstituciones = signal<TipoInstitucion[]>([]);
   municipiosSanitarios = signal<MunicipioSanitario[]>([]);
@@ -49,9 +46,9 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
 
   // Signals computados basados en institutionData
   canEdit = computed(() => this.institutionData() !== null);
-  
+
   hasUsers = computed(() => (this.institutionData()?.usuarios?.length ?? 0) > 0);
-  
+
   /**
    * Computed optimizado que calcula todas las estadísticas de usuarios en una sola pasada
    * Evita múltiples iteraciones sobre el array de usuarios
@@ -59,19 +56,19 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
   userStats = computed(() => {
     const users = this.institutionData()?.usuarios ?? [];
     const total = users.length;
-    const active = users.filter(user => 
+    const active = users.filter(user =>
       user.is_enabled && user.usuario_institucion.is_enabled
     ).length;
     const inactive = total - active;
-    
+
     return { total, active, inactive };
   });
-  
+
   // Computed derivados para compatibilidad (si se necesitan individualmente)
   totalUsers = computed(() => this.userStats().total);
   activeUsers = computed(() => this.userStats().active);
   inactiveUsers = computed(() => this.userStats().inactive);
-  
+
   // Getter para acceder a los datos de la institución
   get currentInstitution(): InstitucionConUsuarios | null {
     return this.institutionData();
@@ -97,7 +94,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
 
   private loadCatalogs(): void {
     this.loadingCatalogs.set(true);
-    
+
     forkJoin({
       tiposInstituciones: this.catalogService.getInstitutionTypes(),
       municipiosSanitarios: this.catalogService.getHealthMunicipalities()
@@ -120,9 +117,9 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
       this.resetComponent();
       return;
     }
-    
+
     this.loading.set(true);
-    
+
     this.institutionService.getInstitutionById(this.institution.id)
       .pipe(
         catchError(error => {
@@ -182,7 +179,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
     this.loading.set(false);
     this.updating.set(false);
     this.activeTab.set('details');
-    
+
     // Resetear formulario
     if (this.institutionForm) {
       this.institutionForm.reset();
@@ -214,7 +211,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
           catchError(error => {
             console.error('Error updating institution:', error);
             this.updating.set(false);
-            
+
             let errorMessage = 'Error al actualizar la institución';
             if (error.error?.message) {
               errorMessage = error.error.message;
@@ -225,7 +222,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
             } else if (error.status === 404) {
               errorMessage = 'Institución no encontrada';
             }
-            
+
             this.notificationService.showError(errorMessage);
             return of(null);
           })
@@ -234,7 +231,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
           this.updating.set(false);
           if (response?.data) {
             this.notificationService.showSuccess('Institución actualizada exitosamente');
-            
+
             // Actualizar los datos locales con la respuesta del servidor
              const updatedInstitution: InstitucionConUsuarios = {
                ...institution,
@@ -248,7 +245,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
                  nombre: this.municipiosSanitarios().find(m => m.id === response.data?.municipio_sanitario_id)?.nombre || ''
                }
              };
-            
+
             this.institutionData.set(updatedInstitution);
             this.institutionUpdated.emit(updatedInstitution);
             this.closeModal();
@@ -278,7 +275,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
     const userEnabled = user.is_enabled;
     const institutionUserEnabled = user.usuario_institucion?.is_enabled;
     const isActive = userEnabled && institutionUserEnabled;
-    
+
     if (!userEnabled) {
       return {
         isActive: false,
@@ -287,7 +284,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
         iconClass: 'bi bi-person-x'
       };
     }
-    
+
     if (!institutionUserEnabled) {
       return {
         isActive: false,
@@ -296,7 +293,7 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
         iconClass: 'bi bi-building-x'
       };
     }
-    
+
     return {
       isActive: true,
       statusText: 'Activo',
@@ -356,12 +353,10 @@ export class InstitutionDetailModalComponent implements OnInit, OnChanges {
 
   getRoleBadgeClass(roleName: string): string {
     const roleClasses: { [key: string]: string } = {
-      'ADMINISTRADOR': 'bg-danger',
-      'COORDINADOR': 'bg-warning text-dark',
-      'NUTRICIONISTA': 'bg-primary',
-      'MEDICO': 'bg-info text-dark',
-      'ENFERMERO': 'bg-success'
+      'Nutricionista': 'bg-info-subtle text-info',
+      'Administrador': 'bg-success-subtle text-success',
+      'Supervisor': 'bg-warning-subtle text-warning',
     };
-    return roleClasses[roleName.toUpperCase()] || 'bg-secondary';
+    return roleClasses[roleName] || 'bg-secondary-subtle text-secondary';
   }
 }

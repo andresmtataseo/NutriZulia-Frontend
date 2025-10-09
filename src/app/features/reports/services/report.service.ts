@@ -32,4 +32,18 @@ export class ReportService {
     return this.http.get(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.REPORT.DATA_FRESHNESS}`, { params });
   }
 
+  /**
+   * Descarga el reporte trimestral para un municipio sanitario, año y número de trimestre [1..4].
+   */
+  downloadQuarterlyReport(municipioSanitarioId: number, anio: number, trimestre: number): Observable<Blob> {
+    const params = new HttpParams()
+      .set('municipioSanitarioId', municipioSanitarioId)
+      .set('anio', anio)
+      .set('trimestre', trimestre);
+
+    return this.http.get(`${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.REPORT.QUARTERLY}`,
+      { params, responseType: 'blob' }
+    );
+  }
+
 }

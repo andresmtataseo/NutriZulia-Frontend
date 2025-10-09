@@ -121,15 +121,9 @@
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
                       <div class="d-flex align-items-center">
                         Institución
-                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
                       </div>
                     </th>
-                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
-                      <div class="d-flex align-items-center">
-                        Tipo
-                        <i class="bi bi-arrow-up-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                      </div>
-                    </th>
+                    <!-- Eliminado: columna Tipo -->
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">
                       <div class="d-flex align-items-center">
                         Municipio
@@ -137,7 +131,6 @@
                       </div>
                     </th>
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Usuario</th>
-                    <th scope="col" class="border-top-0 border-start-0 border-bottom border-end cedula-column">Cédula</th>
                     <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado Usuario</th>
                   </tr>
                 </thead>
@@ -156,13 +149,9 @@
                           @if (isFirst) {
                             <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
                               <div class="fw-semibold">{{ institution.nombre }}</div>
+                              <small class="text-muted">Tipo: {{ institution.tipo_institucion.nombre }}</small>
                             </td>
-                            <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
-                              <span class="badge bg-info text-dark">
-                                <i class="bi bi-building me-1"></i>
-                                {{ institution.tipo_institucion.nombre }}
-                              </span>
-                            </td>
+                            <!-- Eliminado: celda independiente de Tipo -->
                             <td [attr.rowspan]="institution.usuarios.length" class="align-middle border-end">
                               <span class="text-muted">
                                 <i class="bi bi-geo-alt me-1"></i>
@@ -172,11 +161,9 @@
                           }
                           <td class="align-middle border-end">
                             <div class="fw-semibold">{{ user.nombres }} {{ user.apellidos }}</div>
-                            <small class="text-muted">{{ user.correo }}</small>
+                            <small class="text-muted">Cédula: {{ user.cedula }}</small>
                           </td>
-                          <td class="align-middle border-end cedula-cell">
-                            <span class="font-monospace">{{ user.cedula }}</span>
-                          </td>
+                          <!-- Eliminado: celda independiente de Cédula -->
                           <td class="align-middle">
                             @let userStatus = getUserStatus(user);
                             <span class="badge" [class]="userStatus.statusClass">
@@ -197,13 +184,9 @@
                           title="Haz clic para ver detalles de la institución">
                         <td class="align-middle border-end">
                           <div class="fw-semibold">{{ institution.nombre }}</div>
+                          <small class="text-muted">Tipo: {{ institution.tipo_institucion.nombre }}</small>
                         </td>
-                        <td class="align-middle border-end">
-                          <span class="badge bg-info text-dark">
-                            <i class="bi bi-building me-1"></i>
-                            {{ institution.tipo_institucion.nombre }}
-                          </span>
-                        </td>
+                        <!-- Eliminado: celda independiente de Tipo -->
                         <td class="align-middle border-end">
                           <span class="text-muted">
                             <i class="bi bi-geo-alt me-1"></i>
@@ -216,16 +199,13 @@
                             Sin usuarios asignados
                           </span>
                         </td>
-                        <td class="align-middle border-end cedula-cell">
-                          <span class="text-muted">-</span>
-                        </td>
+                        <!-- Eliminado: celda independiente de Cédula -->
                         <td class="align-middle">
                           <span class="badge bg-light text-muted border">
                             <i class="bi bi-dash-circle me-1"></i>
                             Sin estado
                           </span>
                         </td>
-                      </tr>
                     }
                   }
                 </tbody>

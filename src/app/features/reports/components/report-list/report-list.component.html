@@ -20,11 +20,13 @@
                 <i class="bi bi-arrow-clockwise me-1"></i>
                 {{ isLoadingFreshness() ? 'Actualizando...' : 'Actualizar' }}
               </button>
-        <button type="button" class="btn btn-success" [disabled]="!selectedMunicipioId() || isGeneratingReport()"
-          (click)="exportAnnualReport()">
-          <i class="bi bi-file-earmark-excel me-2"></i>
-          {{ isGeneratingReport() ? 'Generando...' : 'Exportar a Excel' }}
-        </button>
+        <div class="btn-group" role="group" aria-label="Acciones de reporte">
+          <button type="button" class="btn btn-success" [disabled]="!canExport()"
+            (click)="exportReport()">
+            <i class="bi bi-file-earmark-excel me-2"></i>
+            {{ isGeneratingReport() ? 'Generando...' : 'Exportar Excel' }}
+          </button>
+        </div>
         </div>
       </div>
     </div>
@@ -125,22 +127,27 @@
             <div class="p-4 text-center text-muted"><i class="bi bi-info-circle me-2"></i>No hay datos para mostrar</div>
           } @else {
           <div class="table-responsive" role="region" aria-label="Tabla de actualización de datos">
-            <table class="table table-hover mb-0 align-middle">
+            <table class="table mb-0 align-middle">
               <thead class="table-light">
                 <tr>
                   <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Institución</th>
                   <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Nutricionista</th>
                   <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Última actualización</th>
-                  <th scope="col" class="border-top-0 border-start-0 border-bottom border-end">Estado</th>
+
                 </tr>
               </thead>
               <tbody>
                 @for (inst of institucionFreshnessList(); track inst.institucionId) {
-                  @for (user of inst.usuarios; track user.usuarioInstitucionId) {
-                  <tr>
-                    <td class="align-middle border-end">
+                  @for (user of inst.usuarios; track user.usuarioInstitucionId; let isFirst = $first) {
+                  <tr class="freshness-row-group"
+                      [attr.data-institution-id]="inst.institucionId"
+                      (mouseenter)="onFreshnessRowHover(inst.institucionId, true)"
+                      (mouseleave)="onFreshnessRowHover(inst.institucionId, false)">
+                    @if (isFirst) {
+                    <td [attr.rowspan]="inst.usuarios.length" class="align-middle border-end">
                       <div class="fw-semibold">{{ inst.institucionNombre }}</div>
                     </td>
+                    }
                     <td class="align-middle border-end">
                       <div class="fw-semibold">{{ getFullName(user) }}</div>
                       <small class="text-muted">Cédula: {{ user.cedula }} | Rol: {{ user.rolNombre }}</small>
@@ -148,12 +155,7 @@
                     <td class="align-middle border-end">
                       <span class="font-monospace">{{ formatDate(user.ultimaActualizacion) }}</span>
                     </td>
-                    <td class="align-middle">
-                      <span class="badge" [ngClass]="'bg-' + getFreshnessStatus(user.ultimaActualizacion).cls">
-                        <i class="bi" [ngClass]="getFreshnessStatus(user.ultimaActualizacion).cls.includes('warning') ? 'bi-clock' : (getFreshnessStatus(user.ultimaActualizacion).cls === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle')"></i>
-                        {{ getFreshnessStatus(user.ultimaActualizacion).label }}
-                      </span>
-                    </td>
+
                   </tr>
                   }
                 }

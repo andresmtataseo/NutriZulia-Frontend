@@ -14,8 +14,7 @@ import { InstitutionDetailModalComponent } from '../institution-detail-modal/ins
   selector: 'app-institution-list',
   standalone: true,
   imports: [CommonModule, FormsModule, NotificationComponent, InstitutionCreateModalComponent, InstitutionDetailModalComponent],
-  templateUrl: './institution-list.component.html',
-  styleUrl: './institution-list.component.css'
+  templateUrl: './institution-list.component.html'
 })
 export class InstitutionListComponent implements OnInit {
   // Servicios inyectados
@@ -191,14 +190,14 @@ export class InstitutionListComponent implements OnInit {
   getUserStatus(user: any): { isActive: boolean; statusText: string; statusClass: string; iconClass: string } {
     const userEnabled = user.is_enabled;
     const institutionUserEnabled = user.usuario_institucion?.is_enabled;
-    
+
     // Determinar el estado final basado solo en los flags de habilitación
     const isActive = userEnabled && institutionUserEnabled;
-    
+
     let statusText = '';
     let statusClass = '';
     let iconClass = '';
-    
+
     if (!userEnabled) {
       statusText = 'Usuario Inactivo';
       statusClass = 'bg-danger';
@@ -212,7 +211,7 @@ export class InstitutionListComponent implements OnInit {
       statusClass = 'bg-success';
       iconClass = 'bi bi-check-circle';
     }
-    
+
     return {
       isActive,
       statusText,

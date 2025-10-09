@@ -15,8 +15,7 @@ import { NotificationComponent } from '../../../../shared/components/notificatio
   selector: 'app-user-list',
   standalone: true,
   imports: [CommonModule, FormsModule, UserCreateModalComponent, UserDetailModalComponent, NotificationComponent],
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  templateUrl: './user-list.component.html'
 })
 export class UserListComponent implements OnInit {
   private usersService = inject(UsersService);
@@ -180,7 +179,6 @@ export class UserListComponent implements OnInit {
    */
   getRoleBadgeClass(roleName: string): string {
     const roleClasses: { [key: string]: string } = {
-      'Nutricionista Sup': 'bg-danger-subtle text-danger',
       'Nutricionista': 'bg-info-subtle text-info',
       'Administrador': 'bg-success-subtle text-success',
       'Supervisor': 'bg-warning-subtle text-warning',

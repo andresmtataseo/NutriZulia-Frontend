@@ -3,9 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { catchError, of, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 
-import { User } from '../../models/user.interface';
 import { UsersService } from '../../services/users.service';
-import { UserDetail, UserUpdateRequest, InstitutionAssignmentRequest, UserInstitutionUpdateRequest, UserInstitutionDetail } from '../../../../core/models/user-detail.interface';
+import { UserDetail, UserUpdateRequest, InstitutionAssignmentRequest, UserInstitutionDetail } from '../../../../core/models/user-detail.interface';
 import { Institucion, Rol } from '../../../../core/models';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { venezuelanPhonePrefixValidator, phoneNumberValidator } from '../../../../shared/validators/phone.validators';
@@ -15,8 +14,7 @@ import { ManageAssignmentModalComponent } from '../manage-assignment-modal/manag
   selector: 'app-user-detail-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ManageAssignmentModalComponent],
-  templateUrl: './user-detail-modal.component.html',
-  styleUrls: ['./user-detail-modal.component.css']
+  templateUrl: './user-detail-modal.component.html'
 })
 export class UserDetailModalComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
@@ -548,10 +546,9 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
   // Utilidades para el template
   getRoleBadgeClass(roleName: string): string {
     const roleClasses: { [key: string]: string } = {
-      'Nutricionista Sup': 'bg-danger text-white',
-      'Nutricionista': 'bg-info text-white',
-      'Administrador': 'bg-success text-white',
-      'Supervisor': 'bg-warning text-dark',
+      'Nutricionista': 'bg-info-subtle text-info',
+      'Administrador': 'bg-success-subtle text-success',
+      'Supervisor': 'bg-warning-subtle text-warning',
     };
 
     return roleClasses[roleName] || 'bg-secondary text-white';

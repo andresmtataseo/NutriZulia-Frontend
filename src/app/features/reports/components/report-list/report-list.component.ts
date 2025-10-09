@@ -38,6 +38,18 @@ export class ReportListComponent implements OnInit {
   selectedFechaInicio = signal<string>('');
   selectedFechaFin = signal<string>('');
 
+  // Trimestre mapeado a número [1..4]
+  getSelectedQuarter(): number | null {
+    const period = this.selectedPeriod();
+    switch (period) {
+      case 'TRIMESTRE I': return 1;
+      case 'TRIMESTRE II': return 2;
+      case 'TRIMESTRE III': return 3;
+      case 'TRIMESTRE IV': return 4;
+      default: return null;
+    }
+  }
+
   // Estado de actualización de datos
   isLoadingFreshness = signal<boolean>(false);
   institucionFreshnessList = signal<any[]>([]);
@@ -193,8 +205,30 @@ export class ReportListComponent implements OnInit {
     });
   }
 
-  // Exporta el reporte anual usando el servicio
-  exportAnnualReport(): void {
+  // Helper para descargar archivos Blob de forma reutilizable
+  private downloadBlobFile(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+  // Habilita/deshabilita el botón de exportación según los parámetros seleccionados
+  canExport(): boolean {
+    const municipioId = this.selectedMunicipioId();
+    if (!municipioId || this.isGeneratingReport()) return false;
+    const period = this.selectedPeriod();
+    if (period === 'ANUAL') return true;
+    const quarter = this.getSelectedQuarter();
+    return quarter !== null;
+  }
+
+  // Exportación dinámica: decide entre anual y trimestral según el periodo seleccionado
+  exportReport(): void {
     const municipioId = this.selectedMunicipioId();
     const year = this.selectedYear();
     const period = this.selectedPeriod();
@@ -204,34 +238,48 @@ export class ReportListComponent implements OnInit {
       return;
     }
 
-    if (period !== 'ANUAL') {
-      this.notificationService.showInfo('El reporte está diseñado para periodo ANUAL. Ajusta el filtro a ANUAL para continuar.');
-      return;
-    }
-
     this.isGeneratingReport.set(true);
 
-    this.reportService.downloadAnnualReport(municipioId, year).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        a.download = `reporte_anual_municipio_${municipioId}_${year}_${timestamp}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        this.notificationService.showSuccess('Reporte generado y descargado exitosamente');
+    if (period === 'ANUAL') {
+      this.reportService.downloadAnnualReport(municipioId, year).subscribe({
+        next: (blob: Blob) => {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const filename = `reporte_anual_municipio_${municipioId}_${year}_${timestamp}.xlsx`;
+          this.downloadBlobFile(blob, filename);
+          this.notificationService.showSuccess('Reporte anual generado y descargado exitosamente');
+          this.isGeneratingReport.set(false);
+        },
+        error: (error) => {
+          console.error('Error al generar/descargar reporte anual:', error);
+          const message = (error?.error?.message) ? error.error.message : 'Error al generar el reporte anual';
+          this.notificationService.showError(message);
+          this.isGeneratingReport.set(false);
+        }
+      });
+    } else {
+      const quarter = this.getSelectedQuarter();
+      if (!quarter) {
+        this.notificationService.showInfo('Selecciona un periodo trimestral (I, II, III, IV) para generar el reporte trimestral.');
         this.isGeneratingReport.set(false);
-      },
-      error: (error) => {
-        console.error('Error al generar/descargar reporte anual:', error);
-        const message = (error?.error?.message) ? error.error.message : 'Error al generar el reporte anual';
-        this.notificationService.showError(message);
-        this.isGeneratingReport.set(false);
+        return;
       }
-    });
+
+      this.reportService.downloadQuarterlyReport(municipioId, year, quarter).subscribe({
+        next: (blob: Blob) => {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const filename = `reporte_trimestral_municipio_${municipioId}_${year}_T${quarter}_${timestamp}.xlsx`;
+          this.downloadBlobFile(blob, filename);
+          this.notificationService.showSuccess('Reporte trimestral generado y descargado exitosamente');
+          this.isGeneratingReport.set(false);
+        },
+        error: (error) => {
+          console.error('Error al generar/descargar reporte trimestral:', error);
+          const message = (error?.error?.message) ? error.error.message : 'Error al generar el reporte trimestral';
+          this.notificationService.showError(message);
+          this.isGeneratingReport.set(false);
+        }
+      });
+    }
   }
 
   /**
@@ -278,16 +326,26 @@ export class ReportListComponent implements OnInit {
     return d.toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
   }
 
-  getFreshnessStatus(iso: string | null): { label: string; cls: string } {
-    if (!iso) return { label: 'Sin registros', cls: 'secondary' };
-    const now = new Date().getTime();
-    const ts = new Date(iso).getTime();
-    if (isNaN(ts)) return { label: 'Fecha inválida', cls: 'secondary' };
-    const diffDays = Math.floor((now - ts) / (1000 * 60 * 60 * 24));
-    if (diffDays <= 30) return { label: 'Actualizado', cls: 'success' };
-    if (diffDays <= 60) return { label: 'Reciente', cls: 'warning text-dark' };
-    return { label: 'Desactualizado', cls: 'danger' };
+  // Métodos de hover para efectos visuales (resalta todas las filas del mismo grupo de institución)
+  onFreshnessRowHover(institutionId: number, isHovering: boolean): void {
+    const rows = document.querySelectorAll(`[data-institution-id="${institutionId}"]`);
+    rows.forEach(row => {
+      if (isHovering) {
+        row.classList.add('hovered');
+        // Aplicar color de fondo a todas las celdas de las filas agrupadas
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+          (cell as HTMLElement).style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
+        });
+      } else {
+        row.classList.remove('hovered');
+        // Remover color de fondo
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+          (cell as HTMLElement).style.backgroundColor = '';
+        });
+      }
+    });
   }
-
 
 }
