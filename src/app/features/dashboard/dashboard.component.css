@@ -1,0 +1,7 @@
+/* Ajustes para mejorar la responsividad de los charts dentro de cards */
+.card-body canvas {
+  width: 100% !important;
+  /* La altura la define cada componente de chart (320px); no forzar height: 100% para evitar desbordes */
+  height: auto !important;
+  display: block;
+}

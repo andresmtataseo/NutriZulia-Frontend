@@ -1,73 +1,188 @@
 <div class="container py-4">
-  <h1>Dashboard</h1>
-    <!-- Cards de Resumen Estadístico -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card text-white bg-primary shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h5 class="card-title">Total Consultas</h5>
-              <h2 class="mb-0">2,847</h2>
-              <small class="opacity-75">Este mes</small>
-            </div>
-            <div class="align-self-center">
-              <i class="bi bi-people-fill fs-1 opacity-75"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card text-white bg-success shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h5 class="card-title">Instituciones Activas</h5>
-              <h2 class="mb-0">24</h2>
-              <small class="opacity-75">De 28 totales</small>
-            </div>
-            <div class="align-self-center">
-              <i class="bi bi-hospital-fill fs-1 opacity-75"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card text-white bg-warning shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h5 class="card-title">Promedio Mensual</h5>
-              <h2 class="mb-0">2,156</h2>
-              <small class="opacity-75">Últimos 6 meses</small>
-            </div>
-            <div class="align-self-center">
-              <i class="bi bi-graph-up fs-1 opacity-75"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card text-white bg-info shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h5 class="card-title">Nutricionistas</h5>
-              <h2 class="mb-0">67</h2>
-              <small class="opacity-75">Registrados</small>
-            </div>
-            <div class="align-self-center">
-              <i class="bi bi-person-badge-fill fs-1 opacity-75"></i>
-            </div>
-          </div>
+  <app-notification [notification]="notification" position="top" (dismissed)="onNotificationDismiss()"></app-notification>
+    <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h3 mb-1 text-gray-800">
+            <i class="bi bi-house-door-fill me-2 text-primary"></i>
+            Inicio
+          </h1>
+          <p class="text-muted mb-0">Visualiza estadísticas clave y filtros para el monitoreo del sistema NutriZulia</p>
         </div>
       </div>
     </div>
   </div>
+
+  <form [formGroup]="filterForm" class="mb-4">
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <div class="form-floating">
+                  <select id="startMonthOnly" class="form-select" formControlName="startMonthOnly" placeholder="Desde (mes)">
+                    <option *ngFor="let m of MONTHS" [value]="m.value">{{ m.label }}</option>
+                  </select>
+                  <label for="startMonthOnly"><i class="bi bi-calendar-date me-2"></i>Desde (mes)</label>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-floating">
+                  <select id="startYear" class="form-select" formControlName="startYear" placeholder="Desde (año)">
+                    <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+                  </select>
+                  <label for="startYear"><i class="bi bi-calendar3 me-2"></i>Desde (año)</label>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-floating">
+                  <select id="endMonthOnly" class="form-select" formControlName="endMonthOnly" placeholder="Hasta (mes)">
+                    <option *ngFor="let m of MONTHS" [value]="m.value">{{ m.label }}</option>
+                  </select>
+                  <label for="endMonthOnly"><i class="bi bi-calendar-date me-2"></i>Hasta (mes)</label>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-floating">
+                  <select id="endYear" class="form-select" formControlName="endYear" placeholder="Hasta (año)">
+                    <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+                  </select>
+                  <label for="endYear"><i class="bi bi-calendar3 me-2"></i>Hasta (año)</label>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-floating">
+                  <select id="municipio" class="form-select" formControlName="municipio" placeholder="Municipio sanitario">
+                    <option value="">Todos</option>
+                    <option *ngFor="let m of municipiosSanitarios; trackBy: trackById" [value]="m.id">{{ m.nombre }}</option>
+                  </select>
+                  <label for="municipio"><i class="bi bi-geo-alt me-2"></i>Municipio sanitario</label>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-floating">
+                  <select id="institucion" class="form-select" formControlName="institucion" placeholder="Institución" [disabled]="!isInstitutionEnabled">
+                    <option value="">Todas</option>
+                    <option *ngFor="let i of instituciones; trackBy: trackById" [value]="i.id">{{ i.nombre }}</option>
+                  </select>
+                  <label for="institucion"><i class="bi bi-hospital me-2"></i>Institución</label>
+                </div>
+              </div>
+            </div>
+            <!-- Mensaje inline de error eliminado; se usa app-notification -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Grid de Gráficos -->
+  <div class="row g-4">
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Consultas por Mes</h5>
+        </div>
+        <div class="card-body">
+          <ng-container *ngIf="!loading; else loadingTpl">
+            <app-line-chart [data]="consultasData" aria-label="Gráfico de línea: consultas por mes" role="img"></app-line-chart>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Distribución por Grupo Etario</h5>
+        </div>
+        <div class="card-body">
+          <ng-container *ngIf="!loading; else loadingTpl">
+            <app-doughnut-chart [data]="etarioData" aria-label="Gráfico de dona: distribución por grupo etario" role="img"></app-doughnut-chart>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Estado Nutricional por Grupo Etario</h5>
+        </div>
+        <div class="card-body">
+          <ng-container *ngIf="!loading; else loadingTpl">
+            <app-bar-chart [data]="estadoData" [stacked]="true" aria-label="Gráfico de barras apiladas: estado nutricional" role="img"></app-bar-chart>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    </div>
+      <!-- Sección de filtros específicos para activos -->
+  <form [formGroup]="activeFilterForm" class="mb-4 mt-5">
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="form-floating">
+                  <select id="activoMunicipioId" class="form-select" formControlName="activoMunicipioId" placeholder="Municipio sanitario (activos)">
+                    <option value="">Todos</option>
+                    <option *ngFor="let m of municipiosSanitarios; trackBy: trackById" [value]="m.id">{{ m.nombre }}</option>
+                  </select>
+                  <label for="activoMunicipioId"><i class="bi bi-geo-alt me-2"></i>Municipio sanitario</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+<div class="row g-4">
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Instituciones Activas por Municipio</h5>
+        </div>
+        <div class="card-body">
+          <ng-container *ngIf="!loadingActive; else loadingActiveTpl">
+            <app-bar-chart [data]="institucionesData" aria-label="Gráfico de barras: instituciones activas" role="img"></app-bar-chart>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Usuarios Activos por Institución</h5>
+        </div>
+        <div class="card-body">
+          <ng-container *ngIf="!loadingActive; else loadingActiveTpl">
+            <app-bar-chart [data]="usuariosInstitucionData" [horizontal]="true" aria-label="Gráfico de barras horizontal: usuarios activos por institución" role="img"></app-bar-chart>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
+
+<ng-template #loadingTpl>
+  <div class="d-flex justify-content-center align-items-center h-100">
+    <div class="spinner-border text-primary" role="status" aria-live="polite" aria-label="Cargando">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #loadingActiveTpl>
+  <div class="d-flex justify-content-center align-items-center h-100">
+    <div class="spinner-border text-info" role="status" aria-live="polite" aria-label="Cargando activos">
+      <span class="visually-hidden">Cargando activos...</span>
+    </div>
+  </div>
+</ng-template>

@@ -45,6 +45,14 @@ export const API_ENDPOINTS = {
     QUARTERLY: '/report/quarterly',
     DATA_FRESHNESS: '/report/data-freshness',
     DATA_FRESHNESS_EXCEL: '/report/data-freshness/excel'
+  },
+  DASHBOARD: {
+    BASE: '/dashboard',
+    CONSULTATIONS_PER_MONTH: '/dashboard/consultations-per-month',
+    ACTIVE_INSTITUTIONS_BY_MUNICIPALITY: '/dashboard/active-institutions-by-municipality',
+    ACTIVE_USERS_BY_INSTITUTION: '/dashboard/active-users-by-institution',
+    AGE_GROUP_DISTRIBUTION: '/dashboard/age-group-distribution',
+    NUTRITIONAL_STATUS_BY_AGE_GROUP: '/dashboard/nutritional-status-by-age-group'
   }
 } as const;
 
