@@ -42,12 +42,12 @@ export class DoughnutChartComponent implements AfterViewInit, OnDestroy, OnChang
       try { return this.labelFormatter(label); } catch { /* noop */ }
     }
     const map: Record<string, string> = {
-      LT2: '<2 años',
-      A2_6: '2–6',
-      A7_12: '7–12',
-      A13_18: '13–18',
-      A19_59: '19–59',
-      GTE60: '≥60'
+      LT2: '<2 años años',
+      A2_6: '2–6 años',
+      A7_12: '7–12 años',
+      A13_18: '13–18 años',
+      A19_59: '19–59 años',
+      GTE60: '≥60 años'
     };
     return map[label] ?? label;
   }

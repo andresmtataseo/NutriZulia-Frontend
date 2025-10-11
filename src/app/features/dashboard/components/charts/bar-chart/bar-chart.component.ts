@@ -97,11 +97,11 @@ export class BarChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   private mapLabel(bucket: string): string {
     switch (bucket) {
       case 'LT2': return '<2 años';
-      case 'A2_6': return '2–6';
-      case 'A7_12': return '7–12';
-      case 'A13_18': return '13–18';
-      case 'A19_59': return '19–59';
-      case 'GTE60': return '≥60';
+      case 'A2_6': return '2–6 años';
+      case 'A7_12': return '7–12 años';
+      case 'A13_18': return '13–18 años';
+      case 'A19_59': return '19–59 años';
+      case 'GTE60': return '≥60 años';
       default: return bucket;
     }
   }
