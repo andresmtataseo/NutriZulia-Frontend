@@ -1,1 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Override Bootstrap primary color */
+:root {
+  --bs-primary: #003FC4;
+  --bs-primary-rgb: 0, 63, 196;
+  --bs-link-color: #003FC4;
+}
+
+/* Fallbacks in case some components don’t use CSS variables (older Bootstrap styles) */
+.btn-primary {
+  background-color: #003FC4;
+  border-color: #003FC4;
+}
+.text-primary { color: #003FC4 !important; }
+.border-primary { border-color: #003FC4 !important; }
+.bg-primary { background-color: #003FC4 !important; }
