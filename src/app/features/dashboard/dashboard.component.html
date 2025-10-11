@@ -148,7 +148,7 @@
           <h5 class="card-title mb-0">Instituciones Activas por Municipio</h5>
         </div>
         <div class="card-body">
-          <ng-container *ngIf="!loadingActive; else loadingActiveTpl">
+          <ng-container *ngIf="!loadingActive; else loadingTpl">
             <app-bar-chart [data]="institucionesData" aria-label="Gráfico de barras: instituciones activas" role="img"></app-bar-chart>
           </ng-container>
         </div>
@@ -161,7 +161,7 @@
           <h5 class="card-title mb-0">Usuarios Activos por Institución</h5>
         </div>
         <div class="card-body">
-          <ng-container *ngIf="!loadingActive; else loadingActiveTpl">
+          <ng-container *ngIf="!loadingActive; else loadingTpl">
             <app-bar-chart [data]="usuariosInstitucionData" [horizontal]="true" aria-label="Gráfico de barras horizontal: usuarios activos por institución" role="img"></app-bar-chart>
           </ng-container>
         </div>
@@ -175,14 +175,6 @@
   <div class="d-flex justify-content-center align-items-center h-100">
     <div class="spinner-border text-primary" role="status" aria-live="polite" aria-label="Cargando">
       <span class="visually-hidden">Cargando...</span>
-    </div>
-  </div>
-</ng-template>
-
-<ng-template #loadingActiveTpl>
-  <div class="d-flex justify-content-center align-items-center h-100">
-    <div class="spinner-border text-info" role="status" aria-live="polite" aria-label="Cargando activos">
-      <span class="visually-hidden">Cargando activos...</span>
     </div>
   </div>
 </ng-template>

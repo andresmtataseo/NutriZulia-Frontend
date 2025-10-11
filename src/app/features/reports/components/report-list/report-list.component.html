@@ -8,14 +8,14 @@
   <div class="row mb-4">
     <div class="col-12">
       <div class="row g-3 align-items-center">
-        <div class="col-12 col-lg-9">
+        <div class="col-12 col-lg-6">
           <h1 class="h3 mb-1 text-gray-800">
             <i class="bi bi-graph-up me-2 text-primary"></i>
             Actualización de Datos
           </h1>
           <p class="text-muted mb-0">Consulta y analiza la actualización de datos de nutricionistas del sistema NutriZulia</p>
         </div>
-        <div class="col-12 col-lg-3">
+        <div class="col-12 col-lg-6">
           <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100">
             <button type="button" class="btn btn-outline-primary w-100 w-sm-auto"
                     [disabled]="!selectedMunicipioId() || isLoadingFreshness()" (click)="fetchDataFreshness()">
