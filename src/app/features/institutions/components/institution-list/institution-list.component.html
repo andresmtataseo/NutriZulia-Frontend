@@ -7,20 +7,25 @@
 
   <!-- Header Section -->
   <!-- Header responsive -->
+  <!-- Header Section responsive 9/3 cols on lg -->
   <div class="row mb-4">
     <div class="col-12">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-        <div>
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-lg-9">
           <h1 class="h3 mb-1 text-gray-800">
             <i class="bi bi-building me-2 text-primary"></i>
-            Gestión de Instituciones
+            Instituciones
           </h1>
-          <p class="text-muted mb-0">Administra las instituciones del sistema NutriZulia</p>
+          <p class="text-muted mb-0">Administra las instituciones registradas</p>
         </div>
-        <button type="button" class="btn btn-primary w-100 w-md-auto mt-3 mt-md-0" (click)="openCreateModal()">
-          <i class="bi bi-plus-circle me-2"></i>
-          Nueva Institución
-        </button>
+        <div class="col-12 col-lg-3">
+          <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100">
+            <button type="button" class="btn btn-primary w-100 w-sm-auto" (click)="openCreateModal()">
+              <i class="bi bi-plus-circle me-2"></i>
+              Crear Institución
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -217,12 +222,11 @@
 
         <!-- Pagination Footer -->
         <div class="card-footer bg-white py-3">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
+          <div class="d-flex justify-content-between align-items-center flex-column flex-md-row gap-2">
+            <div class="d-flex align-items-center flex-wrap justify-content-center justify-content-md-start mb-2 mb-md-0">
               <span class="text-muted me-3">Mostrar</span>
               <select
-                class="form-select form-select-sm"
-                style="width: auto;"
+                class="form-select form-select-sm w-auto"
                 [value]="pageSize()"
                 (change)="onPageSizeChange($event)">
                 <option value="10">10</option>
@@ -235,7 +239,7 @@
 
             @if (institutionsResponse(); as response) {
               <nav aria-label="Paginación de instituciones">
-                <ul class="pagination pagination-sm mb-0">
+                <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center mt-2 mt-md-0">
                   <li class="page-item" [class.disabled]="response.first">
                     <button
                       class="page-link"

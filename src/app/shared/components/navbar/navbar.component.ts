@@ -42,20 +42,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Obtiene el rol del usuario desde el token JWT
+   * Obtiene el correo del usuario desde localStorage
    */
-  get userRole(): string {
-    const roles = this.authStorageService.getUserRoles();
-    if (roles && roles.length > 0) {
-      // Mapear roles técnicos a nombres más amigables
-      const roleMap: { [key: string]: string } = {
-        'ADMIN': 'Administrador',
-        'USER': 'Usuario',
-        'MODERATOR': 'Moderador'
-      };
-      return roleMap[roles[0]] || roles[0];
-    }
-    return 'Usuario';
+  get userEmail(): string {
+    const userData = this.authStorageService.getUserData();
+    return userData && userData.correo ? userData.correo : '';
   }
 
   ngOnInit(): void {
@@ -65,7 +56,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    
+
     // Limpiar modal si existe
     if (this.logoutModal) {
       this.logoutModal.dispose();
@@ -99,7 +90,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           // El logout fue exitoso, cerrar modal
           this.hideLogoutModal();
           this.isLoggingOut = false;
-          
+
           // Mostrar mensaje de éxito si es necesario
           console.log('Logout exitoso:', response.message);
         },
