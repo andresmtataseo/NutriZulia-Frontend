@@ -23,7 +23,7 @@
               <div class="col-md-3">
                 <div class="form-floating">
                   <select id="startMonthOnly" class="form-select" formControlName="startMonthOnly" placeholder="Desde (mes)">
-                    <option *ngFor="let m of MONTHS" [value]="m.value">{{ m.label }}</option>
+                    <option *ngFor="let m of MONTHS" [value]="m.value" [disabled]="isMonthDisabled('start', m.value)">{{ m.label }}</option>
                   </select>
                   <label for="startMonthOnly"><i class="bi bi-calendar-date me-2"></i>Desde (mes)</label>
                 </div>
@@ -39,7 +39,7 @@
               <div class="col-md-3">
                 <div class="form-floating">
                   <select id="endMonthOnly" class="form-select" formControlName="endMonthOnly" placeholder="Hasta (mes)">
-                    <option *ngFor="let m of MONTHS" [value]="m.value">{{ m.label }}</option>
+                    <option *ngFor="let m of MONTHS" [value]="m.value" [disabled]="isMonthDisabled('end', m.value)">{{ m.label }}</option>
                   </select>
                   <label for="endMonthOnly"><i class="bi bi-calendar-date me-2"></i>Hasta (mes)</label>
                 </div>

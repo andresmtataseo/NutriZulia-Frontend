@@ -99,7 +99,7 @@ export class DashboardComponent implements AfterViewInit {
       endYear: [deDate.getFullYear()],
       municipio: [''],
       institucion: ['']
-    }, { validators: [this.monthRangeValidator.bind(this)] });
+    }, { validators: [this.monthRangeValidator.bind(this), this.futureMonthValidator.bind(this)] });
     this.institutionOptions = this.getInstitucionesList('Todos');
 
     // Inicializar formulario de filtros para gráficos de activos
@@ -182,6 +182,14 @@ export class DashboardComponent implements AfterViewInit {
           dismissible: true,
           autoClose: false
         };
+      } else if (this.filterForm.errors?.['futureMonthStart'] || this.filterForm.errors?.['futureMonthEnd']) {
+        this.notification = {
+          type: 'error',
+          title: 'Mes inválido',
+          message: 'No se pueden seleccionar meses futuros.',
+          dismissible: true,
+          autoClose: false
+        };
       }
       return;
     }
@@ -215,8 +223,8 @@ export class DashboardComponent implements AfterViewInit {
     this.loading = true;
 
     const consultas$ = this.dashboardService.getConsultasPorMes(startMonth, endMonth, municipioId ?? undefined, institucionId ?? undefined);
-    const etario$ = this.dashboardService.getDistribucionGrupoEtario(startMonth, endMonth, institucionId ?? undefined);
-    const estado$ = this.dashboardService.getEstadoNutricionalPorGrupoEtario(startMonth, endMonth, institucionId ?? undefined);
+    const etario$ = this.dashboardService.getDistribucionGrupoEtario(startMonth, endMonth, institucionId ?? undefined, municipioId ?? undefined);
+    const estado$ = this.dashboardService.getEstadoNutricionalPorGrupoEtario(startMonth, endMonth, institucionId ?? undefined, municipioId ?? undefined);
 
     forkJoin({ consultas: consultas$, etario: etario$, estado: estado$ }).subscribe({
       next: ({ consultas, etario, estado }) => {
@@ -275,9 +283,20 @@ export class DashboardComponent implements AfterViewInit {
     const yearCtrl = this.filterForm.get(which === 'start' ? 'startYear' : 'endYear');
     const monthCtrl = this.filterForm.get(which === 'start' ? 'startMonthOnly' : 'endMonthOnly');
     if (!yearCtrl || !monthCtrl) { return; }
-    const y = yearCtrl.value as number | null;
-    const m = monthCtrl.value as string | null;
+    let y = yearCtrl.value as number | null;
+    let m = monthCtrl.value as string | null;
     if (!y || !m) { return; }
+
+    // Evitar meses futuros cuando el año es el actual
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    if (y === currentYear && Number(m) > currentMonth) {
+      const safeMonth = String(currentMonth).padStart(2, '0');
+      monthCtrl.setValue(safeMonth, { emitEvent: false });
+      m = safeMonth;
+    }
+
     const combined = `${y}-${m}`;
     const targetCtrl = this.filterForm.get(which === 'start' ? 'startMonth' : 'endMonth');
     targetCtrl?.setValue(combined);
@@ -317,6 +336,27 @@ export class DashboardComponent implements AfterViewInit {
     return this.parseMonth(start) < this.parseMonth(end) ? null : { monthRange: true };
   }
 
+  // Validator para evitar meses futuros en inicio y fin
+  private futureMonthValidator(group: AbstractControl): ValidationErrors | null {
+    const start = group.get('startMonth')?.value as string | undefined;
+    const end = group.get('endMonth')?.value as string | undefined;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    const isFuture = (value?: string): boolean => {
+      if (!value) { return false; }
+      const [y, m] = value.split('-').map(Number);
+      if (!y || !m) { return false; }
+      return y > currentYear || (y === currentYear && m > currentMonth);
+    };
+
+    const errors: ValidationErrors = {};
+    if (isFuture(start)) { errors['futureMonthStart'] = true; }
+    if (isFuture(end)) { errors['futureMonthEnd'] = true; }
+    return Object.keys(errors).length ? errors : null;
+  }
+
   private formatPeriodTitle(start: string, end: string): string {
     const fmt = new Intl.DateTimeFormat('es-VE', { month: 'short', year: 'numeric' });
     const s = fmt.format(this.parseMonth(start));
@@ -327,6 +367,16 @@ export class DashboardComponent implements AfterViewInit {
   // trackBy para listas por ID
   trackById(_: number, item: { id: number }): number {
     return item.id;
+  }
+
+  // Determina si una opción de mes debe estar deshabilitada por ser futura para el año seleccionado
+  isMonthDisabled(which: 'start' | 'end', monthValue: string): boolean {
+    const yearCtrl = this.filterForm.get(which === 'start' ? 'startYear' : 'endYear');
+    const yearVal = (yearCtrl?.value as number | null) ?? null;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    return !!yearVal && yearVal === currentYear && Number(monthValue) > currentMonth;
   }
 
   private initializeActiveFilterSubscriptions(): void {
@@ -343,8 +393,8 @@ export class DashboardComponent implements AfterViewInit {
     this.loading = true;
 
     const consultas$ = this.dashboardService.getConsultasPorMes(startMonth, endMonth, municipioId ?? undefined, institucionId ?? undefined);
-    const etario$ = this.dashboardService.getDistribucionGrupoEtario(startMonth, endMonth, institucionId ?? undefined);
-    const estado$ = this.dashboardService.getEstadoNutricionalPorGrupoEtario(startMonth, endMonth, institucionId ?? undefined);
+    const etario$ = this.dashboardService.getDistribucionGrupoEtario(startMonth, endMonth, institucionId ?? undefined, municipioId ?? undefined);
+    const estado$ = this.dashboardService.getEstadoNutricionalPorGrupoEtario(startMonth, endMonth, institucionId ?? undefined, municipioId ?? undefined);
 
     forkJoin({ consultas: consultas$, etario: etario$, estado: estado$ }).subscribe({
       next: ({ consultas, etario, estado }) => {
