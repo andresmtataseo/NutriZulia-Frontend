@@ -40,14 +40,14 @@ export class DashboardService {
     return this.http.get<ApiResponse<ChartResponseDto>>(url, { params }).pipe(map(r => r.data!));
   }
 
-  getDistribucionGrupoEtario(inicio: string, fin: string, institucionId?: number): Observable<ChartResponseDto> {
-    const params = this.buildParams({ inicio, fin, institucionId });
+  getDistribucionGrupoEtario(inicio: string, fin: string, institucionId?: number, municipioId?: number): Observable<ChartResponseDto> {
+    const params = this.buildParams({ inicio, fin, institucionId, municipioId });
     const url = `${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.DASHBOARD.AGE_GROUP_DISTRIBUTION}`;
     return this.http.get<ApiResponse<ChartResponseDto>>(url, { params }).pipe(map(r => r.data!));
   }
 
-  getEstadoNutricionalPorGrupoEtario(inicio: string, fin: string, institucionId?: number): Observable<ChartResponseDto> {
-    const params = this.buildParams({ inicio, fin, institucionId });
+  getEstadoNutricionalPorGrupoEtario(inicio: string, fin: string, institucionId?: number, municipioId?: number): Observable<ChartResponseDto> {
+    const params = this.buildParams({ inicio, fin, institucionId, municipioId });
     const url = `${this.baseUrl}${API_PREFIX}${API_ENDPOINTS.DASHBOARD.NUTRITIONAL_STATUS_BY_AGE_GROUP}`;
     return this.http.get<ApiResponse<ChartResponseDto>>(url, { params }).pipe(map(r => r.data!));
   }
