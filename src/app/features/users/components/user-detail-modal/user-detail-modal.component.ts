@@ -83,12 +83,14 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
       nombres: ['', [
         Validators.required,
         Validators.minLength(2),
-        Validators.maxLength(50)
+        Validators.maxLength(50),
+        this.spanishAlphabeticValidator
       ]],
       apellidos: ['', [
         Validators.required,
         Validators.minLength(2),
-        Validators.maxLength(50)
+        Validators.maxLength(50),
+        this.spanishAlphabeticValidator
       ]],
       fechaNacimiento: ['', [
         Validators.required,
@@ -341,6 +343,24 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     return null;
   }
 
+  // Validador personalizado para nombres y apellidos (solo alfabeto español y espacios)
+  private spanishAlphabeticValidator = (control: AbstractControl): { [key: string]: any } | null => {
+    const value = control.value;
+    if (value === null || value === undefined) {
+      return null; // se maneja con "required" si corresponde
+    }
+    if (typeof value === 'string') {
+      // Detectar entradas de solo espacios
+      if (value.trim() === '' && value.length > 0) {
+        return { whitespaceOnly: true };
+      }
+      // Permitir letras con acentos y ñ, y espacios entre palabras
+      const pattern = /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/;
+      return pattern.test(value) ? null : { invalidAlphabetic: true };
+    }
+    return { invalidAlphabetic: true };
+  }
+
   // Validador para fechas de inicio (no puede ser en el pasado)
 
 
@@ -571,6 +591,12 @@ export class UserDetailModalComponent implements OnInit, OnChanges {
     const errors = field.errors;
 
     if (errors['required']) return `${this.getFieldLabel(fieldName)} es requerido`;
+    if (errors['invalidAlphabetic'] && (fieldName === 'nombres' || fieldName === 'apellidos')) {
+      return `${this.getFieldLabel(fieldName)} solo puede contener letras del alfabeto español y espacios`;
+    }
+    if (errors['whitespaceOnly'] && (fieldName === 'nombres' || fieldName === 'apellidos')) {
+      return `${this.getFieldLabel(fieldName)} no puede estar vacío ni contener solo espacios`;
+    }
     if (errors['email']) return 'Formato de correo electrónico inválido';
     if (errors['minlength']) return `${this.getFieldLabel(fieldName)} debe tener al menos ${errors['minlength'].requiredLength} caracteres`;
     if (errors['maxlength']) return `${this.getFieldLabel(fieldName)} no puede exceder ${errors['maxlength'].requiredLength} caracteres`;

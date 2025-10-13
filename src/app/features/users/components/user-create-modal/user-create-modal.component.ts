@@ -8,8 +8,7 @@ import { CreateUserRequest, User } from '../../models/user.interface';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { NotificationComponent } from '../../../../shared/components/notification/notification.component';
 import { ApiResponse } from '../../../../core/models/api-response.interface';
-import { numeroCedulaValidator } from '../../../auth/validators/auth.validators';
-import { venezuelanPhonePrefixValidator, phoneNumberValidator } from '../../../../shared/validators/phone.validators';
+import { phoneNumberValidator } from '../../../../shared/validators/phone.validators';
 
 @Component({
   selector: 'app-user-create-modal',
@@ -53,12 +52,14 @@ export class UserCreateModalComponent implements OnInit {
       nombres: ['', [
         Validators.required,
         Validators.minLength(2),
-        Validators.maxLength(50)
+        Validators.maxLength(50),
+        this.spanishAlphabeticValidator
       ]],
       apellidos: ['', [
         Validators.required,
         Validators.minLength(2),
-        Validators.maxLength(50)
+        Validators.maxLength(50),
+        this.spanishAlphabeticValidator
       ]],
       fechaNacimiento: ['', [
         Validators.required,
@@ -211,6 +212,28 @@ export class UserCreateModalComponent implements OnInit {
     return null;
   }
 
+  // Validador para nombres/apellidos: solo letras del alfabeto español y espacios entre palabras. No permite números, símbolos ni solo espacios
+  private spanishAlphabeticValidator(control: AbstractControl): {[key: string]: any} | null {
+    const value = control.value;
+    if (value === null || value === undefined) return null;
+
+    const trimmed = String(value).trim();
+
+    // Rechazar entradas con solo espacios
+    if (trimmed.length === 0) {
+      return { whitespaceOnly: true };
+    }
+
+    // Permitir letras con acentos y ñ, con espacios entre palabras
+    const regex = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+
+    if (!regex.test(trimmed)) {
+      return { invalidAlphabetic: true };
+    }
+
+    return null;
+  }
+
   // Validador personalizado para teléfono
   private phoneValidator(form: AbstractControl): {[key: string]: any} | null {
     const prefijoTelefono = form.get('prefijoTelefono')?.value;
@@ -260,10 +283,10 @@ export class UserCreateModalComponent implements OnInit {
       this.usersService.createUser(createUserRequest).pipe(
         catchError(error => {
           console.error('Error creating user:', error);
-          
+
           // Obtener mensaje del servidor si está disponible
           let errorMessage = 'Error al crear el usuario. Por favor, intente nuevamente.';
-          
+
           if (error.error?.message) {
             errorMessage = error.error.message;
           } else if (error.status === 400) {
@@ -282,7 +305,7 @@ export class UserCreateModalComponent implements OnInit {
           // Mostrar mensaje de éxito del servidor
           const successMessage = response.message || 'Usuario creado exitosamente';
           this.notificationService.showSuccess(successMessage);
-          
+
           this.userCreated.emit(response.data);
           this.resetForm();
         }
@@ -320,15 +343,15 @@ export class UserCreateModalComponent implements OnInit {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.userForm.get(fieldName);
     const fieldInvalid = !!(field && field.invalid && (field.dirty || field.touched));
-    
+
     // También verificar errores a nivel de formulario para campos de teléfono
     if ((fieldName === 'prefijoTelefono' || fieldName === 'numeroTelefono') && this.userForm.errors) {
-      const hasPhoneErrors = !!(this.userForm.errors['phoneRequiresPrefix'] || 
-                               this.userForm.errors['prefixRequiresPhone'] || 
+      const hasPhoneErrors = !!(this.userForm.errors['phoneRequiresPrefix'] ||
+                               this.userForm.errors['prefixRequiresPhone'] ||
                                this.userForm.errors['invalidVenezuelanPhonePrefix']);
       return fieldInvalid || hasPhoneErrors;
     }
-    
+
     return fieldInvalid;
   }
 
@@ -368,6 +391,8 @@ export class UserCreateModalComponent implements OnInit {
     if (errors['tooYoung']) return 'Debe ser mayor de 18 años';
     if (errors['invalidVenezuelanPhonePrefix']) return 'Prefijo inválido. Use: 0414, 0424, 0412, 0416 o 0426';
     if (errors['invalidPhoneNumber']) return 'Número inválido. Debe tener exactamente 7 dígitos';
+    if (errors['invalidAlphabetic']) return 'Solo letras del alfabeto español (incluye acentos y ñ). No se permiten números ni símbolos';
+    if (errors['whitespaceOnly']) return 'No se permiten únicamente espacios en blanco';
 
     return 'Campo inválido';
   }

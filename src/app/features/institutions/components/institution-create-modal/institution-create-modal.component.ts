@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { catchError, of, forkJoin } from 'rxjs';
 
 import { InstitutionService } from '../../services/institution.service';
@@ -53,7 +53,7 @@ export class InstitutionCreateModalComponent implements OnInit {
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(100),
-        Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-\.0-9]+$/)
+        this.spanishAlphabeticValidator
       ]],
       tipo_institucion_id: ['', [
         Validators.required
@@ -167,6 +167,20 @@ export class InstitutionCreateModalComponent implements OnInit {
     });
   }
 
+  // Validador personalizado para permitir solo letras del alfabeto español y puntos, y rechazar entradas solo con espacios
+  private spanishAlphabeticValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value as string;
+    if (value === null || value === undefined) {
+      return null; // Dejar que otros validadores (required) manejen null/undefined
+    }
+    const trimmed = value.trim();
+    if (trimmed.length === 0) {
+      return { whitespaceOnly: true };
+    }
+    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]+$/;
+    return regex.test(value) ? null : { invalidAlphabetic: true };
+  }
+
   // Métodos de utilidad para validación
   isFieldInvalid(fieldName: string): boolean {
     const field = this.institutionForm.get(fieldName);
@@ -184,6 +198,15 @@ export class InstitutionCreateModalComponent implements OnInit {
       }
       if (field.errors['maxlength']) {
         return `Máximo ${field.errors['maxlength'].requiredLength} caracteres`;
+      }
+      // Mensajes específicos para el campo nombre con el validador personalizado
+      if (fieldName === 'nombre') {
+        if (field.errors['invalidAlphabetic']) {
+          return 'Formato inválido. Solo se permiten letras del alfabeto español y puntos';
+        }
+        if (field.errors['whitespaceOnly']) {
+          return 'El nombre no puede ser solo espacios en blanco';
+        }
       }
       if (field.errors['pattern']) {
         return 'Formato inválido. Solo se permiten letras, números, espacios, guiones y puntos';
