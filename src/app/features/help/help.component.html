@@ -1,0 +1,76 @@
+<div class="container py-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h3 mb-1 text-gray-800">
+            <i class="bi bi-info-circle me-2 text-primary"></i>
+            Ayuda
+          </h1>
+          <p class="text-muted mb-0">Descripción del sistema y accesos rápidos a manuales y descarga de la app móvil.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-2">¿Qué es {{ appName }}?</h5>
+          <p class="card-text text-muted mb-0">
+            {{ appName }} es un sistema administrativo web enfocado en el seguimiento y análisis nutricional en instituciones del estado Zulia.
+            Ofrece un panel de control con métricas clave, gestión de usuarios e instituciones, y generación de reportes para apoyar la toma de decisiones.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-filetype-pdf fs-2 text-primary me-2" aria-hidden="true"></i>
+            <h5 class="card-title mb-0">Manual de usuario (Aplicación web)</h5>
+          </div>
+          <p class="card-text text-muted flex-grow-1">Guía rápida para navegación y uso de la aplicación web administrativa.</p>
+          <a class="btn btn-primary mt-auto" [href]="downloads.webManualUrl" download target="_blank" rel="noopener">
+            <i class="bi bi-download me-2"></i>Descargar manual
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-filetype-pdf fs-2 text-primary me-2" aria-hidden="true"></i>
+            <h5 class="card-title mb-0">Manual de usuario (Aplicación movil)</h5>
+          </div>
+          <p class="card-text text-muted flex-grow-1">Instrucciones detalladas para usuarios (nutricionistas) de la aplicación móvil.</p>
+          <a class="btn btn-primary mt-auto" [href]="downloads.appWebManualUrl" download target="_blank" rel="noopener">
+            <i class="bi bi-download me-2"></i>Descargar manual
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-phone fs-2 text-primary me-2" aria-hidden="true"></i>
+            <h5 class="card-title mb-0">Aplicación móvil (APK)</h5>
+          </div>
+          <p class="card-text text-muted flex-grow-1">Instala la app móvil para la gestion y monitorización de nutrición en campo. Solo para teléfonos Android.</p>
+          <a class="btn btn-primary mt-auto" [href]="downloads.apkUrl" download target="_blank" rel="noopener">
+            <i class="bi bi-download me-2"></i>Descargar APK
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

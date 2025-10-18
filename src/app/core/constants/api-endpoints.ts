@@ -53,6 +53,12 @@ export const API_ENDPOINTS = {
     ACTIVE_USERS_BY_INSTITUTION: '/dashboard/active-users-by-institution',
     AGE_GROUP_DISTRIBUTION: '/dashboard/age-group-distribution',
     NUTRITIONAL_STATUS_BY_AGE_GROUP: '/dashboard/nutritional-status-by-age-group'
+  },
+  // Endpoints públicos para descargas
+  PUBLIC: {
+    MANUAL_WEB: '/public/manual-web',
+    MANUAL_APP: '/public/manual-app',
+    APK: '/public/apk'
   }
 } as const;
 
