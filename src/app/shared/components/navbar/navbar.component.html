@@ -48,7 +48,7 @@
             </div>
           </li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#" (click)="changePassword()">Cambiar contraseña</a></li>
+          <li><a class="dropdown-item" (click)="changePassword()">Cambiar contraseña</a></li>
           <li><hr class="dropdown-divider"></li>
           <li>
             <button class="dropdown-item text-danger" type="button" (click)="showLogoutModal()">
@@ -81,6 +81,56 @@
         </div>
       </div>
       <!-- Fin modal de confirmación -->
+      <!-- Modal cambio de contraseña -->
+      <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordLabel" aria-hidden="true" data-bs-theme="light">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="changePasswordLabel">Cambiar contraseña</h5>
+              <button type="button" class="btn-close" [disabled]="isChangingPassword" (click)="hideChangePasswordModal()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form [formGroup]="changePasswordForm" (ngSubmit)="submitChangePassword()">
+                <div class="mb-3">
+                  <label for="clave_actual" class="form-label">Contraseña actual</label>
+                  <input id="clave_actual" type="password" class="form-control" formControlName="clave_actual" [class.is-invalid]="hasChangePasswordFieldError('clave_actual')" autocomplete="current-password">
+                  <div class="invalid-feedback" *ngIf="hasChangePasswordFieldError('clave_actual')">
+                    {{ getChangePasswordFieldError('clave_actual') }}
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="clave_nueva" class="form-label">Nueva contraseña</label>
+                  <input id="clave_nueva" type="password" class="form-control" formControlName="clave_nueva" [class.is-invalid]="hasChangePasswordFieldError('clave_nueva')" autocomplete="new-password">
+                  <div class="form-text">
+                    Debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y carácter especial (&#64;$!%*?&).
+                  </div>
+                  <div class="invalid-feedback" *ngIf="hasChangePasswordFieldError('clave_nueva')">
+                    {{ getChangePasswordFieldError('clave_nueva') }}
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="clave_nueva_confirmacion" class="form-label">Confirmar nueva contraseña</label>
+                  <input id="clave_nueva_confirmacion" type="password" class="form-control" formControlName="clave_nueva_confirmacion" [class.is-invalid]="hasChangePasswordFieldError('clave_nueva_confirmacion')" autocomplete="new-password">
+                  <div class="invalid-feedback" *ngIf="hasChangePasswordFieldError('clave_nueva_confirmacion')">
+                    {{ getChangePasswordFieldError('clave_nueva_confirmacion') }}
+                  </div>
+                </div>
+
+                <div class="modal-footer px-0">
+                  <button type="button" class="btn btn-outline-secondary" [disabled]="isChangingPassword" (click)="hideChangePasswordModal()">Cancelar</button>
+                  <button type="submit" class="btn btn-primary" [disabled]="isChangingPassword || changePasswordForm.invalid">
+                    <span class="spinner-border spinner-border-sm me-2 text-light" *ngIf="isChangingPassword" role="status" aria-hidden="true"></span>
+                    Cambiar contraseña
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Fin modal cambio de contraseña -->
     </div>
   </div>
 </nav>

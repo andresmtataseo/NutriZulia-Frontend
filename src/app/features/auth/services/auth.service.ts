@@ -12,6 +12,7 @@ import {
   LoginResponse,
   User,
   ForgotPasswordRequest,
+  ChangePasswordRequest,
   AuthState
 } from '../../../core/models';
 import { AuthStorageService } from './auth-storage.service';
@@ -61,6 +62,19 @@ export class AuthService {
     const forgotPasswordUrl = getApiUrl(API_ENDPOINTS.AUTH.FORGOT_PASSWORD);
 
     return this.http.post<ApiResponse<any>>(forgotPasswordUrl, request).pipe(
+      catchError(error => this.handleAuthError(error))
+    );
+  }
+
+  /**
+   * Cambia la contraseña del usuario autenticado
+   * @param request - Datos para el cambio de contraseña
+   * @returns Observable con la respuesta del servidor
+   */
+  changePassword(request: ChangePasswordRequest): Observable<ApiResponse<any>> {
+    const url = getApiUrl(API_ENDPOINTS.AUTH.CHANGE_PASSWORD);
+
+    return this.http.post<ApiResponse<any>>(url, request).pipe(
       catchError(error => this.handleAuthError(error))
     );
   }

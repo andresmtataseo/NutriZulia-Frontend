@@ -16,7 +16,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   // URLs que requieren autenticación pero no deben redirigir en error 401
   const logoutUrls = [
-    API_ENDPOINTS.AUTH.LOGOUT
+    API_ENDPOINTS.AUTH.LOGOUT,
+    API_ENDPOINTS.AUTH.CHANGE_PASSWORD
   ];
 
   if (excludedUrls.some(url => req.url.includes(url))) {

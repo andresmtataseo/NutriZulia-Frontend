@@ -10,3 +10,4 @@ export * from './rol.interface';
 export * from './catalog/institucion.interface';
 export * from './catalog/tipo-institucion.interface';
 export * from './catalog/municipio-sanitario.interface';
+export * from './change-password-request.interface';
