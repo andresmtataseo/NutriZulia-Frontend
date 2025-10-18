@@ -1,0 +1,12 @@
+.user-info {
+  min-width: 240px;
+}
+.user-info .fw-semibold {
+  font-size: 0.95rem;
+}
+.user-info .small {
+  line-height: 1.2;
+}
+.dropdown-menu {
+  border-radius: 0.5rem;
+}
