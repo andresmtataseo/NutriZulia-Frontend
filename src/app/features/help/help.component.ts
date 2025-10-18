@@ -18,6 +18,7 @@ export class HelpComponent {
   downloads = {
     webManualUrl: getApiUrl(API_ENDPOINTS.PUBLIC.MANUAL_WEB),
     appWebManualUrl: getApiUrl(API_ENDPOINTS.PUBLIC.MANUAL_APP),
-    apkUrl: getApiUrl(API_ENDPOINTS.PUBLIC.APK)
+    apkUrl: getApiUrl(API_ENDPOINTS.PUBLIC.APK),
+    qrImageUrl: '/qr.png'
   };
 }

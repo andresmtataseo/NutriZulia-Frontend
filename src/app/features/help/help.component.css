@@ -1,0 +1,26 @@
+.qr-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.qr-image {
+  transition: filter 0.2s ease;
+}
+
+.qr-wrapper:hover .qr-image {
+  filter: brightness(60%);
+}
+
+.qr-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 0.375rem;
+}
+
+.qr-wrapper:hover .qr-overlay {
+  display: flex;
+}

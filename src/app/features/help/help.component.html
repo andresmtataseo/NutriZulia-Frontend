@@ -27,38 +27,8 @@
     </div>
   </div>
 
-  <div class="row row-cols-1 row-cols-md-3 g-4">
-    <div class="col">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body d-flex flex-column">
-          <div class="d-flex align-items-center mb-3">
-            <i class="bi bi-filetype-pdf fs-2 text-primary me-2" aria-hidden="true"></i>
-            <h5 class="card-title mb-0">Manual de usuario (Aplicación web)</h5>
-          </div>
-          <p class="card-text text-muted flex-grow-1">Guía rápida para navegación y uso de la aplicación web administrativa.</p>
-          <a class="btn btn-primary mt-auto" [href]="downloads.webManualUrl" download target="_blank" rel="noopener">
-            <i class="bi bi-download me-2"></i>Descargar manual
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body d-flex flex-column">
-          <div class="d-flex align-items-center mb-3">
-            <i class="bi bi-filetype-pdf fs-2 text-primary me-2" aria-hidden="true"></i>
-            <h5 class="card-title mb-0">Manual de usuario (Aplicación movil)</h5>
-          </div>
-          <p class="card-text text-muted flex-grow-1">Instrucciones detalladas para usuarios (nutricionistas) de la aplicación móvil.</p>
-          <a class="btn btn-primary mt-auto" [href]="downloads.appWebManualUrl" download target="_blank" rel="noopener">
-            <i class="bi bi-download me-2"></i>Descargar manual
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col">
+  <div class="row g-4">
+    <div class="col-12 col-md-6">
       <div class="card h-100 shadow-sm">
         <div class="card-body d-flex flex-column">
           <div class="d-flex align-items-center mb-3">
@@ -66,9 +36,60 @@
             <h5 class="card-title mb-0">Aplicación móvil (APK)</h5>
           </div>
           <p class="card-text text-muted flex-grow-1">Instala la app móvil para la gestion y monitorización de nutrición en campo. Solo para teléfonos Android.</p>
-          <a class="btn btn-primary mt-auto" [href]="downloads.apkUrl" download target="_blank" rel="noopener">
-            <i class="bi bi-download me-2"></i>Descargar APK
-          </a>
+          <div class="row align-items-center g-3">
+            <div class="col-12 col-md-6">
+              <div class="qr-wrapper mx-auto">
+                <img [src]="downloads.qrImageUrl" class="img-fluid rounded border qr-image" alt="Código QR de descarga de la APK">
+                <div class="qr-overlay">
+                  <a class="btn btn-light btn-sm" [href]="downloads.qrImageUrl" download="NutriZulia-QR.png" target="_blank" rel="noopener">
+                    <i class="bi bi-image me-1"></i>Descargar QR
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6 d-flex justify-content-center">
+              <div class="text-center">
+                <a class="btn btn-primary" [href]="downloads.apkUrl" download target="_blank" rel="noopener">
+                  <i class="bi bi-download me-2"></i>Descargar APK
+                </a>
+                <p class="small text-muted mt-2 mb-0">Versión mínima: Android 8.0 Oreo</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <div class="row g-4">
+        <div class="col-12">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-filetype-pdf fs-2 text-primary me-2" aria-hidden="true"></i>
+                <h5 class="card-title mb-0">Manual de usuario (Aplicación movil)</h5>
+              </div>
+              <p class="card-text text-muted flex-grow-1">Instrucciones detalladas para usuarios (nutricionistas) de la aplicación móvil.</p>
+              <a class="btn btn-primary mt-auto" [href]="downloads.appWebManualUrl" download target="_blank" rel="noopener">
+                <i class="bi bi-download me-2"></i>Descargar manual
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-filetype-pdf fs-2 text-primary me-2" aria-hidden="true"></i>
+                <h5 class="card-title mb-0">Manual de usuario (Aplicación web)</h5>
+              </div>
+              <p class="card-text text-muted flex-grow-1">Guía rápida para navegación y uso de la aplicación web administrativa.</p>
+              <a class="btn btn-primary mt-auto" [href]="downloads.webManualUrl" download target="_blank" rel="noopener">
+                <i class="bi bi-download me-2"></i>Descargar manual
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
